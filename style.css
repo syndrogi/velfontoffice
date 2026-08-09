@@ -306,17 +306,25 @@ a {
   align-items: center;
 }
 
+/* Box sized to exactly the glyph (width/height == font-size, line-height:1
+   removes the font's built-in leading) so the clickable area is the "+"
+   itself, not padded whitespace around it — matching how .social-icon
+   next to it is just its 18px svg with no extra box. */
 .more-toggle {
-  width: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
   font-family: inherit;
-  font-size: clamp(15px, 1.6vw, 19px);
+  font-size: 22px;
+  line-height: 1;
   font-weight: 700;
   letter-spacing: 0.08em;
   color: var(--color-fg);
   background: none;
   border: none;
   padding: 0;
-  text-align: center;
   cursor: pointer;
   transition: color 180ms var(--ease);
 }
@@ -417,16 +425,19 @@ a {
    merged contents of both. */
 .menu-toggle {
   display: none;
-  width: 20px;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
   font-family: inherit;
-  font-size: clamp(15px, 1.6vw, 19px);
+  font-size: 22px;
+  line-height: 1;
   font-weight: 700;
   letter-spacing: 0.08em;
   color: var(--color-fg);
   background: none;
   border: none;
   padding: 0;
-  text-align: center;
   cursor: pointer;
   transition: color 180ms var(--ease);
 }
@@ -457,17 +468,22 @@ a {
   pointer-events: auto;
 }
 
-/* Mobile drawer nav — off-canvas, slides in from the right */
+/* Mobile drawer nav — off-canvas, slides in from the right.
+   max-width keeps a 140px clearance on the left at any viewport width
+   so the drawer never reaches under the header logo (its widest case,
+   80px tall, extends to ~175px from the left edge). */
 .mobile-nav {
   position: fixed;
   top: 0;
   right: 0;
   z-index: 96;
   width: min(78vw, 320px);
+  max-width: calc(100% - 140px);
   height: 100vh;
   height: 100dvh;
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
   gap: 28px;
   padding: calc(var(--header-height) + 24px) 32px 40px;
   background: var(--color-bg);
@@ -484,13 +500,12 @@ a {
   font-size: 13px;
   letter-spacing: 0.12em;
   color: var(--color-fg);
-  opacity: 0.5;
-  transition: opacity 180ms var(--ease), color 180ms var(--ease);
+  text-align: right;
+  transition: color 180ms var(--ease);
 }
 
 .mobile-nav a:hover,
 .mobile-nav a:focus-visible {
-  opacity: 1;
   color: var(--color-hover);
 }
 
@@ -500,7 +515,7 @@ a {
 }
 
 .mobile-nav a.is-active {
-  opacity: 1;
+  color: var(--color-hover);
 }
 
 /* ==========================================================================
@@ -1223,7 +1238,7 @@ html.js-typing .hero-subtitle {
   }
 
   .menu-toggle {
-    display: inline-block;
+    display: inline-flex;
   }
 
   .section-placeholder {

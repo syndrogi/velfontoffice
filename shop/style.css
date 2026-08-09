@@ -1067,25 +1067,36 @@ svg {
 }
 
 /* ---------- Product Detail ---------- */
+/* Flex, not grid: the panel needs to sit flush against the image with
+   only `gap` between them (flex-basis auto) and still reach the same
+   right-hand padding the image's left edge reaches on the left — a
+   fixed fr-track would either strand the panel far from the image or
+   need a hardcoded max-width that goes stale as the image resizes. */
 .product-detail {
-  display: grid;
-  grid-template-columns: 2.2fr 1fr;
-  gap: 64px;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
   max-width: 1400px;
   margin: 0 auto;
   padding: 24px 64px 140px;
-  align-items: start;
 }
 
 .product-gallery {
   position: sticky;
   top: calc(var(--header-height) + 40px);
+  display: flex;
+  gap: 16px;
 }
 
+/* Sized from the viewport's height (not the column's width) so the photo
+   reads as close to full-screen as the header allows, with the thumbnail
+   rail beside it rather than stacked below eating into that height. */
 .gallery-main {
   position: relative;
+  height: calc(100vh - var(--header-height) - 48px);
   aspect-ratio: 3 / 4;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .gallery-visual {
@@ -1129,8 +1140,9 @@ svg {
 
 .gallery-thumbs {
   display: flex;
+  flex-direction: column;
   gap: 10px;
-  margin-top: 20px;
+  flex-shrink: 0;
 }
 
 .thumb {
@@ -1140,6 +1152,7 @@ svg {
   opacity: 0.6;
   overflow: hidden;
   padding: 0;
+  flex-shrink: 0;
 }
 
 .thumb img {
@@ -1156,9 +1169,8 @@ svg {
 }
 
 .product-panel {
+  flex: 1;
   padding-top: 8px;
-  max-width: 400px;
-  justify-self: end;
 }
 
 .product-panel h1 {
@@ -1327,18 +1339,32 @@ svg {
   }
 
   .product-detail {
-    grid-template-columns: 1fr;
+    flex-direction: column;
     gap: 32px;
     padding: 0 16px 64px;
   }
 
+  /* Height-driven sizing and a side-by-side thumbnail rail only make
+     sense with the horizontal room a desktop screen has — narrower than
+     this, the image goes back to sizing off its own full width, with
+     thumbnails as a row underneath it like before. */
   .product-gallery {
     position: static;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .gallery-main {
+    height: auto;
+    width: 100%;
+  }
+
+  .gallery-thumbs {
+    flex-direction: row;
   }
 
   .product-panel {
     padding-top: 24px;
-    max-width: none;
   }
 }
 

@@ -6,13 +6,13 @@ function getProductFromUrl() {
 // product_images rows carry no color of their own — but they're inserted
 // one contiguous block per color, in the same order as the color list
 // (e.g. white front/back, then black front/back), so an even split across
-// the color count recovers which images belong to which color. Anything
-// that doesn't divide evenly (single color, odd counts, etc.) just shows
-// every image, which is also the correct behavior for those cases.
-function imagesForColor(images, colorIndex, colorCount) {
-  if (colorCount <= 1 || images.length % colorCount !== 0) return images;
+// the color count recovers which image starts a given color's block.
+// Anything that doesn't divide evenly (single color, odd counts, etc.)
+// just points back at the first image.
+function colorStartIndex(images, colorIndex, colorCount) {
+  if (colorCount <= 1 || images.length % colorCount !== 0) return 0;
   const perColor = images.length / colorCount;
-  return images.slice(colorIndex * perColor, (colorIndex + 1) * perColor);
+  return colorIndex * perColor;
 }
 
 function galleryHtml(images, product, soldOut) {
@@ -36,11 +36,11 @@ function galleryHtml(images, product, soldOut) {
     : "";
 
   return `
+    ${thumbsHtml}
     <div class="gallery-main">
       ${mainVisual}
       ${soldOut ? '<span class="badge">Sold Out</span>' : ""}
     </div>
-    ${thumbsHtml}
   `;
 }
 
@@ -85,7 +85,7 @@ function renderProductDetail(product) {
   const el = document.getElementById("productDetail");
   el.innerHTML = `
     <div class="product-gallery" id="productGallery">
-      ${galleryHtml(imagesForColor(images, 0, colorList.length), product, soldOut)}
+      ${galleryHtml(images, product, soldOut)}
     </div>
 
     <div class="product-panel">
@@ -165,21 +165,25 @@ function setupGallery() {
   });
 }
 
-// Re-renders just the gallery (not the whole page) with the selected
-// color's image slice — see imagesForColor(). A single color (or an
-// image count that doesn't split evenly) just re-shows every image, so
-// this never breaks products that only have one photo.
-function setupColorSelect(product, images, colorList) {
+// Jumps the main image (and the matching thumb's active state) to the
+// selected color's first image — see colorStartIndex(). The thumbnail
+// rail itself always keeps showing every image (detail shots and every
+// color together), exactly like clicking a thumb directly; this just
+// picks one for you.
+function setupColorSelect(images, colorList) {
   const select = document.getElementById("colorSelect");
-  const gallery = document.getElementById("productGallery");
-  if (!select || !gallery || colorList.length < 2) return;
-
-  const soldOut = product.status === "sold_out";
+  const mainImage = document.getElementById("mainImage");
+  if (!select || !mainImage || colorList.length < 2) return;
 
   select.addEventListener("change", () => {
-    const colorIndex = colorList.indexOf(select.value);
-    gallery.innerHTML = galleryHtml(imagesForColor(images, Math.max(colorIndex, 0), colorList.length), product, soldOut);
-    setupGallery();
+    const colorIndex = Math.max(colorList.indexOf(select.value), 0);
+    const index = colorStartIndex(images, colorIndex, colorList.length);
+    const src = images[index];
+    if (!src) return;
+
+    mainImage.src = src;
+    const thumbs = document.querySelectorAll(".thumb");
+    thumbs.forEach((thumb, i) => thumb.classList.toggle("active", i === index));
   });
 }
 
@@ -219,7 +223,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     setupSizeOptions();
     if (product) {
       setupAddToCart(product);
-      setupColorSelect(product, images, colorList);
+      setupColorSelect(images, colorList);
     }
   }
 

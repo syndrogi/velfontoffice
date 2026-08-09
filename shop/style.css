@@ -926,7 +926,7 @@ svg {
    badge competing with the .sold-out-label already in place of the
    price below. */
 .collection-card-media.is-sold-out .stage-image {
-  transform: rotate(180deg);
+  filter: blur(2px);
 }
 
 .collection-card-media .badge {
@@ -1126,11 +1126,6 @@ svg {
     #f7f7f7 2px,
     #f7f7f7 14px
   );
-}
-
-.gallery-visual.sold-out {
-  opacity: 0.6;
-  filter: blur(6px);
 }
 
 .gallery-main .badge {

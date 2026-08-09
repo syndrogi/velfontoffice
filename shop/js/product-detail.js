@@ -16,10 +16,9 @@ function colorStartIndex(images, colorIndex, colorCount) {
 }
 
 function galleryHtml(images, product, soldOut) {
-  const soldOutClass = soldOut ? " sold-out" : "";
   const mainVisual = images.length
-    ? `<div class="gallery-visual${soldOutClass}"><img id="mainImage" src="${images[0]}" alt="${product.name}"></div>`
-    : `<div class="gallery-visual gallery-placeholder${soldOutClass}"></div>`;
+    ? `<div class="gallery-visual"><img id="mainImage" src="${images[0]}" alt="${product.name}"></div>`
+    : `<div class="gallery-visual gallery-placeholder"></div>`;
 
   const thumbsHtml = images.length > 1
     ? `

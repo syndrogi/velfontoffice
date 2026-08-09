@@ -857,6 +857,13 @@ svg {
   opacity: 1;
 }
 
+/* Sold-out cards read as visibly "off" at a glance, without another
+   badge competing with the .sold-out-label already in place of the
+   price below. */
+.collection-card-media.is-sold-out .stage-image {
+  transform: rotate(180deg);
+}
+
 .collection-card-media .badge {
   position: absolute;
   top: 12px;

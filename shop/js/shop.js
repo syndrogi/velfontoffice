@@ -1,5 +1,4 @@
 const ARCHIVE_STORAGE_BUCKET = "archive";
-const HOVER_CYCLE_MS = 900;
 const ARCHIVE_BLOCK_INTERVAL = 5; // an archive block after every 5th product, while blocks last
 
 // Sold-out products already show "Sold Out" in place of the price (see
@@ -49,7 +48,7 @@ function productCardHtml(product) {
 
   return `
     <a class="collection-card" href="product.html?slug=${product.slug}" data-product-id="${product.id}">
-      <div class="collection-card-media">
+      <div class="collection-card-media${soldOut ? " is-sold-out" : ""}">
         ${stageImagesHtml}
         ${badgeFor(product)}
       </div>
@@ -81,30 +80,27 @@ function archiveBlockHtml(block) {
   `;
 }
 
-// Crossfades through a product's stage images (main/detail/fabric/
-// construction/campaign) while hovered. With only one image — true for
-// every product today — this simply does nothing, since there's nothing
-// to cycle to.
+// Swaps straight to the card's last stage image on hover — product_images
+// rows are inserted white-first then black-last (see supabase/*.sql), so
+// the last image is that product's black colorway. Crossfades via the
+// .stage-image opacity transition in style.css, not a timer, so it
+// reacts immediately instead of waiting out a cycle interval. With only
+// one image this is a no-op, since there's nothing to swap to.
 function setupHoverCycle(card) {
   const stageImages = card.querySelectorAll(".stage-image");
   if (stageImages.length < 2) return;
 
-  let index = 0;
-  let intervalId = null;
-
-  function show(next) {
-    stageImages[index].classList.remove("is-active");
-    index = next;
-    stageImages[index].classList.add("is-active");
-  }
+  const first = stageImages[0];
+  const last = stageImages[stageImages.length - 1];
 
   card.addEventListener("pointerenter", () => {
-    intervalId = setInterval(() => show((index + 1) % stageImages.length), HOVER_CYCLE_MS);
+    first.classList.remove("is-active");
+    last.classList.add("is-active");
   });
 
   card.addEventListener("pointerleave", () => {
-    clearInterval(intervalId);
-    show(0);
+    last.classList.remove("is-active");
+    first.classList.add("is-active");
   });
 }
 

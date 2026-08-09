@@ -3,23 +3,19 @@ function getProductFromUrl() {
   return getProductBySlug(slug) || getProducts()[0];
 }
 
-function renderProductDetail(product) {
-  if (!product) {
-    document.getElementById("productDetail").innerHTML = `<p class="cart-empty">${t("product.notFound")}</p>`;
-    return;
-  }
+// product_images rows carry no color of their own — but they're inserted
+// one contiguous block per color, in the same order as the color list
+// (e.g. white front/back, then black front/back), so an even split across
+// the color count recovers which images belong to which color. Anything
+// that doesn't divide evenly (single color, odd counts, etc.) just shows
+// every image, which is also the correct behavior for those cases.
+function imagesForColor(images, colorIndex, colorCount) {
+  if (colorCount <= 1 || images.length % colorCount !== 0) return images;
+  const perColor = images.length / colorCount;
+  return images.slice(colorIndex * perColor, (colorIndex + 1) * perColor);
+}
 
-  document.title = `VELFONT OFFICE — ${product.name}`;
-  document.getElementById("breadcrumbName").textContent = product.name;
-
-  const productImages = getProductImages(product.id);
-  const images = productImages.length
-    ? productImages.map((row) => resolveImageUrl(row.image))
-    : product.thumbnail
-    ? [resolveImageUrl(product.thumbnail)]
-    : [];
-
-  const soldOut = product.status === "sold_out";
+function galleryHtml(images, product, soldOut) {
   const soldOutClass = soldOut ? " sold-out" : "";
   const mainVisual = images.length
     ? `<div class="gallery-visual${soldOutClass}"><img id="mainImage" src="${images[0]}" alt="${product.name}"></div>`
@@ -39,12 +35,39 @@ function renderProductDetail(product) {
       </div>`
     : "";
 
-  const colorOptions = (product.color || "")
+  return `
+    <div class="gallery-main">
+      ${mainVisual}
+      ${soldOut ? '<span class="badge">Sold Out</span>' : ""}
+    </div>
+    ${thumbsHtml}
+  `;
+}
+
+function renderProductDetail(product) {
+  if (!product) {
+    document.getElementById("productDetail").innerHTML = `<p class="cart-empty">${t("product.notFound")}</p>`;
+    return { images: [], colorList: [] };
+  }
+
+  document.title = `VELFONT OFFICE — ${product.name}`;
+  document.getElementById("breadcrumbName").textContent = product.name;
+
+  const productImages = getProductImages(product.id);
+  const images = productImages.length
+    ? productImages.map((row) => resolveImageUrl(row.image))
+    : product.thumbnail
+    ? [resolveImageUrl(product.thumbnail)]
+    : [];
+
+  const soldOut = product.status === "sold_out";
+
+  const colorList = (product.color || "")
     .split("/")
     .map((c) => c.trim())
-    .filter(Boolean)
-    .map((c) => `<option value="${c}">${c}</option>`)
-    .join("");
+    .filter(Boolean);
+
+  const colorOptions = colorList.map((c) => `<option value="${c}">${c}</option>`).join("");
 
   const sizeOptions = (product.size || "")
     .split(",")
@@ -61,12 +84,8 @@ function renderProductDetail(product) {
 
   const el = document.getElementById("productDetail");
   el.innerHTML = `
-    <div class="product-gallery">
-      <div class="gallery-main">
-        ${mainVisual}
-        ${soldOut ? '<span class="badge">Sold Out</span>' : ""}
-      </div>
-      ${thumbsHtml}
+    <div class="product-gallery" id="productGallery">
+      ${galleryHtml(imagesForColor(images, 0, colorList.length), product, soldOut)}
     </div>
 
     <div class="product-panel">
@@ -128,6 +147,8 @@ function renderProductDetail(product) {
       </div>
     </div>
   `;
+
+  return { images, colorList };
 }
 
 function setupGallery() {
@@ -141,6 +162,24 @@ function setupGallery() {
       thumbs.forEach((t) => t.classList.remove("active"));
       thumb.classList.add("active");
     });
+  });
+}
+
+// Re-renders just the gallery (not the whole page) with the selected
+// color's image slice — see imagesForColor(). A single color (or an
+// image count that doesn't split evenly) just re-shows every image, so
+// this never breaks products that only have one photo.
+function setupColorSelect(product, images, colorList) {
+  const select = document.getElementById("colorSelect");
+  const gallery = document.getElementById("productGallery");
+  if (!select || !gallery || colorList.length < 2) return;
+
+  const soldOut = product.status === "sold_out";
+
+  select.addEventListener("change", () => {
+    const colorIndex = colorList.indexOf(select.value);
+    gallery.innerHTML = galleryHtml(imagesForColor(images, Math.max(colorIndex, 0), colorList.length), product, soldOut);
+    setupGallery();
   });
 }
 
@@ -175,10 +214,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const product = getProductFromUrl();
 
   function render() {
-    renderProductDetail(product);
+    const { images, colorList } = renderProductDetail(product);
     setupGallery();
     setupSizeOptions();
-    if (product) setupAddToCart(product);
+    if (product) {
+      setupAddToCart(product);
+      setupColorSelect(product, images, colorList);
+    }
   }
 
   render();

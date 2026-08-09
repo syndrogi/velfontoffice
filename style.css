@@ -307,6 +307,7 @@ a {
 }
 
 .more-toggle {
+  width: 20px;
   font-family: inherit;
   font-size: clamp(15px, 1.6vw, 19px);
   font-weight: 700;
@@ -315,6 +316,7 @@ a {
   background: none;
   border: none;
   padding: 0;
+  text-align: center;
   cursor: pointer;
   transition: color 180ms var(--ease);
 }
@@ -409,42 +411,29 @@ a {
   border-bottom-color: var(--color-fg);
 }
 
-/* Mobile menu toggle — hidden until the nav collapses. Three bars that
-   morph into an X when the drawer is open (.is-open). */
+/* Mobile menu toggle — hidden until the nav collapses. Same "+" / "−"
+   text-toggle language as the desktop More menu (.more-toggle), not a
+   separate icon — it opens the mobile drawer, which now carries the
+   merged contents of both. */
 .menu-toggle {
   display: none;
-  flex-direction: column;
-  justify-content: center;
-  gap: 5px;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  font-family: inherit;
+  font-size: clamp(15px, 1.6vw, 19px);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-fg);
   background: none;
   border: none;
+  padding: 0;
+  text-align: center;
   cursor: pointer;
+  transition: color 180ms var(--ease);
 }
 
-.menu-toggle span {
-  display: block;
-  height: 1px;
-  background: var(--color-fg);
-  transition: background-color 180ms var(--ease), transform 180ms var(--ease),
-    opacity 180ms var(--ease);
-}
-
-.menu-toggle:hover span {
-  background-color: var(--color-hover);
-}
-
-.menu-toggle.is-open span:nth-child(1) {
-  transform: translateY(6px) rotate(45deg);
-}
-
-.menu-toggle.is-open span:nth-child(2) {
-  opacity: 0;
-}
-
-.menu-toggle.is-open span:nth-child(3) {
-  transform: translateY(-6px) rotate(-45deg);
+.menu-toggle:hover,
+.menu-toggle.is-open {
+  color: var(--color-hover);
 }
 
 .menu-toggle:focus-visible {
@@ -1234,7 +1223,7 @@ html.js-typing .hero-subtitle {
   }
 
   .menu-toggle {
-    display: flex;
+    display: inline-block;
   }
 
   .section-placeholder {

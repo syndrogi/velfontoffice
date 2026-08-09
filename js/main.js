@@ -56,6 +56,7 @@
     backdrop.hidden = false;
     toggle.setAttribute("aria-expanded", "true");
     toggle.classList.add("is-open");
+    toggle.textContent = "−";
     document.body.style.overflow = "hidden";
   }
 
@@ -65,6 +66,7 @@
     backdrop.classList.remove("is-visible");
     toggle.setAttribute("aria-expanded", "false");
     toggle.classList.remove("is-open");
+    toggle.textContent = "+";
     document.body.style.overflow = "";
     window.setTimeout(function () {
       if (!drawer.classList.contains("is-open")) backdrop.hidden = true;
@@ -92,6 +94,14 @@
   mobileMedia.addEventListener("change", function (e) {
     if (!e.matches) closeMenu();
   });
+
+  // Placeholder link — no destination yet, see the HTML comment above it.
+  var fifthAveMobile = document.getElementById("fifthAveLinkMobile");
+  if (fifthAveMobile) {
+    fifthAveMobile.addEventListener("click", function (e) {
+      e.preventDefault();
+    });
+  }
 
   // Active-section highlighting for in-page anchor links (Office/Archive/About).
   var anchorLinks = document.querySelectorAll(
@@ -223,6 +233,18 @@
     var draggable = options && options.draggable;
     var segments = captureSegments(el);
 
+    // Tags this specific run so a stale step() can tell it's been
+    // superseded — by a second typeElement() call on the same element, or
+    // by lang.js writing translated text directly (see applyLang in
+    // lang.js). Without this, a still-pending step() scheduled against
+    // the segments captured here would keep appending onto whatever text
+    // is there by the time it fires, corrupting it (e.g. lang.js's
+    // synchronous initial-load call is only *supposed* to always finish
+    // before this animation's setTimeout-deferred start — under real-world
+    // load, that ordering isn't guaranteed).
+    var runToken = {};
+    el.__typeRun = runToken;
+
     el.textContent = "";
     el.classList.add("is-typing");
 
@@ -230,12 +252,7 @@
     var charIndex = 0;
 
     function step() {
-      // Set by lang.js when a user-triggered language switch overwrites
-      // this element mid-animation — without this, a still-pending step()
-      // scheduled against the segments captured from the pre-switch text
-      // would keep appending/mutating on top of the freshly-translated
-      // content a moment later, corrupting it.
-      if (el.dataset.i18nLocked) {
+      if (el.__typeRun !== runToken) {
         el.classList.remove("is-typing");
         return;
       }

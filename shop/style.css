@@ -758,6 +758,20 @@ svg {
   transform: translate(-55%, -58%);
 }
 
+/* Fixed to the banner's own corner (not .promo-banner-image-center),
+   so the caption stays put while the photo drifts/pans underneath it. */
+.promo-banner-caption {
+  position: absolute;
+  right: 24px;
+  bottom: 16px;
+  z-index: 1;
+  color: #fff;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
 /* js/main.js drives this element's own transform: a small continuous
    idle drift. */
 .promo-banner-image img {

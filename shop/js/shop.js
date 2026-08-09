@@ -2,8 +2,10 @@ const ARCHIVE_STORAGE_BUCKET = "archive";
 const HOVER_CYCLE_MS = 900;
 const ARCHIVE_BLOCK_INTERVAL = 5; // an archive block after every 5th product, while blocks last
 
+// Sold-out products already show "Sold Out" in place of the price (see
+// productCardHtml's .sold-out-label below) — a badge on top of the image
+// would just repeat it, so this only flags coming-soon items.
 function badgeFor(product) {
-  if (product.status === "sold_out") return '<span class="badge">Sold Out</span>';
   if (product.status === "coming_soon") return '<span class="badge">Coming Soon</span>';
   return "";
 }

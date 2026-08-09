@@ -105,16 +105,20 @@
     menu.setAttribute("aria-hidden", "true");
   }
 
-  // `lock`: true only for a user-triggered switch (see the click handler
-  // below) — it marks each element so main.js's typing animation bails
-  // out if a step for it is still pending (see the dataset.i18nLocked
-  // check in typeElement's step()). The initial call on page load never
-  // locks: it always finishes before that animation's setTimeout chain
-  // gets a chance to start (synchronous script execution runs to
-  // completion first), so there's nothing to race against yet, and
-  // locking here would permanently prevent the typing effect from ever
-  // running on a first visit.
-  function applyLang(lang, lock) {
+  // Invalidates main.js's typing animation for each element it touches
+  // (see the `el.__typeRun` check in typeElement's step()) before writing
+  // the translated text — otherwise a still-pending step() from a typing
+  // run already in progress on that element would keep appending onto
+  // whatever text is here by the time it fires, corrupting it. This
+  // covers both a user-triggered language switch mid-animation and the
+  // initial call on page load: that one is only *supposed* to always
+  // finish before the animation's setTimeout-deferred start (synchronous
+  // script execution running to completion first), but that ordering
+  // isn't guaranteed under real-world load — invalidating unconditionally
+  // is correct either way, since a typeElement() call that hasn't started
+  // yet just picks up the already-translated text as its own starting
+  // point once it does.
+  function applyLang(lang) {
     var dict = TRANSLATIONS[lang];
     if (!dict) return;
     currentLang = lang;
@@ -123,14 +127,14 @@
     document.querySelectorAll("[data-i18n]").forEach(function (el) {
       var key = el.getAttribute("data-i18n");
       if (dict[key] === undefined) return;
-      if (lock) el.dataset.i18nLocked = "1";
+      el.__typeRun = {};
       el.textContent = dict[key];
     });
 
     document.querySelectorAll("[data-i18n-html]").forEach(function (el) {
       var key = el.getAttribute("data-i18n-html");
       if (dict[key] === undefined) return;
-      if (lock) el.dataset.i18nLocked = "1";
+      el.__typeRun = {};
       el.innerHTML = dict[key];
     });
 
@@ -159,7 +163,7 @@
 
   options.forEach(function (opt) {
     opt.addEventListener("click", function () {
-      applyLang(opt.dataset.lang, true);
+      applyLang(opt.dataset.lang);
       closeMenu();
     });
   });

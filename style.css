@@ -98,6 +98,7 @@ a {
 .logo {
   display: inline-flex;
   align-items: center;
+  position: relative;
 }
 
 .logo:focus-visible {
@@ -118,12 +119,60 @@ a {
   mask-repeat: no-repeat;
   -webkit-mask-position: center;
   mask-position: center;
-  transition: background-color 180ms var(--ease);
+  transition: opacity 350ms var(--ease), background-color 180ms var(--ease);
 }
 
 .logo:hover .logo-mark,
 .logo:focus-visible .logo-mark {
   background-color: var(--color-hover);
+}
+
+/* First-paint intro only (js/logo-draw.js) — an SVG traced from the
+   logo's own construction grid (images/logo-draw.svg), stroke-drawn with
+   anime.js's createDrawable, then cross-faded into .logo-mark above.
+   Fetched and inserted by JS only when the intro is actually going to
+   run, so reduced-motion / no-JS visitors never pay for the request and
+   the mask-image logo (already in the HTML) is the only thing they see. */
+.logo-draw {
+  display: block;
+  position: absolute;
+  inset: 0;
+  color: var(--color-fg);
+  opacity: 0;
+  transition: opacity 350ms var(--ease);
+}
+
+.logo-draw.is-visible {
+  opacity: 1;
+}
+
+.logo:hover .logo-draw,
+.logo:focus-visible .logo-draw {
+  color: var(--color-hover);
+}
+
+.logo-draw-lines {
+  fill: none;
+  stroke: currentColor;
+}
+
+.logo-draw-line {
+  vector-effect: non-scaling-stroke;
+  stroke-width: 1.5;
+}
+
+.logo-draw-fill {
+  fill: currentColor;
+  opacity: 0;
+  transition: opacity 300ms var(--ease);
+}
+
+.logo-draw-fill.is-filled {
+  opacity: 1;
+}
+
+.logo-mark.is-intro-hidden {
+  opacity: 0;
 }
 
 .header-right {

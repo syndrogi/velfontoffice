@@ -926,7 +926,7 @@ svg {
    badge competing with the .sold-out-label already in place of the
    price below. */
 .collection-card-media.is-sold-out .stage-image {
-  filter: blur(2px);
+  filter: blur(4px);
 }
 
 .collection-card-media .badge {

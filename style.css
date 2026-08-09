@@ -922,47 +922,45 @@ html.labs-blueprint body::after {
   pointer-events: none;
 }
 
-/* Noise — TV-signal grain. Opacity is driven per-frame from JS (cursor
-   speed + glitch state); .is-glitching adds a brief positional jump. */
-.labs-noise-canvas {
+/* Noise — cursor-local "order breaks, then re-forms" distortion field
+   (js/labs/noise.js). Individual header/hero/labs/footer elements get a
+   tiny transform jitter composed through js/transform.js's noise-only
+   offset (never touching translate/rotate/scale owned by other Labs);
+   the two rules below only cover the small overlay pieces that trail
+   the pointer — a local grain patch and the rare horizontal tear line.
+   Both stay invisible whenever Noise is off. */
+.labs-noise-grain {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
   z-index: 550;
-  width: 100%;
-  height: 100%;
   image-rendering: pixelated;
   mix-blend-mode: multiply;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms var(--ease);
+  -webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.35) 45%, transparent 72%);
+  mask-image: radial-gradient(circle, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.35) 45%, transparent 72%);
 }
 
-.labs-noise-canvas.is-glitching {
-  transform: translateX(6px) scaleY(1.02);
+.labs-noise-grain.is-active {
+  opacity: 1;
 }
 
-.labs-noise-scanlines {
+.labs-noise-tear {
   position: fixed;
-  inset: 0;
+  left: 0;
+  width: 100%;
   z-index: 551;
-  background: repeating-linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.06) 0px,
-    rgba(0, 0, 0, 0.06) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-  mix-blend-mode: multiply;
+  background: var(--color-fg);
+  opacity: 0;
   pointer-events: none;
+  transform: translateX(0);
+  transition: transform 90ms var(--ease);
 }
 
-.labs-noise-scanlines.is-glitching {
-  transform: translateX(-6px);
-  background: repeating-linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.12) 0px,
-    rgba(0, 0, 0, 0.12) 1px,
-    transparent 1px,
-    transparent 2px
-  );
+.labs-noise-tear.is-active {
+  opacity: 0.14;
 }
 
 /* Scale — click to select, drag a corner handle to resize

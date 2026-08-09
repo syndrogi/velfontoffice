@@ -15,6 +15,13 @@
  * more accurate/consistent results than string-templating and leaves
  * room to compose additional operations later without re-deriving the
  * math by hand.
+ *
+ * Noise (js/labs/noise.js) adds a fourth kind of state — noiseX/noiseY/
+ * noiseRotate — composed in *addition* to tx/ty/rotate rather than
+ * replacing them, so its temporary jitter can never clobber wherever
+ * Gravity, Physics, or a letter-drag currently has an element. It's
+ * updated through the dedicated updateNoise()/clearNoise() calls below,
+ * never through update(), which only ever touches the base fields.
  */
 (function () {
   var state = new WeakMap();
@@ -31,7 +38,7 @@
   function getState(el) {
     var s = state.get(el);
     if (!s) {
-      s = { tx: 0, ty: 0, rotate: 0, scaleX: 1, scaleY: 1 };
+      s = { tx: 0, ty: 0, rotate: 0, scaleX: 1, scaleY: 1, noiseX: 0, noiseY: 0, noiseRotate: 0 };
       state.set(el, s);
     }
     return s;
@@ -40,15 +47,16 @@
   function compose(el) {
     var s = getState(el);
     var matrix = new DOMMatrix()
-      .translate(s.tx, s.ty)
-      .rotate(s.rotate * RAD_TO_DEG)
+      .translate(s.tx + s.noiseX, s.ty + s.noiseY)
+      .rotate((s.rotate + s.noiseRotate) * RAD_TO_DEG)
       .scale(s.scaleX, s.scaleY);
     el.style.transform = matrix.toString();
   }
 
   window.labsTransform = {
     // partial: any of { tx, ty, rotate, scaleX, scaleY } — only given
-    // keys change.
+    // keys change. Noise's offset never goes through here — see
+    // updateNoise() below.
     update: function (el, partial) {
       var s = getState(el);
       if (partial.tx !== undefined) s.tx = partial.tx;
@@ -58,11 +66,43 @@
       if (partial.scaleY !== undefined) s.scaleY = partial.scaleY;
       compose(el);
     },
+    // Noise-only offset, composed on top of the base state above.
+    // partial: any of { x, y, rotate }.
+    updateNoise: function (el, partial) {
+      var s = getState(el);
+      if (partial.x !== undefined) s.noiseX = partial.x;
+      if (partial.y !== undefined) s.noiseY = partial.y;
+      if (partial.rotate !== undefined) s.noiseRotate = partial.rotate;
+      compose(el);
+    },
+    // Zeroes just the noise offset — leaves tx/ty/rotate/scale untouched.
+    clearNoise: function (el) {
+      var s = state.get(el);
+      if (!s || (!s.noiseX && !s.noiseY && !s.noiseRotate)) return;
+      s.noiseX = 0;
+      s.noiseY = 0;
+      s.noiseRotate = 0;
+      compose(el);
+    },
     get: function (el) {
       return getState(el);
     },
     lock: function (el) {
       locked.add(el);
+      // Scale is about to measure this element's un-transformed box
+      // (captureSelectionMetrics, synchronously right after this call)
+      // — any lingering noise offset would throw that measurement off
+      // by however many px Noise happened to be jittering it at that
+      // exact instant. Clearing it here, ahead of the measurement,
+      // removes the race entirely rather than relying on Noise's own
+      // per-frame loop to notice the lock and catch up a frame late.
+      var s = state.get(el);
+      if (s && (s.noiseX || s.noiseY || s.noiseRotate)) {
+        s.noiseX = 0;
+        s.noiseY = 0;
+        s.noiseRotate = 0;
+        compose(el);
+      }
     },
     unlock: function (el) {
       locked.delete(el);

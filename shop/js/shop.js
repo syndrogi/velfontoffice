@@ -260,8 +260,24 @@ function setupPromoBannerIdle() {
   requestAnimationFrame(idleTick);
 }
 
+// Collapses/reveals the promo banner via .promo-banner-clip's max-height
+// transition (see style.css) — the button itself lives outside that clip
+// so it stays put as the small reveal control once collapsed, swapping
+// its own icon/label through .promo-banner.is-hidden.
+function setupPromoBannerToggle() {
+  const banner = document.getElementById("promoBanner");
+  const toggle = document.getElementById("promoBannerToggle");
+  if (!banner || !toggle) return;
+
+  toggle.addEventListener("click", () => {
+    const hidden = banner.classList.toggle("is-hidden");
+    toggle.setAttribute("aria-label", t(hidden ? "promo.reveal" : "promo.hide"));
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   setupPromoBannerIdle();
+  setupPromoBannerToggle();
 });
 
 document.addEventListener("DOMContentLoaded", async () => {

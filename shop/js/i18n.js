@@ -48,6 +48,8 @@ const translations = {
     "shop.loadError": "상품을 불러오지 못했습니다.",
     "shop.empty": "등록된 상품이 없습니다.",
     "shop.noResults": "'{query}'에 대한 검색 결과가 없습니다.",
+    "promo.hide": "배너 숨기기",
+    "promo.reveal": "배너 다시 보기",
     "product.soldOutLabel": "품절",
 
     "product.color": "색상",
@@ -126,6 +128,8 @@ const translations = {
     "shop.loadError": "Failed to load products.",
     "shop.empty": "No products available.",
     "shop.noResults": "No results found for \"{query}\".",
+    "promo.hide": "Hide banner",
+    "promo.reveal": "reveal",
     "product.soldOutLabel": "Sold Out",
 
     "product.color": "Color",

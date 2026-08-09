@@ -143,9 +143,10 @@ svg {
   height: 100%;
   color: #111;
   opacity: 0;
-  /* Matches .logo-mark's own filter above so the cross-fade doesn't jump
-     in weight the instant it hands off. */
-  filter: blur(0.6px) contrast(2.6);
+  /* Left un-filtered, unlike .logo-mark above — the blur+contrast pass
+     that thickens the static mask-image mark just softens this SVG's
+     thin drawn strokes during the intro instead, reading as blurry
+     rather than crisp (main site's .logo-draw has no filter either). */
   transition: opacity 0.35s ease;
 }
 
@@ -989,13 +990,17 @@ svg {
 /* Sold-out cards read as visibly "off" at a glance, without another
    badge competing with the .sold-out-label already in place of the
    price below. */
-/* Scaled up so the blur's own soft edge falls outside the card's crop
-   (.collection-card-media's overflow: hidden) instead of feathering the
-   card's border — blurring an image that exactly fills its box softens
-   that boundary too, not just the image content. */
+/* overflow: visible (+ dropping the placeholder background) so the blur
+   is free to soften past the card's own crop instead of getting cut off
+   hard at its edge — the effect reads as the garment fading into the
+   page, not a blurred image awkwardly boxed in. */
+.collection-card-media.is-sold-out {
+  overflow: visible;
+  background: none;
+}
+
 .collection-card-media.is-sold-out .stage-image {
   filter: blur(4px);
-  transform: scale(1.08);
 }
 
 .collection-card-media .badge {

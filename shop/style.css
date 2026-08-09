@@ -799,7 +799,26 @@ svg {
 
 /* ---------- Promo Banner ---------- */
 .promo-banner {
+  position: relative;
   border-bottom: 1px solid #111;
+}
+
+/* The collapsing element — .promo-banner-image itself keeps its full
+   aspect-ratio height always, so the zoom/idle-drift positioning below
+   (all computed as percentages of that box) never has to recompute mid-
+   collapse. This wrapper's max-height shrinks over it instead, revealing
+   less of the image from the top down — i.e. the bottom disappears
+   first — via plain overflow clipping, not a resize of the photo itself.
+   The open-state cap mirrors .promo-banner-image's own 1920:700 ratio so
+   it's a no-op until .promo-banner.is-hidden collapses it to 0. */
+.promo-banner-clip {
+  overflow: hidden;
+  max-height: calc(100vw * 700 / 1920);
+  transition: max-height 500ms ease;
+}
+
+.promo-banner.is-hidden .promo-banner-clip {
+  max-height: 0;
 }
 
 .promo-banner-image {
@@ -835,6 +854,51 @@ svg {
   letter-spacing: 0.02em;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   pointer-events: none;
+}
+
+/* Positioned against .promo-banner itself, not .promo-banner-clip — so
+   it stays put (top-right of where the banner was) once the clip has
+   collapsed, instead of disappearing along with the photo. Same white +
+   drop-shadow treatment as the scrolled header logo, for legibility over
+   whatever part of the photo it's sitting on. */
+.promo-banner-toggle {
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  color: #fff;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
+  transition: color 0.18s ease;
+}
+
+.promo-banner-toggle:hover {
+  color: var(--color-hover);
+}
+
+.promo-banner-toggle-icon {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.promo-banner-toggle-label {
+  display: none;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.promo-banner.is-hidden .promo-banner-toggle-icon {
+  display: none;
+}
+
+.promo-banner.is-hidden .promo-banner-toggle-label {
+  display: block;
 }
 
 /* js/main.js drives this element's own transform: a small continuous

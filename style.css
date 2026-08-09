@@ -1052,6 +1052,21 @@ html.js-typing .hero-subtitle {
 }
 
 /* ==========================================================================
+   Footer — structural placeholder; full footer design comes in a later pass
+   ========================================================================== */
+
+.site-footer {
+  padding: 64px var(--edge);
+  border-top: 1px solid var(--color-line);
+}
+
+.footer-copy {
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: var(--color-fg-faint);
+}
+
+/* ==========================================================================
    Responsive
    ========================================================================== */
 
@@ -1086,6 +1101,10 @@ html.js-typing .hero-subtitle {
   .section-grid {
     grid-template-columns: 1fr;
     gap: 16px;
+  }
+
+  .site-footer {
+    padding: 40px var(--edge);
   }
 }
 

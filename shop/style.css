@@ -134,6 +134,13 @@ svg {
   display: block;
   position: absolute;
   inset: 0;
+  /* The shop's generic `svg { width: 20px; height: 20px; }` reset (used
+     for the header/cart/search icons) would otherwise win here since
+     .logo-draw itself never declared a size — pin it explicitly so the
+     traced SVG fills the same box as .logo-mark instead of shrinking to
+     that reset's 20px square. */
+  width: 100%;
+  height: 100%;
   color: #111;
   opacity: 0;
   /* Matches .logo-mark's own filter above so the cross-fade doesn't jump

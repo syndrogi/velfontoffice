@@ -158,7 +158,10 @@ a {
 
 .logo-draw-line {
   vector-effect: non-scaling-stroke;
-  stroke-width: 1.5;
+  /* Matches images/logo.png's own line weight at 80px tall (~9px thick
+     at the source's native 1080px width) — thicker reads as a heavier,
+     less faithful mark once .logo-mark cross-fades in over it. */
+  stroke-width: 1;
 }
 
 .logo-draw-fill {

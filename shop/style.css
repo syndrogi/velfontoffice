@@ -95,6 +95,7 @@ svg {
   align-items: center;
   justify-self: center;
   white-space: nowrap;
+  position: relative;
 }
 
 .logo-mark {
@@ -114,12 +115,66 @@ svg {
      header-text-btn type next to it at this size — a slight blur+
      contrast pass thickens its edges to match without swapping assets. */
   filter: blur(0.6px) contrast(2.6);
-  transition: background-color 0.18s ease;
+  transition: opacity 0.35s ease, background-color 0.18s ease;
 }
 
 .logo:hover .logo-mark,
 .logo:focus-visible .logo-mark {
   background-color: var(--color-hover);
+}
+
+/* First-paint intro only (js/logo-draw.js) — same treatment as the main
+   site's header logo (see .logo-draw there): an SVG traced from this
+   mark's own construction grid (images/logo-draw.svg), stroke-drawn with
+   anime.js's createDrawable, then cross-faded into .logo-mark above.
+   Fetched and inserted by JS only when the intro is actually going to
+   run, so reduced-motion / no-JS visitors never pay for the request and
+   the mask-image logo (already in the HTML) is the only thing they see. */
+.logo-draw {
+  display: block;
+  position: absolute;
+  inset: 0;
+  color: #111;
+  opacity: 0;
+  /* Matches .logo-mark's own filter above so the cross-fade doesn't jump
+     in weight the instant it hands off. */
+  filter: blur(0.6px) contrast(2.6);
+  transition: opacity 0.35s ease;
+}
+
+.logo-draw.is-visible {
+  opacity: 1;
+}
+
+.logo:hover .logo-draw,
+.logo:focus-visible .logo-draw {
+  color: var(--color-hover);
+}
+
+.logo-draw-lines {
+  fill: none;
+  stroke: currentColor;
+}
+
+.logo-draw-line {
+  vector-effect: non-scaling-stroke;
+  /* Matches images/logo.png's own line weight at 80px tall (~9px thick
+     at the source's native 1080px width). */
+  stroke-width: 1;
+}
+
+.logo-draw-fill {
+  fill: currentColor;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.logo-draw-fill.is-filled {
+  opacity: 1;
+}
+
+.logo-mark.is-intro-hidden {
+  opacity: 0;
 }
 
 .main-nav > ul {

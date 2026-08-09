@@ -81,6 +81,7 @@ a {
 .nav-link,
 .social-icon,
 .lang-switch,
+.more,
 .menu-toggle {
   pointer-events: auto;
 }
@@ -293,6 +294,92 @@ a {
 
 .lang-option.is-active {
   color: var(--color-fg);
+}
+
+/* "More" menu — a "+" toggle that expands into a small dropdown
+   (Members Only, 5th Ave. Bipolar Kids). Same open/close shape as
+   .lang-switch above; typography and the per-item stagger-in match
+   Labs (.labs-toggle / .labs-menu-item further down). */
+.more {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.more-toggle {
+  font-family: inherit;
+  font-size: clamp(15px, 1.6vw, 19px);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-fg);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: color 180ms var(--ease);
+}
+
+.more-toggle:hover,
+.more.is-open .more-toggle {
+  color: var(--color-hover);
+}
+
+.more-toggle:focus-visible {
+  outline: 1px solid var(--color-fg-muted);
+  outline-offset: 6px;
+}
+
+.more-menu {
+  position: absolute;
+  top: calc(100% + 14px);
+  right: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+  list-style: none;
+  pointer-events: none;
+}
+
+.more.is-open .more-menu {
+  pointer-events: auto;
+}
+
+.more-menu-item {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 200ms var(--ease), transform 200ms var(--ease);
+}
+
+.more-menu.is-visible .more-menu-item {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.more-menu-item:nth-child(2) {
+  transition-delay: 30ms;
+}
+
+.more-menu-link {
+  display: block;
+  font-family: inherit;
+  font-size: clamp(15px, 1.6vw, 19px);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-fg);
+  white-space: nowrap;
+  transition: color 180ms var(--ease);
+}
+
+.more-menu-link:hover,
+.more-menu-link:focus-visible {
+  color: var(--color-hover);
+}
+
+.more-menu-link:focus-visible {
+  outline: 1px solid var(--color-fg-muted);
+  outline-offset: 6px;
 }
 
 /* .nav-link (not a `.main-nav a` descendant selector) so hover/focus
@@ -1139,6 +1226,10 @@ html.js-typing .hero-subtitle {
    the hero title and section grid below it. */
 @media (max-width: 768px) {
   .main-nav {
+    display: none;
+  }
+
+  .more {
     display: none;
   }
 

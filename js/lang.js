@@ -45,6 +45,7 @@
       "contact.phone": "Phone",
       "contact.comment": "Comment",
       "contact.send": "Send",
+      "nav.fifthAve": "5th ave. bipolar kids",
       "footer.copy": "© 2026 VELFONT OFFICE",
     },
     ko: {
@@ -75,6 +76,7 @@
       "contact.phone": "전화번호",
       "contact.comment": "메시지",
       "contact.send": "보내기",
+      "nav.fifthAve": "5th ave. bipolar kids",
       "footer.copy": "© 2026 VELFONT OFFICE",
     },
   };

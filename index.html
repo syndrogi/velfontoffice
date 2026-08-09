@@ -32,8 +32,8 @@
     <div class="header-right">
       <nav class="main-nav" aria-label="Primary">
         <a href="/shop/" class="nav-link" data-i18n="nav.shop">shop</a>
+        <a href="#archive" class="nav-link" data-i18n="nav.archive">archive</a>
         <a href="#" class="nav-link js-contact-toggle" id="contactToggle" aria-haspopup="true" aria-expanded="false" aria-controls="contactPanel" data-i18n="nav.contact">contact</a>
-        <a href="/os/" class="nav-link" data-i18n="nav.membersOnly">members only</a>
       </nav>
 
       <div class="lang-switch" id="langSwitch">
@@ -72,6 +72,27 @@
           <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
         </svg>
       </a>
+
+      <div class="more" id="more">
+        <button
+          type="button"
+          class="more-toggle"
+          id="moreToggle"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="moreMenu"
+          aria-label="More"
+        >+</button>
+        <ul class="more-menu" id="moreMenu" aria-hidden="true">
+          <li class="more-menu-item">
+            <a href="/os/" class="more-menu-link" data-i18n="nav.membersOnly">members only</a>
+          </li>
+          <li class="more-menu-item">
+            <!-- Destination pending — real URL to be added later. -->
+            <a href="#" class="more-menu-link" id="fifthAveLink" data-i18n="nav.fifthAve">5th ave. bipolar kids</a>
+          </li>
+        </ul>
+      </div>
 
       <button
         type="button"
@@ -214,6 +235,7 @@
 <script src="js/transform.js" defer></script>
 <script src="js/main.js" defer></script>
 <script src="js/logo-draw.js" defer></script>
+<script src="js/more-menu.js" defer></script>
 <script src="js/lang.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="js/contact.js" defer></script>

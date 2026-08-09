@@ -308,27 +308,40 @@ a {
   align-items: center;
 }
 
-/* Box sized to exactly the glyph (width/height == font-size, line-height:1
-   removes the font's built-in leading) so the clickable area is the "+"
-   itself, not padded whitespace around it — matching how .social-icon
-   next to it is just its 18px svg with no extra box. */
+/* An SVG cross instead of a text "+"/"−" — a font glyph's ink is never
+   quite centered in its own em-box (see .social-icon/.lang-toggle next to
+   it, which are exact for the same reason: hand-authored geometry, not
+   font metrics), so no amount of line-height/padding/transform tuning on
+   text ever lands perfectly symmetric. Two lines drawn from the exact
+   center of a 20x20 viewBox are symmetric by construction. The vertical
+   line fades out on open (.more.is-open) instead of the JS swapping to a
+   "−" character — see js/more-menu.js. */
 .more-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  font-family: inherit;
-  font-size: 22px;
-  line-height: 1;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--color-fg);
+  width: 20px;
+  height: 20px;
   background: none;
   border: none;
   padding: 0;
+  color: var(--color-fg);
   cursor: pointer;
   transition: color 180ms var(--ease);
+}
+
+.more-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+.more-toggle-v {
+  transform-origin: center;
+  transition: opacity 180ms var(--ease);
+}
+
+.more.is-open .more-toggle-v {
+  opacity: 0;
 }
 
 .more-toggle:hover,
@@ -421,27 +434,35 @@ a {
   border-bottom-color: var(--color-fg);
 }
 
-/* Mobile menu toggle — hidden until the nav collapses. Same "+" / "−"
-   text-toggle language as the desktop More menu (.more-toggle), not a
-   separate icon — it opens the mobile drawer, which now carries the
-   merged contents of both. */
+/* Mobile menu toggle — hidden until the nav collapses. Same SVG cross as
+   the desktop More toggle (.more-toggle) — it opens the mobile drawer,
+   which now carries the merged contents of both. */
 .menu-toggle {
   display: none;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  font-family: inherit;
-  font-size: 22px;
-  line-height: 1;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--color-fg);
+  width: 20px;
+  height: 20px;
   background: none;
   border: none;
   padding: 0;
+  color: var(--color-fg);
   cursor: pointer;
   transition: color 180ms var(--ease);
+}
+
+.menu-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+.menu-toggle-v {
+  transform-origin: center;
+  transition: opacity 180ms var(--ease);
+}
+
+.menu-toggle.is-open .menu-toggle-v {
+  opacity: 0;
 }
 
 .menu-toggle:hover,

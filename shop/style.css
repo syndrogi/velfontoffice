@@ -158,9 +158,12 @@ svg {
 
 .logo-draw-line {
   vector-effect: non-scaling-stroke;
-  /* Matches images/logo.png's own line weight at 80px tall (~9px thick
-     at the source's native 1080px width). */
-  stroke-width: 1;
+  /* Measured against the rendered .logo-mark itself (not the source
+     PNG's own pixel weight — mask-image's downscaling renders its
+     hairlines thinner than a naive size ratio suggests): its border
+     reads at ~0.5px on screen at this height. Thicker than that reads
+     as a heavier, less faithful mark once .logo-mark cross-fades in. */
+  stroke-width: 0.5;
 }
 
 .logo-draw-fill {

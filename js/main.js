@@ -93,14 +93,6 @@
     if (!e.matches) closeMenu();
   });
 
-  // Placeholder link — no destination yet, see the HTML comment above it.
-  var fifthAveMobile = document.getElementById("fifthAveLinkMobile");
-  if (fifthAveMobile) {
-    fifthAveMobile.addEventListener("click", function (e) {
-      e.preventDefault();
-    });
-  }
-
   // Active-section highlighting for in-page anchor links (Office/Archive/About).
   var anchorLinks = document.querySelectorAll(
     '.main-nav a[href^="#"], .mobile-nav a[href^="#"]'

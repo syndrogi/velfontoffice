@@ -50,12 +50,4 @@
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && isOpen) closeMenu();
   });
-
-  // Placeholder link — no destination yet, see the HTML comment above it.
-  var fifthAve = document.getElementById("fifthAveLink");
-  if (fifthAve) {
-    fifthAve.addEventListener("click", function (e) {
-      e.preventDefault();
-    });
-  }
 })();

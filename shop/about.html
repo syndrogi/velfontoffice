@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VELFONT SHOP — 브랜드 소개</title>
+<link rel="canonical" href="https://velfontoffice.com/shop/about.html">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+<link rel="icon" href="/favicon.ico">
+<link rel="manifest" href="/site.webmanifest">
+<script>
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.documentElement.classList.add("js-enter");
+  }
+</script>
+</head>
+<body>
+
+<div class="page-veil" aria-hidden="true"></div>
+
+<header class="site-header">
+  <div class="header-side header-left">
+    <button class="nav-toggle" id="navToggle" data-i18n-aria-label="nav.menuOpen" aria-label="메뉴 열기">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="main-nav" id="mainNav">
+      <ul>
+        <li><a href="index.html">All</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <a href="index.html" class="logo" data-i18n-aria-label="nav.logoHome" aria-label="VELFONT OFFICE 홈으로 이동">
+    <span class="logo-mark" role="img" aria-label="VELFONT OFFICE"></span>
+  </a>
+
+  <div class="header-side header-right"></div>
+</header>
+
+<nav class="breadcrumb">
+  <a href="index.html">All</a> <span>/</span> <span>브랜드 소개</span>
+</nav>
+
+<main class="checkout-page">
+  <section class="checkout-summary">
+    <h1>브랜드 소개</h1>
+    <p class="checkout-note">브랜드 소개 페이지를 준비 중입니다.</p>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-col">
+    <h4>Shop</h4>
+    <ul>
+      <li><a href="index.html?search=Outerwear">Outerwear</a></li>
+      <li><a href="index.html?search=Tops">Tops</a></li>
+      <li><a href="index.html?search=Bottoms">Bottoms</a></li>
+      <li><a href="index.html?search=Accessories">Accessories</a></li>
+    </ul>
+  </div>
+  <div class="footer-col">
+    <h4>Help</h4>
+    <ul>
+      <li><a href="shipping.html" data-i18n="footer.helpShipping">배송 안내</a></li>
+      <li><a href="exchange.html" data-i18n="footer.helpExchange">교환/반품</a></li>
+      <li><a href="size-guide.html" data-i18n="footer.helpSizeGuide">사이즈 가이드</a></li>
+      <li><a href="contact.html" data-i18n="footer.helpContact">문의하기</a></li>
+    </ul>
+  </div>
+  <div class="footer-col">
+    <h4>Company</h4>
+    <ul>
+      <li><a href="about.html" data-i18n="footer.companyAbout">브랜드 소개</a></li>
+      <li><a href="store.html" data-i18n="footer.companyStore">스토어 안내</a></li>
+      <li><a href="careers.html" data-i18n="footer.companyCareers">채용</a></li>
+    </ul>
+  </div>
+  <div class="footer-col newsletter">
+    <h4>Newsletter</h4>
+    <p data-i18n="footer.newsletterText">신상품 소식을 가장 먼저 받아보세요.</p>
+    <form id="newsletterForm">
+      <input type="email" data-i18n-placeholder="footer.newsletterPlaceholder" placeholder="이메일 주소" required>
+      <button type="submit" data-i18n="footer.newsletterSubmit">구독</button>
+    </form>
+    <div class="social-links">
+      <a href="https://www.instagram.com/velfontoffice/" target="_blank" rel="noopener">Instagram</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2026 VELFONT OFFICE. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/products.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/common.js"></script>
+</body>
+</html>

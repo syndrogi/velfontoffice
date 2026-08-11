@@ -25,7 +25,10 @@
 <header class="site-header">
   <div class="header-side header-left">
     <button class="nav-toggle" id="navToggle" data-i18n-aria-label="nav.menuOpen" aria-label="메뉴 열기">
-      <span></span><span></span><span></span>
+      <svg viewBox="0 0 20 20" aria-hidden="true">
+        <line class="nav-toggle-v" x1="10" y1="2" x2="10" y2="18"></line>
+        <line x1="2" y1="10" x2="18" y2="10"></line>
+      </svg>
     </button>
 
     <nav class="main-nav" id="mainNav">
@@ -203,7 +206,7 @@
   </div>
 </footer>
 
-<script src="js/logo-draw.js" defer></script>
+<script src="js/logo-draw.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 <script src="js/products.js"></script>

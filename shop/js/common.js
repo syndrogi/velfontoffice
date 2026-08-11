@@ -114,6 +114,7 @@ function setupNav() {
   const mainNav = document.getElementById("mainNav");
   navToggle?.addEventListener("click", () => {
     const isOpen = mainNav?.classList.toggle("open");
+    navToggle.classList.toggle("open", isOpen);
     // The off-canvas nav and the search bar are both full-width overlays
     // on narrow viewports — leaving both open stacks the nav's opaque
     // background over the search results, hiding them from view.
@@ -157,6 +158,7 @@ function setupSearch() {
   function openSearch() {
     // See setupNav()'s matching guard: same reason, reversed direction.
     document.getElementById("mainNav")?.classList.remove("open");
+    document.getElementById("navToggle")?.classList.remove("open");
     searchBar.classList.add("open");
     searchInput.focus();
   }

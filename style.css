@@ -1152,7 +1152,15 @@ html.js-typing .hero-subtitle {
   background: var(--color-bg);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 420ms var(--ease);
+  transition: opacity 420ms var(--ease), background-color 420ms var(--ease);
+}
+
+/* Set alongside .is-active for the 5th Ave. Bipolar Kids hand-off (see
+   js/main.js) — a black fade instead of the shop transition's white one,
+   reading as a sharper break for a link leaving VELFONT entirely rather
+   than moving to another section of it. */
+.page-veil.is-dark {
+  background: var(--color-fg);
 }
 
 .page-veil.is-active {

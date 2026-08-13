@@ -305,8 +305,29 @@
   var HERO_DRAW_DURATION_MS = 900;
   var HERO_DRAW_STAGGER_MS = 9;
 
+  // "VELFONT OFFICE" in nine other scripts (Korean, Chinese, Japanese,
+  // Thai, Russian, Arabic, Hindi, Greek, Hebrew) — spun through before
+  // landing back on the English original. Plain strings, no dir/lang
+  // metadata needed: .hero-title-visual's `unicode-bidi: plaintext`
+  // (style.css) reads each script's own directionality automatically,
+  // so Arabic/Hebrew flip RTL on their own frames without any JS
+  // bookkeeping.
+  var HERO_LANGS = [
+    "벨폰트 오피스",
+    "贝方奥非",
+    "ヴェルフォント オフィス",
+    "เวลฟอนต์ ออฟฟิศ",
+    "ВЕЛФОНТ ОФИС",
+    "مكتب فيلفونت",
+    "वेलफोंट ऑफिस",
+    "ΒΕΛΦΟΝΤ ΟΦΙΣ",
+    "וולפונט אופיס",
+  ];
+  var HERO_SPIN_LOOPS = 2;
+
   var navLinks = document.querySelectorAll(".main-nav a");
   var heroTitle = document.querySelector(".hero-title");
+  var heroTitleVisual = document.querySelector(".hero-title-visual");
   var heroSubtitle = document.querySelector(".hero-subtitle");
 
   navLinks.forEach(function (link, i) {
@@ -326,14 +347,9 @@
   // Keeps "VELFONT OFFICE" as real text — every letter is inserted up
   // front (nothing to read out of order for assistive tech) and reveals
   // via a stroke-to-fill CSS animation, staggered per letter.
-  function drawHeroTitle(el, onDone) {
-    if (!el) {
-      if (onDone) onDone();
-      return;
-    }
-    var text = el.textContent;
-    el.textContent = "";
-    el.classList.add("is-typing");
+  function drawHeroTitle(visual, onDone) {
+    var text = visual.textContent;
+    visual.textContent = "";
 
     var letters = text.split("");
     letters.forEach(function (ch, i) {
@@ -342,19 +358,63 @@
       span.textContent = ch === " " ? " " : ch;
       span.style.animationDelay = i * HERO_DRAW_STAGGER_MS + "ms";
       makeLetterDraggable(span);
-      el.appendChild(span);
+      visual.appendChild(span);
     });
 
     var totalMs = (letters.length - 1) * HERO_DRAW_STAGGER_MS + HERO_DRAW_DURATION_MS;
     setTimeout(function () {
-      el.classList.remove("is-typing");
-      el.classList.add("is-typed");
+      heroTitle.classList.remove("is-typing");
+      heroTitle.classList.add("is-typed");
       if (onDone) onDone();
     }, totalMs);
   }
 
+  // Spins "VELFONT OFFICE" through its other-language renderings like a
+  // slot machine reel — quick ticks at first, slowing down near the end
+  // — then lands back on the original English text and hands off to
+  // drawHeroTitle() for its letter-by-letter draw.
+  function spinHeroTitle(visual, onDone) {
+    var finalText = visual.textContent; // "Velfont Office", as authored in the HTML
+    var sequence = [];
+    for (var loop = 0; loop < HERO_SPIN_LOOPS; loop++) {
+      sequence = sequence.concat(HERO_LANGS);
+    }
+
+    var i = 0;
+
+    function tick() {
+      if (i >= sequence.length) {
+        visual.classList.remove("is-spinning", "is-ticking");
+        visual.textContent = finalText;
+        drawHeroTitle(visual, onDone);
+        return;
+      }
+
+      visual.textContent = sequence[i];
+      // Restarts the CSS tick animation on every frame swap — remove,
+      // force reflow, re-add, since re-adding an already-present class
+      // wouldn't replay the animation on its own.
+      visual.classList.remove("is-ticking");
+      void visual.offsetWidth;
+      visual.classList.add("is-ticking");
+
+      i++;
+      var progress = i / sequence.length;
+      var stepDelay = 70 + progress * progress * 260; // decelerates toward the end
+      setTimeout(tick, stepDelay);
+    }
+
+    heroTitle.classList.add("is-typing");
+    visual.classList.add("is-spinning");
+    tick();
+  }
+
   setTimeout(function () {
-    drawHeroTitle(heroTitle, revealSubtitle);
+    if (heroTitle && heroTitleVisual) {
+      spinHeroTitle(heroTitleVisual, revealSubtitle);
+    } else {
+      revealSubtitle();
+    }
   }, 350);
 })();
 

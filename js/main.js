@@ -302,25 +302,26 @@
   // before its text is swapped for real letter spans.
   var HERO_TICK_MS = 110;
 
-  // "VELFONT OFFICE" in nine other scripts (Korean, Chinese, Japanese,
-  // Thai, Russian, Arabic, Hindi, Greek, Hebrew) — spun through before
-  // landing back on the English original. Plain strings, no dir/lang
-  // metadata needed: .hero-title-visual's `unicode-bidi: plaintext`
-  // (style.css) reads each script's own directionality automatically,
-  // so Arabic/Hebrew flip RTL on their own frames without any JS
-  // bookkeeping.
-  var HERO_LANGS = [
-    "벨폰트 오피스",
-    "贝方奥非",
-    "ヴェルフォント オフィス",
-    "เวลฟอนต์ ออฟฟิศ",
-    "ВЕЛФОНТ ОФИС",
-    "مكتب فيلفونت",
-    "वेलफोंट ऑफिस",
-    "ΒΕΛΦΟΝΤ ΟΦΙΣ",
-    "וולפונט אופיס",
-  ];
+  // "VELFONT OFFICE" in nine other scripts — spun through before landing
+  // back on the English original. Plain strings, no dir metadata needed:
+  // .hero-title-visual's `unicode-bidi: plaintext` (style.css) reads
+  // each script's own directionality automatically, so Arabic/Hebrew
+  // flip RTL on their own frames without any JS bookkeeping.
+  var HERO_LANGS = {
+    ko: "벨폰트 오피스",
+    zh: "维尔方公司",
+    ja: "ヴェルフォント オフィス",
+    th: "เวลฟอนต์ ออฟฟิศ",
+    ru: "ВЕЛФОНТ ОФИС",
+    ar: "مكتب فيلفونت",
+    hi: "वेलफोंट ऑफिस",
+    el: "ΒΕΛΦΟΝΤ ΟΦΙΣ",
+    he: "וולפונט אופיס",
+  };
+  var HERO_SPIN_ORDER = ["ko", "zh", "ja", "th", "ru", "ar", "hi", "el", "he"];
   var HERO_SPIN_LOOPS = 2;
+  // The reel's final approach, right before landing on English.
+  var HERO_LANDING_ORDER = ["zh", "ar", "ja", "ko"];
 
   var navLinks = document.querySelectorAll(".main-nav a");
   var heroTitle = document.querySelector(".hero-title");
@@ -363,8 +364,13 @@
   function spinHeroTitle(visual, onDone) {
     var sequence = [];
     for (var loop = 0; loop < HERO_SPIN_LOOPS; loop++) {
-      sequence = sequence.concat(HERO_LANGS);
+      HERO_SPIN_ORDER.forEach(function (code) {
+        sequence.push(HERO_LANGS[code]);
+      });
     }
+    HERO_LANDING_ORDER.forEach(function (code) {
+      sequence.push(HERO_LANGS[code]);
+    });
     sequence.push(visual.textContent); // "Velfont Office", as authored in the HTML
 
     var i = 0;
@@ -390,8 +396,11 @@
         return;
       }
 
+      // Cubic (not quadratic) — ticks stay quick for most of the spin,
+      // then stretch out hard over the last few frames, like a real
+      // slot machine reel settling into place.
       var progress = i / sequence.length;
-      var stepDelay = 40 + progress * progress * 170; // decelerates toward the end
+      var stepDelay = 40 + progress * progress * progress * 480;
       setTimeout(tick, stepDelay);
     }
 

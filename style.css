@@ -21,6 +21,10 @@
   --edge: 56px;
 
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Matches anime.js's "inOutQuad" — used by the header logo's SVG line
+     draw (js/logo-draw.js) and reused by the hero title's letter draw
+     (see .hero-title .letter below) so both read as the same animation. */
+  --ease-in-out-quad: cubic-bezier(0.455, 0.03, 0.515, 0.955);
 }
 
 * {
@@ -513,12 +517,42 @@ a {
 }
 
 .hero-title {
-  font-family: var(--font-sans);
-  font-size: clamp(34px, 6vw, 92px);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+  display: inline-block;
+  position: relative;
   margin-bottom: 40px;
+  font-size: clamp(40px, 8vw, 96px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+/* Reveals "VELFONT OFFICE" as real text — each letter is stroke-outlined
+   only, then fills solid, over the same 900ms/inOutQuad timing with a
+   9ms per-letter stagger as the header logo's SVG line draw
+   (js/logo-draw.js), so the two intros read as the same animation even
+   though this one draws real glyphs instead of a traced mark. */
+.hero-title .letter {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--color-fg);
+  opacity: 0;
+  animation: heroLetterDraw 900ms var(--ease-in-out-quad) forwards;
+}
+
+@keyframes heroLetterDraw {
+  0% { opacity: 0; }
+  35% { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+.hero-title.is-typed .letter {
+  color: var(--color-fg);
+  transition: color 300ms var(--ease);
+}
+
+.hero-title.is-typed .letter:hover,
+.hero-title.is-typed .letter.is-dragging {
+  color: var(--color-hover);
 }
 
 .hero-subtitle {
@@ -619,6 +653,10 @@ a {
 }
 
 .labs-menu-btn:hover {
+  color: var(--color-hover);
+}
+
+.labs-menu-btn.is-active {
   color: var(--color-hover);
 }
 

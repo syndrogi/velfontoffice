@@ -239,7 +239,14 @@
 
     function step() {
       if (el.__typeRun !== runToken) {
+        // Superseded by a second typeElement() call — the element's
+        // content is already final, so mark it typed rather than leaving
+        // it with neither class: under
+        // html.js-typing that combination stays visibility:hidden forever
+        // (see .main-nav a in style.css), since only .is-typing/.is-typed
+        // force it visible.
         el.classList.remove("is-typing");
+        el.classList.add("is-typed");
         return;
       }
 
@@ -290,6 +297,14 @@
     step();
   }
 
+  // Same timing/easing as the header logo's stroke-drawn intro
+  // (js/logo-draw.js: `duration: 900, delay: stagger(9), ease: "inOutQuad"`)
+  // so the hero title's reveal reads as "the same animation" even though
+  // it draws real text (each letter stroke-outlined, then filled), not a
+  // traced SVG mark.
+  var HERO_DRAW_DURATION_MS = 900;
+  var HERO_DRAW_STAGGER_MS = 9;
+
   var navLinks = document.querySelectorAll(".main-nav a");
   var heroTitle = document.querySelector(".hero-title");
   var heroSubtitle = document.querySelector(".hero-subtitle");
@@ -300,19 +315,46 @@
     }, i * 60);
   });
 
-  setTimeout(function () {
-    typeElement(heroTitle, {
-      speed: 30,
+  function revealSubtitle() {
+    typeElement(heroSubtitle, {
+      speed: 14,
       letterSpans: true,
       draggable: true,
-      onDone: function () {
-        typeElement(heroSubtitle, {
-          speed: 14,
-          letterSpans: true,
-          draggable: true,
-        });
-      },
     });
+  }
+
+  // Keeps "VELFONT OFFICE" as real text — every letter is inserted up
+  // front (nothing to read out of order for assistive tech) and reveals
+  // via a stroke-to-fill CSS animation, staggered per letter.
+  function drawHeroTitle(el, onDone) {
+    if (!el) {
+      if (onDone) onDone();
+      return;
+    }
+    var text = el.textContent;
+    el.textContent = "";
+    el.classList.add("is-typing");
+
+    var letters = text.split("");
+    letters.forEach(function (ch, i) {
+      var span = document.createElement("span");
+      span.className = "letter";
+      span.textContent = ch === " " ? " " : ch;
+      span.style.animationDelay = i * HERO_DRAW_STAGGER_MS + "ms";
+      makeLetterDraggable(span);
+      el.appendChild(span);
+    });
+
+    var totalMs = (letters.length - 1) * HERO_DRAW_STAGGER_MS + HERO_DRAW_DURATION_MS;
+    setTimeout(function () {
+      el.classList.remove("is-typing");
+      el.classList.add("is-typed");
+      if (onDone) onDone();
+    }, totalMs);
+  }
+
+  setTimeout(function () {
+    drawHeroTitle(heroTitle, revealSubtitle);
   }, 350);
 })();
 

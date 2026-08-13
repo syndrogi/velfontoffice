@@ -20,6 +20,7 @@
     "header button",
     ".hero-content .letter",
     ".hero-content img",
+    ".labs-logo-mark",
   ].join(", ");
 
   // Visual properties that only exist because of an ancestor (the big

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,33 +31,10 @@
 
     <div class="header-right">
       <nav class="main-nav" aria-label="Primary">
-        <a href="/shop/" class="nav-link" data-i18n="nav.shop">shop</a>
-        <a href="#archive" class="nav-link" data-i18n="nav.archive">archive</a>
-        <a href="#" class="nav-link js-contact-toggle" id="contactToggle" aria-haspopup="true" aria-expanded="false" aria-controls="contactPanel" data-i18n="nav.contact">contact</a>
+        <a href="/shop/" class="nav-link">shop</a>
+        <a href="#archive" class="nav-link">archive</a>
+        <a href="#" class="nav-link js-contact-toggle" id="contactToggle" aria-haspopup="true" aria-expanded="false" aria-controls="contactPanel">contact</a>
       </nav>
-
-      <div class="lang-switch" id="langSwitch">
-        <button
-          type="button"
-          class="lang-toggle"
-          id="langToggle"
-          aria-haspopup="true"
-          aria-expanded="false"
-          aria-controls="langMenu"
-          aria-label="Change language"
-          data-i18n-aria="lang.toggleLabel"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="2" y1="12" x2="22" y2="12"></line>
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-          </svg>
-        </button>
-        <ul class="lang-menu" id="langMenu" aria-hidden="true">
-          <li><button type="button" class="lang-option" data-lang="en">English</button></li>
-          <li><button type="button" class="lang-option" data-lang="ko">한국어</button></li>
-        </ul>
-      </div>
 
       <a
         href="https://www.instagram.com/velfontoffice/"
@@ -90,14 +67,13 @@
         </button>
         <ul class="more-menu" id="moreMenu" aria-hidden="true">
           <li class="more-menu-item">
-            <a href="/os/" class="more-menu-link" data-i18n="nav.membersOnly">members only</a>
+            <a href="/os/" class="more-menu-link">members only</a>
           </li>
           <li class="more-menu-item">
             <a
               href="https://revel-trace-46441903.figma.site/"
               class="more-menu-link"
               id="fifthAveLink"
-              data-i18n="nav.fifthAve"
             >5th ave. bipolar kids</a>
           </li>
         </ul>
@@ -109,7 +85,6 @@
         aria-expanded="false"
         aria-controls="mobile-nav"
         aria-label="MENU"
-        data-i18n-aria="nav.menu"
       >
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
           <line class="menu-toggle-v" x1="10" y1="2" x2="10" y2="18"></line>
@@ -123,16 +98,15 @@
 <div class="nav-backdrop" hidden></div>
 
 <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile" inert>
-  <a href="/shop/" data-i18n="nav.shop">shop</a>
-  <a href="#office" data-i18n="nav.office">office</a>
-  <a href="#archive" data-i18n="nav.archive">archive</a>
-  <a href="#about" data-i18n="nav.about">about</a>
-  <a href="#" class="js-contact-toggle" aria-haspopup="true" aria-expanded="false" aria-controls="contactPanel" data-i18n="nav.contact">contact</a>
-  <a href="/os/" data-i18n="nav.membersOnly">members only</a>
+  <a href="/shop/">shop</a>
+  <a href="#office">office</a>
+  <a href="#archive">archive</a>
+  <a href="#about">about</a>
+  <a href="#" class="js-contact-toggle" aria-haspopup="true" aria-expanded="false" aria-controls="contactPanel">contact</a>
+  <a href="/os/">members only</a>
   <a
     href="https://revel-trace-46441903.figma.site/"
     id="fifthAveLinkMobile"
-    data-i18n="nav.fifthAve"
   >5th ave. bipolar kids</a>
 </nav>
 
@@ -149,8 +123,8 @@
     <div class="hero-overlay"></div>
 
     <div class="hero-content">
-      <h1 class="hero-title">Velfont Office</h1>
-      <p class="hero-subtitle" data-i18n-html="hero.subtitle">
+      <h1 class="hero-title"><span class="hero-title-mark" role="img" aria-label="VELFONT OFFICE"></span></h1>
+      <p class="hero-subtitle">
         A Creative Office for Fashion,<br>
         Research,<br>
         Archive,<br>
@@ -171,35 +145,35 @@
     </div>
 
     <div class="contact-panel" id="contactPanel" aria-hidden="true">
-      <button type="button" class="contact-close" id="contactClose" aria-label="Close contact form" data-i18n-aria="contact.closeLabel">&times;</button>
-      <h2 class="contact-title" data-i18n="contact.title">Contact</h2>
+      <button type="button" class="contact-close" id="contactClose" aria-label="Close contact form">&times;</button>
+      <h2 class="contact-title">Contact</h2>
       <form class="contact-form" id="contactForm" novalidate>
         <label class="contact-field">
-          <span data-i18n="contact.name">Name</span>
+          <span>Name</span>
           <input type="text" name="name" autocomplete="name">
         </label>
         <label class="contact-field">
-          <span data-i18n-html="contact.email">Email <em>required</em></span>
+          <span>Email <em>required</em></span>
           <input type="email" name="email" required autocomplete="email">
         </label>
         <label class="contact-field">
-          <span data-i18n="contact.reason">Reason for Inquiry</span>
+          <span>Reason for Inquiry</span>
           <select name="reason">
-            <option value="General" data-i18n="contact.reasonGeneral">General</option>
-            <option value="Collaboration" data-i18n="contact.reasonCollab">Collaboration</option>
-            <option value="Press" data-i18n="contact.reasonPress">Press</option>
-            <option value="Other" data-i18n="contact.reasonOther">Other</option>
+            <option value="General">General</option>
+            <option value="Collaboration">Collaboration</option>
+            <option value="Press">Press</option>
+            <option value="Other">Other</option>
           </select>
         </label>
         <label class="contact-field">
-          <span data-i18n="contact.phone">Phone</span>
+          <span>Phone</span>
           <input type="tel" name="phone" autocomplete="tel">
         </label>
         <label class="contact-field">
-          <span data-i18n="contact.comment">Comment</span>
+          <span>Comment</span>
           <textarea name="comment" rows="7"></textarea>
         </label>
-        <button type="submit" class="contact-submit" data-i18n="contact.send">Send</button>
+        <button type="submit" class="contact-submit">Send</button>
         <p class="contact-status" id="contactStatus" aria-live="polite"></p>
       </form>
     </div>
@@ -209,11 +183,11 @@
     <div class="section-grid">
       <div class="section-label">
         <img src="images/logo.png" alt="" class="section-tag">
-        <span data-i18n="section.officeTitle">Office</span>
+        <span>Office</span>
       </div>
       <div class="section-body">
-        <h2 class="section-title" data-i18n="section.officeTitle">Office</h2>
-        <p class="section-desc" data-i18n="section.officeDesc">Internal structure, process, and the working methods behind VELFONT OFFICE.</p>
+        <h2 class="section-title">Office</h2>
+        <p class="section-desc">Internal structure, process, and the working methods behind VELFONT OFFICE.</p>
       </div>
     </div>
   </section>
@@ -222,11 +196,11 @@
     <div class="section-grid">
       <div class="section-label">
         <img src="images/logo.png" alt="" class="section-tag">
-        <span data-i18n="section.archiveTitle">Archive</span>
+        <span>Archive</span>
       </div>
       <div class="section-body">
-        <h2 class="section-title" data-i18n="section.archiveTitle">Archive</h2>
-        <p class="section-desc" data-i18n="section.archiveDesc">A growing record of collections, references, and research.</p>
+        <h2 class="section-title">Archive</h2>
+        <p class="section-desc">A growing record of collections, references, and research.</p>
       </div>
     </div>
   </section>
@@ -235,18 +209,18 @@
     <div class="section-grid">
       <div class="section-label">
         <img src="images/logo.png" alt="" class="section-tag">
-        <span data-i18n="section.aboutTitle">About</span>
+        <span>About</span>
       </div>
       <div class="section-body">
-        <h2 class="section-title" data-i18n="section.aboutTitle">About</h2>
-        <p class="section-desc" data-i18n="section.aboutDesc">Notes on the studio, its practice, and the people behind it.</p>
+        <h2 class="section-title">About</h2>
+        <p class="section-desc">Notes on the studio, its practice, and the people behind it.</p>
       </div>
     </div>
   </section>
 </main>
 
 <footer class="site-footer">
-  <span class="footer-copy" data-i18n="footer.copy">© 2026 VELFONT OFFICE</span>
+  <span class="footer-copy">© 2026 VELFONT OFFICE</span>
 </footer>
 
 <div class="page-veil" aria-hidden="true"></div>
@@ -255,7 +229,6 @@
 <script src="js/main.js" defer></script>
 <script src="js/logo-draw.js" defer></script>
 <script src="js/more-menu.js" defer></script>
-<script src="js/lang.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="js/contact.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js" defer></script>
@@ -268,5 +241,6 @@
 <script src="js/labs/measure.js" defer></script>
 <script src="js/labs/physics.js" defer></script>
 <script src="js/labs/developer.js" defer></script>
+<script src="js/labs/logo.js" defer></script>
 </body>
 </html>

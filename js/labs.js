@@ -25,6 +25,7 @@
   var isOpen = false;
   var noticeEl = null;
   var noticeTimer = null;
+  var buttonsById = {};
 
   function renderItem(lab) {
     var index = labs.length - 1;
@@ -46,13 +47,22 @@
     btn.appendChild(document.createTextNode(lab.title));
 
     btn.addEventListener("click", function () {
-      closeMenu();
       if (typeof lab.action === "function") lab.action();
     });
 
     li.appendChild(btn);
     menu.appendChild(li);
+    buttonsById[lab.id] = btn;
   }
+
+  // Lets a lab module report its own on/off state without labs.js having
+  // to know what the experiment does — see js/labs/blueprint.js etc.,
+  // which call this from their own enable()/disable().
+  window.labsSetActive = function (id, isActive) {
+    var btn = buttonsById[id];
+    if (!btn) return;
+    btn.classList.toggle("is-active", !!isActive);
+  };
 
   function openMenu() {
     isOpen = true;
@@ -77,14 +87,6 @@
     e.stopPropagation();
     if (isOpen) closeMenu();
     else openMenu();
-  });
-
-  document.addEventListener("click", function (e) {
-    if (isOpen && !root.contains(e.target)) closeMenu();
-  });
-
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && isOpen) closeMenu();
   });
 
   // Shared, minimal feedback for placeholder experiments — a quiet line

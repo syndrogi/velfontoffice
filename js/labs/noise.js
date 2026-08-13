@@ -512,6 +512,7 @@
     window.addEventListener("resize", scheduleRefresh);
 
     rafId = requestAnimationFrame(frame);
+    window.labsSetActive("noise", true);
   }
 
   function disable() {
@@ -546,6 +547,7 @@
     });
 
     if (grainCanvas) grainCanvas.classList.remove("is-active");
+    window.labsSetActive("noise", false);
   }
 
   registerLab({

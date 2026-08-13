@@ -390,6 +390,7 @@
     active = true;
     document.body.classList.add("labs-scale-active");
     document.addEventListener("click", onClick);
+    window.labsSetActive("scale", true);
   }
 
   function disable() {
@@ -397,6 +398,7 @@
     document.body.classList.remove("labs-scale-active");
     document.removeEventListener("click", onClick);
     select(null);
+    window.labsSetActive("scale", false);
   }
 
   registerLab({

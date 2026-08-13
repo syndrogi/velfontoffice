@@ -160,11 +160,13 @@
       container.classList.add("is-visible");
     });
     play();
+    window.labsSetActive("vfo-logo", true);
   }
 
   function hide() {
     active = false;
     if (container) container.classList.remove("is-visible");
+    window.labsSetActive("vfo-logo", false);
   }
 
   registerLab({

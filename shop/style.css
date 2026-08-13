@@ -770,11 +770,18 @@ svg {
   margin-bottom: 8px;
 }
 
-.checkout-field input {
+.checkout-field input,
+.checkout-field select,
+.checkout-field textarea {
   width: 100%;
   border: 1px solid #111;
   padding: 10px 12px;
   font-size: 13px;
+  font-family: inherit;
+}
+
+.checkout-field textarea {
+  resize: vertical;
 }
 
 .checkout-submit-btn {

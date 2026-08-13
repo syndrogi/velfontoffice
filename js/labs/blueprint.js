@@ -12,11 +12,13 @@
   function enable() {
     active = true;
     document.documentElement.classList.add("labs-blueprint");
+    window.labsSetActive("blueprint", true);
   }
 
   function disable() {
     active = false;
     document.documentElement.classList.remove("labs-blueprint");
+    window.labsSetActive("blueprint", false);
   }
 
   registerLab({

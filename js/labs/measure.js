@@ -46,6 +46,7 @@
     currentEl = null;
     document.body.classList.add("labs-measure-cursor");
     window.addEventListener("mousemove", onMove);
+    window.labsSetActive("measure", true);
   }
 
   function disable() {
@@ -55,6 +56,7 @@
     if (highlight) highlight.hidden = true;
     if (label) label.hidden = true;
     currentEl = null;
+    window.labsSetActive("measure", false);
   }
 
   registerLab({

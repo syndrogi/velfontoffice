@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VELFONT SHOP — 문의하기</title>
+<title>VELFONT SHOP — Contact Us</title>
 <link rel="canonical" href="https://velfontoffice.com/shop/contact.html">
 <link rel="stylesheet" href="style.css">
 <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
@@ -44,13 +44,44 @@
 </header>
 
 <nav class="breadcrumb">
-  <a href="index.html">All</a> <span>/</span> <span>문의하기</span>
+  <a href="index.html">All</a> <span>/</span> <span>Contact Us</span>
 </nav>
 
 <main class="checkout-page">
-  <section class="checkout-summary">
-    <h1>문의하기</h1>
-    <p class="checkout-note">문의 페이지를 준비 중입니다. 빠른 시일 내에 연락 방법을 안내해드리겠습니다.</p>
+  <section class="checkout-payment">
+    <h1>Contact Us</h1>
+    <p class="checkout-note">The contact page is coming soon. Contact details will be posted here shortly.</p>
+
+    <form id="contactForm" novalidate>
+      <div class="checkout-field">
+        <label for="contactName">Name</label>
+        <input type="text" id="contactName" name="name" autocomplete="name">
+      </div>
+      <div class="checkout-field">
+        <label for="contactEmail">Email <em>(required)</em></label>
+        <input type="email" id="contactEmail" name="email" required autocomplete="email">
+      </div>
+      <div class="checkout-field">
+        <label for="contactReason">Inquiry Type</label>
+        <select id="contactReason" name="reason">
+          <option value="General">General Inquiry</option>
+          <option value="Collaboration">Collaboration</option>
+          <option value="Press">Press</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="checkout-field">
+        <label for="contactPhone">Phone</label>
+        <input type="tel" id="contactPhone" name="phone" autocomplete="tel">
+      </div>
+      <div class="checkout-field">
+        <label for="contactComment">Message</label>
+        <textarea id="contactComment" name="comment" rows="6"></textarea>
+      </div>
+
+      <button type="submit" class="checkout-submit-btn">Send</button>
+      <p class="checkout-note" id="contactStatus" aria-live="polite"></p>
+    </form>
   </section>
 </main>
 
@@ -102,5 +133,6 @@
 <script src="js/products.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/common.js"></script>
+<script src="js/contact.js"></script>
 </body>
 </html>

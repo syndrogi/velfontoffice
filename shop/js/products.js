@@ -91,6 +91,16 @@ function resolveImageUrl(path, bucket = PRODUCTS_STORAGE_BUCKET) {
   return supabaseClient.storage.from(bucket).getPublicUrl(path).data.publicUrl;
 }
 
-function formatPrice(value) {
-  return value.toLocaleString("ko-KR") + "원";
+// Every price in the database is KRW; USD is a static approximate
+// conversion for display only (see the currency note in js/i18n.js).
+const USD_PER_KRW = 1 / 1400;
+
+function formatPrice(krwValue) {
+  if (getCurrency() === "USD") {
+    return (krwValue * USD_PER_KRW).toLocaleString("en-US", {
+      style: "currency",
+      currency: "USD",
+    });
+  }
+  return krwValue.toLocaleString("ko-KR") + "원";
 }

@@ -376,5 +376,5 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", async () => {
   await productsReady;
   setupCartDrawer();
-  onLangChange(renderCartDrawer);
+  onCurrencyChange(renderCartDrawer);
 });

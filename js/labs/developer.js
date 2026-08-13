@@ -61,6 +61,7 @@
     lastFpsTime = 0;
     window.addEventListener("mousemove", onMouseMove);
     rafId = requestAnimationFrame(update);
+    window.labsSetActive("developer", true);
   }
 
   function disable() {
@@ -68,6 +69,7 @@
     if (rafId) cancelAnimationFrame(rafId);
     window.removeEventListener("mousemove", onMouseMove);
     if (overlay) overlay.hidden = true;
+    window.labsSetActive("developer", false);
   }
 
   registerLab({

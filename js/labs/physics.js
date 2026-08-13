@@ -83,6 +83,7 @@
     items = collect();
     window.addEventListener("mousemove", onMove);
     rafId = requestAnimationFrame(loop);
+    window.labsSetActive("physics", true);
   }
 
   function disable() {
@@ -93,6 +94,7 @@
       window.labsTransform.update(item.el, { tx: 0, ty: 0 });
     });
     items = [];
+    window.labsSetActive("physics", false);
   }
 
   registerLab({

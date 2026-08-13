@@ -45,5 +45,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   await productsReady;
   renderCheckout();
   setupCheckoutSubmit();
-  onLangChange(renderCheckout);
+  onCurrencyChange(renderCheckout);
 });

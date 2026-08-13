@@ -284,5 +284,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   await Promise.all([productsReady, archiveBlocksReady]);
   renderCollection();
   setupFloatingNav();
-  onLangChange(renderCollection);
+  onCurrencyChange(renderCollection);
 });

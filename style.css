@@ -529,51 +529,28 @@ a {
 /* `unicode-bidi: plaintext` reads each spun-through language's own
    directionality from its own text (js/main.js's HERO_LANGS), so Arabic
    and Hebrew frames flow right-to-left on their own — no per-frame
-   dir="rtl" bookkeeping needed in JS. */
+   dir="rtl" bookkeeping needed in JS. `white-space: nowrap` keeps every
+   language on a single line — some run long enough to wrap onto a
+   second line at this font-size otherwise, which shifts the whole hero
+   taller frame to frame. */
 .hero-title-visual {
   display: inline-block;
+  white-space: nowrap;
   unicode-bidi: plaintext;
 }
 
 /* Slot-machine spin — js/main.js's spinHeroTitle() swaps the text and
    re-triggers this "tick" on every frame, ticking faster at first and
-   slower near the end, before landing on the English original and
-   handing off to the letter draw below. */
+   slower near the end. The English original is the sequence's own last
+   frame, so landing is just the reel's final tick, not a separate
+   reveal animation. */
 .hero-title-visual.is-spinning.is-ticking {
-  animation: heroSpinTick 140ms var(--ease-in-out-quad);
+  animation: heroSpinTick 110ms var(--ease-in-out-quad);
 }
 
 @keyframes heroSpinTick {
   0% { opacity: 0; transform: translateY(0.2em); }
   60% { opacity: 1; transform: translateY(0); }
-}
-
-/* Reveals "Velfont Office" as real text — each letter is stroke-outlined
-   only, then fills solid, over the same 900ms/inOutQuad timing with a
-   9ms per-letter stagger as the header logo's SVG line draw
-   (js/logo-draw.js), so the two intros read as the same animation even
-   though this one draws real glyphs instead of a traced mark. */
-.hero-title .letter {
-  color: transparent;
-  -webkit-text-stroke: 1px var(--color-fg);
-  opacity: 0;
-  animation: heroLetterDraw 900ms var(--ease-in-out-quad) forwards;
-}
-
-@keyframes heroLetterDraw {
-  0% { opacity: 0; }
-  35% { opacity: 1; }
-  100% { opacity: 1; }
-}
-
-.hero-title.is-typed .letter {
-  color: var(--color-fg);
-  transition: color 300ms var(--ease);
-}
-
-.hero-title.is-typed .letter:hover,
-.hero-title.is-typed .letter.is-dragging {
-  color: var(--color-hover);
 }
 
 .hero-subtitle {

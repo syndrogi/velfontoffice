@@ -297,13 +297,10 @@
     step();
   }
 
-  // Same timing/easing as the header logo's stroke-drawn intro
-  // (js/logo-draw.js: `duration: 900, delay: stagger(9), ease: "inOutQuad"`)
-  // so the hero title's reveal reads as "the same animation" even though
-  // it draws real text (each letter stroke-outlined, then filled), not a
-  // traced SVG mark.
-  var HERO_DRAW_DURATION_MS = 900;
-  var HERO_DRAW_STAGGER_MS = 9;
+  // Matches style.css's `heroSpinTick` animation duration — the final
+  // tick (landing on English) is given this long to finish playing
+  // before its text is swapped for real letter spans.
+  var HERO_TICK_MS = 110;
 
   // "VELFONT OFFICE" in nine other scripts (Korean, Chinese, Japanese,
   // Thai, Russian, Arabic, Hindi, Greek, Hebrew) — spun through before
@@ -338,58 +335,41 @@
 
   function revealSubtitle() {
     typeElement(heroSubtitle, {
-      speed: 14,
+      speed: 8,
       letterSpans: true,
       draggable: true,
     });
   }
 
-  // Keeps "VELFONT OFFICE" as real text — every letter is inserted up
-  // front (nothing to read out of order for assistive tech) and reveals
-  // via a stroke-to-fill CSS animation, staggered per letter.
-  function drawHeroTitle(visual, onDone) {
+  // Swaps the landed text for real letter spans — same draggable-letter
+  // treatment as every other typed element on the page (see hero-subtitle
+  // above), just built in one shot instead of typed in.
+  function buildHeroLetters(visual) {
     var text = visual.textContent;
     visual.textContent = "";
-
-    var letters = text.split("");
-    letters.forEach(function (ch, i) {
+    text.split("").forEach(function (ch) {
       var span = document.createElement("span");
       span.className = "letter";
       span.textContent = ch === " " ? " " : ch;
-      span.style.animationDelay = i * HERO_DRAW_STAGGER_MS + "ms";
       makeLetterDraggable(span);
       visual.appendChild(span);
     });
-
-    var totalMs = (letters.length - 1) * HERO_DRAW_STAGGER_MS + HERO_DRAW_DURATION_MS;
-    setTimeout(function () {
-      heroTitle.classList.remove("is-typing");
-      heroTitle.classList.add("is-typed");
-      if (onDone) onDone();
-    }, totalMs);
   }
 
   // Spins "VELFONT OFFICE" through its other-language renderings like a
   // slot machine reel — quick ticks at first, slowing down near the end
-  // — then lands back on the original English text and hands off to
-  // drawHeroTitle() for its letter-by-letter draw.
+  // — with the English original itself as the final tick, so landing is
+  // just the reel's last stop rather than a separate reveal animation.
   function spinHeroTitle(visual, onDone) {
-    var finalText = visual.textContent; // "Velfont Office", as authored in the HTML
     var sequence = [];
     for (var loop = 0; loop < HERO_SPIN_LOOPS; loop++) {
       sequence = sequence.concat(HERO_LANGS);
     }
+    sequence.push(visual.textContent); // "Velfont Office", as authored in the HTML
 
     var i = 0;
 
     function tick() {
-      if (i >= sequence.length) {
-        visual.classList.remove("is-spinning", "is-ticking");
-        visual.textContent = finalText;
-        drawHeroTitle(visual, onDone);
-        return;
-      }
-
       visual.textContent = sequence[i];
       // Restarts the CSS tick animation on every frame swap — remove,
       // force reflow, re-add, since re-adding an already-present class
@@ -397,10 +377,21 @@
       visual.classList.remove("is-ticking");
       void visual.offsetWidth;
       visual.classList.add("is-ticking");
-
       i++;
+
+      if (i >= sequence.length) {
+        setTimeout(function () {
+          visual.classList.remove("is-spinning", "is-ticking");
+          buildHeroLetters(visual);
+          heroTitle.classList.remove("is-typing");
+          heroTitle.classList.add("is-typed");
+          if (onDone) onDone();
+        }, HERO_TICK_MS);
+        return;
+      }
+
       var progress = i / sequence.length;
-      var stepDelay = 70 + progress * progress * 260; // decelerates toward the end
+      var stepDelay = 40 + progress * progress * 170; // decelerates toward the end
       setTimeout(tick, stepDelay);
     }
 
@@ -415,7 +406,7 @@
     } else {
       revealSubtitle();
     }
-  }, 350);
+  }, 200);
 })();
 
 /**

@@ -80,7 +80,7 @@ function archiveBlockHtml(block) {
   `;
 }
 
-function productReelCardHtml(product, isDuplicate) {
+function productReelCardHtml(product, isDuplicate, index) {
   const images = getProductImages(product.id);
   const imagePath = images.length ? images[0].image : product.thumbnail;
   const imageUrl = resolveImageUrl(imagePath);
@@ -91,7 +91,11 @@ function productReelCardHtml(product, isDuplicate) {
       <span class="product-reel-media">
         ${imageUrl ? `<img src="${imageUrl}" alt="${product.name}" loading="eager">` : ""}
       </span>
-      <span class="product-reel-name">${product.name}</span>
+      <span class="product-reel-meta">
+        <span class="product-reel-index">${String(index + 1).padStart(2, "0")}</span>
+        <span class="product-reel-name">${product.name}</span>
+        <span class="product-reel-category">${product.category || "Collection"}</span>
+      </span>
     </a>
   `;
 }
@@ -106,10 +110,10 @@ function renderProductReel() {
 
   track.innerHTML = `
     <div class="product-reel-set">
-      ${products.map((product) => productReelCardHtml(product, false)).join("")}
+      ${products.map((product, index) => productReelCardHtml(product, false, index)).join("")}
     </div>
     <div class="product-reel-set" aria-hidden="true">
-      ${products.map((product) => productReelCardHtml(product, true)).join("")}
+      ${products.map((product, index) => productReelCardHtml(product, true, index)).join("")}
     </div>
   `;
   reel.hidden = false;

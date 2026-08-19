@@ -970,6 +970,33 @@ svg {
   padding: 20px 0 24px;
 }
 
+.product-reel-viewport::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  z-index: 2;
+  width: 1px;
+  background: rgba(17, 17, 17, 0.42);
+  box-shadow: 0 0 0 1px rgba(247, 247, 247, 0.55);
+  pointer-events: none;
+}
+
+.product-reel-viewport::after {
+  content: "CENTER / SCAN";
+  position: absolute;
+  top: 10px;
+  left: calc(50% + 9px);
+  z-index: 3;
+  color: rgba(17, 17, 17, 0.52);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 .product-reel-track {
   display: flex;
   width: max-content;
@@ -984,10 +1011,30 @@ svg {
 }
 
 .product-reel-card {
+  position: relative;
   display: block;
   width: clamp(180px, 18vw, 280px);
   flex: 0 0 auto;
   color: #111;
+}
+
+.product-reel-card::before,
+.product-reel-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 5px;
+  height: 5px;
+  border-top: 1px solid rgba(17, 17, 17, 0.5);
+}
+
+.product-reel-card::before {
+  border-left: 1px solid rgba(17, 17, 17, 0.5);
+}
+
+.product-reel-card::after {
+  right: 0;
+  border-right: 1px solid rgba(17, 17, 17, 0.5);
 }
 
 .product-reel-media {
@@ -1012,10 +1059,39 @@ svg {
 
 .product-reel-name {
   display: block;
-  padding-top: 9px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+.product-reel-meta {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 8px;
+  row-gap: 3px;
+  padding-top: 9px;
+}
+
+.product-reel-index,
+.product-reel-category {
+  color: rgba(17, 17, 17, 0.54);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.product-reel-index {
+  grid-row: span 2;
+  padding-top: 1px;
+}
+
+.product-reel-category {
+  grid-column: 2;
+  text-transform: uppercase;
 }
 
 @keyframes product-reel-scroll {

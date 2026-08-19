@@ -970,33 +970,6 @@ svg {
   padding: 20px 0 24px;
 }
 
-.product-reel-viewport::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  z-index: 2;
-  width: 1px;
-  background: rgba(17, 17, 17, 0.42);
-  box-shadow: 0 0 0 1px rgba(247, 247, 247, 0.55);
-  pointer-events: none;
-}
-
-.product-reel-viewport::after {
-  content: "CENTER / SCAN";
-  position: absolute;
-  top: 10px;
-  left: calc(50% + 9px);
-  z-index: 3;
-  color: rgba(17, 17, 17, 0.52);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
 .product-reel-track {
   display: flex;
   width: max-content;

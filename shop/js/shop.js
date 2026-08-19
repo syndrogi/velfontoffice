@@ -80,6 +80,41 @@ function archiveBlockHtml(block) {
   `;
 }
 
+function productReelCardHtml(product, isDuplicate) {
+  const images = getProductImages(product.id);
+  const imagePath = images.length ? images[0].image : product.thumbnail;
+  const imageUrl = resolveImageUrl(imagePath);
+  const duplicateAttrs = isDuplicate ? ' aria-hidden="true" tabindex="-1"' : "";
+
+  return `
+    <a class="product-reel-card" href="product.html?slug=${product.slug}"${duplicateAttrs}>
+      <span class="product-reel-media">
+        ${imageUrl ? `<img src="${imageUrl}" alt="${product.name}" loading="eager">` : ""}
+      </span>
+      <span class="product-reel-name">${product.name}</span>
+    </a>
+  `;
+}
+
+function renderProductReel() {
+  const reel = document.getElementById("productReel");
+  const track = document.getElementById("productReelTrack");
+  if (!reel || !track || getProductsLoadError()) return;
+
+  const products = getProducts();
+  if (!products.length) return;
+
+  track.innerHTML = `
+    <div class="product-reel-set">
+      ${products.map((product) => productReelCardHtml(product, false)).join("")}
+    </div>
+    <div class="product-reel-set" aria-hidden="true">
+      ${products.map((product) => productReelCardHtml(product, true)).join("")}
+    </div>
+  `;
+  reel.hidden = false;
+}
+
 // Swaps straight to the card's last stage image on hover — product_images
 // rows are inserted white-first then black-last (see supabase/*.sql), so
 // the last image is that product's black colorway. Crossfades via the
@@ -282,6 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.addEventListener("DOMContentLoaded", async () => {
   await Promise.all([productsReady, archiveBlocksReady]);
+  renderProductReel();
   renderCollection();
   setupFloatingNav();
   onCurrencyChange(renderCollection);

@@ -921,6 +921,85 @@ svg {
   user-select: none;
 }
 
+/* ---------- Product Reel ---------- */
+.product-reel {
+  overflow: hidden;
+  border-bottom: 1px solid #111;
+  background: #f7f7f7;
+}
+
+.product-reel-viewport {
+  overflow: hidden;
+  padding: 20px 0 24px;
+}
+
+.product-reel-track {
+  display: flex;
+  width: max-content;
+  animation: product-reel-scroll 38s linear infinite;
+  will-change: transform;
+}
+
+.product-reel-set {
+  display: flex;
+  gap: 12px;
+  padding-right: 12px;
+}
+
+.product-reel-card {
+  display: block;
+  width: clamp(180px, 18vw, 280px);
+  flex: 0 0 auto;
+  color: #111;
+}
+
+.product-reel-media {
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  background: #e9e9e9;
+}
+
+.product-reel-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 400ms ease;
+}
+
+.product-reel-card:hover .product-reel-media img,
+.product-reel-card:focus-visible .product-reel-media img {
+  transform: scale(1.035);
+}
+
+.product-reel-name {
+  display: block;
+  padding-top: 9px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+@keyframes product-reel-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-reel-track {
+    animation: none;
+  }
+
+  .product-reel-set[aria-hidden="true"] {
+    display: none;
+  }
+}
+
 /* ---------- Collection Head ---------- */
 .collection-head {
   padding: 64px 56px 40px;
@@ -1649,6 +1728,18 @@ svg {
 
   .collection-head {
     padding: 28px 16px 16px;
+  }
+
+  .product-reel-viewport {
+    padding: 14px 0 18px;
+  }
+
+  .product-reel-track {
+    animation-duration: 30s;
+  }
+
+  .product-reel-card {
+    width: 144px;
   }
 
   .collection-feed {

@@ -923,12 +923,49 @@ svg {
 
 /* ---------- Product Reel ---------- */
 .product-reel {
+  position: relative;
   overflow: hidden;
   border-bottom: 1px solid #111;
-  background: #f7f7f7;
+  background:
+    linear-gradient(rgba(17, 17, 17, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 17, 17, 0.035) 1px, transparent 1px),
+    #f7f7f7;
+  background-size: 42px 42px;
+}
+
+.product-reel::before {
+  content: "VELFONT OFFICE";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 0;
+  transform: translate(-50%, -52%);
+  color: rgba(17, 17, 17, 0.045);
+  font-size: clamp(72px, 15vw, 220px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 0.85;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.product-reel::after {
+  content: "SHOP INDEX / PRODUCT RUN";
+  position: absolute;
+  left: 24px;
+  bottom: 16px;
+  z-index: 0;
+  color: rgba(17, 17, 17, 0.22);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  pointer-events: none;
 }
 
 .product-reel-viewport {
+  position: relative;
+  z-index: 1;
   overflow: hidden;
   padding: 20px 0 24px;
 }

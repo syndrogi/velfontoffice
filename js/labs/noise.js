@@ -72,9 +72,14 @@
     pulseDurationMs: 600,
     pulseMaxDisplacement: 10,
 
-    // targets / perf
-    maxTargetsDesktop: 140,
-    maxTargetsMobile: 50,
+    // targets / perf — must clear header (~7) + hero-title letters (14) +
+    // the full hero-subtitle paragraph (~295 letters) + labs-toggle +
+    // labs-menu-btn (one per registered lab) + footer-copy, or
+    // collectTargets() silently drops whatever comes after the cap in DOM
+    // order — i.e. the tail end of the subtitle. Per-target frame cost is
+    // just a distance check (no DOM reads), so headroom here is cheap.
+    maxTargetsDesktop: 400,
+    maxTargetsMobile: 400,
   };
 
   var isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;

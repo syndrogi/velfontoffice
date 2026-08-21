@@ -13,7 +13,7 @@ const members = {
   }
 };
 
-const PASSPHRASE = "0000";
+const PASSPHRASE = "business";
 
 const FLASH_HOLD_MS = 200;
 const FADE_DURATION_MS = 400;

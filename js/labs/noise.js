@@ -2,11 +2,12 @@
  * VELFONT OFFICE — Labs / Noise
  * ORDER → ERROR → ORDER. Wherever the pointer sits, the layout briefly
  * loses its composure — a handful of nearby header/hero/labs/footer
- * elements pick up a small, temporary transform jitter, text
- * occasionally flickers to a stray glyph, and a small monochrome grain
- * patch trails the cursor. Move away (or turn Noise off) and everything
- * eases straight back to exactly where it was — never a sustained
- * shake, never a full-screen effect.
+ * elements pick up a small, temporary transform jitter. Move away (or
+ * turn Noise off) and everything eases straight back to exactly where
+ * it was — never a sustained shake, never a full-screen effect.
+ * Separately, hovering directly over any of those same elements scrambles
+ * its text into symbol characters for as long as the pointer stays there,
+ * restoring the original the moment it leaves.
  *
  * Jitter is composed through js/transform.js's dedicated noise offset
  * (updateNoise/clearNoise), which is added on top of — never replaces —
@@ -24,10 +25,12 @@
  *                      re-synced on resize/scroll, tracked live via
  *                      transform.js state (no per-frame layout reads)
  *   ClickPulse      — expanding/decaying push from a click or tap
- *   TextFX          — character corruption + letter-spacing distortion
+ *   TextScramble    — direct hover swaps a target's text for symbols,
+ *                      reshuffling until the pointer leaves
  *   TearEffect      — rare, brief horizontal seam line on fast swipes
- *   Grain           — small cursor-local grain canvas, radial-masked
- *   NoiseField/Renderer — the single rAF loop tying it all together
+ *   NoiseField/Renderer — the single rAF loop tying the jitter + pulses
+ *                      + tear together (text scramble runs off hover
+ *                      events, not this loop)
  */
 (function () {
   if (typeof registerLab !== "function") return;
@@ -35,7 +38,6 @@
   var NOISE_CONFIG = {
     // field
     radius: 160, // px — cursor-to-element influence radius
-    innerRadiusRatio: 0.55, // text FX only trigger within radius * this
 
     // element jitter
     maxJitter: 6, // px translate ceiling at full strength
@@ -51,19 +53,9 @@
     velocityMultiplier: 1.6, // px of jitter per (px/ms) of smoothed speed
     maxVelocityPxPerMs: 3, // clamp on smoothed speed before scaling
 
-    // text corruption
-    textFxCooldownMs: 700,
-    corruptionChance: 0.3,
-    corruptionDurationMin: 50,
-    corruptionDurationMax: 150,
-    corruptionChars: ["0", "1", "_", "|", "/", "\\", ".", ":", "+", "-"],
-
-    // letter-spacing distortion
-    spacingVelocityThreshold: 1.1, // px/ms — only on fast passes
-    spacingChance: 0.3,
-    spacingDurationMin: 50,
-    spacingDurationMax: 200,
-    spacingExtra: 6, // px added to letter-spacing
+    // text scramble (hover-triggered, see TextScramble below)
+    scrambleIntervalMs: 60,
+    scrambleChars: ["%", "/", "?", "$", "#", "&", "*", "+", "=", "@", "~", "^"],
 
     // horizontal tear
     tearVelocityThreshold: 1.4,
@@ -79,11 +71,6 @@
     pulseMaxRadius: 260,
     pulseDurationMs: 600,
     pulseMaxDisplacement: 10,
-
-    // local grain
-    grainBuffer: 64, // canvas pixel buffer size (scaled up via CSS)
-    grainRadius: 150, // px — half the displayed grain field size
-    grainRedrawMs: 70, // ms between grain buffer redraws
 
     // targets / perf
     maxTargetsDesktop: 140,
@@ -158,7 +145,7 @@
       var rect = el.getBoundingClientRect();
       if (!(rect.width > 0 && rect.height > 0)) continue;
       var s = window.labsTransform.get(el);
-      targets.push({
+      var item = {
         el: el,
         // Un-transformed layout position — any tx/ty another lab already
         // has on this element (Gravity mid-fall, Physics drifting it) is
@@ -176,13 +163,11 @@
         applied: false,
         seed: Math.random() * Math.PI * 2,
         textNode: findTextNode(el),
-        textBusy: false,
-        textKind: null,
+        scrambleTimer: null,
         textOriginal: undefined,
-        spacingOriginal: "",
-        textFxTimer: null,
-        lastTextFxAt: 0,
-      });
+      };
+      if (item.textNode) attachScrambleHover(item);
+      targets.push(item);
     }
   }
 
@@ -224,81 +209,57 @@
     }
   }
 
-  // ==== TextFX (corruption + letter-spacing) ===============================
-  function triggerCorruption(item) {
+  // ==== TextScramble (hover-triggered) =====================================
+  // Direct hover, not proximity/velocity like the jitter above — every
+  // non-space character in the target's text node gets swapped for a
+  // random symbol, reshuffling on an interval for as long as the pointer
+  // stays over it, and restored verbatim the instant it leaves.
+  function scrambleText(text) {
+    var out = "";
+    for (var i = 0; i < text.length; i++) {
+      var ch = text[i];
+      out += /\s/.test(ch)
+        ? ch
+        : NOISE_CONFIG.scrambleChars[(Math.random() * NOISE_CONFIG.scrambleChars.length) | 0];
+    }
+    return out;
+  }
+
+  function startScramble(item) {
     var node = item.textNode;
-    if (!node) return;
-    var original = node.data;
-    var len = original.length;
-    if (!len) return;
-    var idx = Math.floor(Math.random() * len);
-    var glitchChar =
-      NOISE_CONFIG.corruptionChars[Math.floor(Math.random() * NOISE_CONFIG.corruptionChars.length)];
-
-    item.textBusy = true;
-    item.textKind = "corruption";
-    item.textOriginal = original;
-    node.data = original.slice(0, idx) + glitchChar + original.slice(idx + 1);
-
-    var duration =
-      NOISE_CONFIG.corruptionDurationMin +
-      Math.random() * (NOISE_CONFIG.corruptionDurationMax - NOISE_CONFIG.corruptionDurationMin);
-    item.textFxTimer = window.setTimeout(function () {
-      node.data = original;
-      item.textBusy = false;
-      item.textFxTimer = null;
-    }, duration);
+    if (!node || item.scrambleTimer) return;
+    item.textOriginal = node.data;
+    node.data = scrambleText(item.textOriginal);
+    item.scrambleTimer = window.setInterval(function () {
+      node.data = scrambleText(item.textOriginal);
+    }, NOISE_CONFIG.scrambleIntervalMs);
   }
 
-  function triggerSpacing(item) {
-    var el = item.el;
-    var original = el.style.letterSpacing;
-
-    item.textBusy = true;
-    item.textKind = "spacing";
-    item.spacingOriginal = original;
-    el.style.letterSpacing = NOISE_CONFIG.spacingExtra + "px";
-
-    var duration =
-      NOISE_CONFIG.spacingDurationMin +
-      Math.random() * (NOISE_CONFIG.spacingDurationMax - NOISE_CONFIG.spacingDurationMin);
-    item.textFxTimer = window.setTimeout(function () {
-      el.style.letterSpacing = original;
-      item.textBusy = false;
-      item.textFxTimer = null;
-    }, duration);
-  }
-
-  function maybeTriggerTextFx(item, now) {
-    if (item.textBusy || !item.textNode) return;
-    if (now - item.lastTextFxAt < NOISE_CONFIG.textFxCooldownMs) return;
-
-    var fast = pointer.speed > NOISE_CONFIG.spacingVelocityThreshold;
-    var text = item.textNode.data;
-
-    if (fast && text.trim().length > 1 && Math.random() < NOISE_CONFIG.spacingChance) {
-      item.lastTextFxAt = now;
-      triggerSpacing(item);
-      return;
+  function stopScramble(item) {
+    if (item.scrambleTimer) {
+      window.clearInterval(item.scrambleTimer);
+      item.scrambleTimer = null;
     }
-    if (Math.random() < NOISE_CONFIG.corruptionChance) {
-      item.lastTextFxAt = now;
-      triggerCorruption(item);
-    }
-  }
-
-  function forceRestoreTextFx(item) {
-    if (item.textFxTimer) {
-      clearTimeout(item.textFxTimer);
-      item.textFxTimer = null;
-    }
-    if (!item.textBusy) return;
-    if (item.textKind === "corruption" && item.textNode && item.textOriginal !== undefined) {
+    if (item.textNode && item.textOriginal !== undefined) {
       item.textNode.data = item.textOriginal;
-    } else if (item.textKind === "spacing") {
-      item.el.style.letterSpacing = item.spacingOriginal || "";
     }
-    item.textBusy = false;
+    item.textOriginal = undefined;
+  }
+
+  function attachScrambleHover(item) {
+    item.onPointerEnter = function () {
+      startScramble(item);
+    };
+    item.onPointerLeave = function () {
+      stopScramble(item);
+    };
+    item.el.addEventListener("pointerenter", item.onPointerEnter);
+    item.el.addEventListener("pointerleave", item.onPointerLeave);
+  }
+
+  function detachScrambleHover(item) {
+    if (item.onPointerEnter) item.el.removeEventListener("pointerenter", item.onPointerEnter);
+    if (item.onPointerLeave) item.el.removeEventListener("pointerleave", item.onPointerLeave);
   }
 
   // ==== TearEffect ==========================================================
@@ -347,46 +308,6 @@
     }, duration);
   }
 
-  // ==== Grain ===============================================================
-  var grainCanvas = null;
-  var grainCtx = null;
-  var lastGrainDraw = 0;
-  var GRAIN_DISPLAY = NOISE_CONFIG.grainRadius * 2;
-
-  function ensureGrain() {
-    if (grainCanvas || isCoarsePointer) return;
-    grainCanvas = document.createElement("canvas");
-    grainCanvas.className = "labs-noise-grain";
-    grainCanvas.width = NOISE_CONFIG.grainBuffer;
-    grainCanvas.height = NOISE_CONFIG.grainBuffer;
-    grainCanvas.style.width = GRAIN_DISPLAY + "px";
-    grainCanvas.style.height = GRAIN_DISPLAY + "px";
-    grainCtx = grainCanvas.getContext("2d");
-    document.body.appendChild(grainCanvas);
-  }
-
-  function updateGrain(timestamp) {
-    if (!grainCanvas) return;
-    var half = GRAIN_DISPLAY / 2;
-    grainCanvas.style.transform =
-      "translate3d(" + (pointer.x - half) + "px, " + (pointer.y - half) + "px, 0)";
-
-    if (timestamp - lastGrainDraw < NOISE_CONFIG.grainRedrawMs) return;
-    lastGrainDraw = timestamp;
-
-    var size = NOISE_CONFIG.grainBuffer;
-    var imageData = grainCtx.createImageData(size, size);
-    var buffer = imageData.data;
-    for (var i = 0; i < buffer.length; i += 4) {
-      var v = Math.random() * 255;
-      buffer[i] = v;
-      buffer[i + 1] = v;
-      buffer[i + 2] = v;
-      buffer[i + 3] = 255;
-    }
-    grainCtx.putImageData(imageData, 0, 0);
-  }
-
   // ==== NoiseField / Renderer ===============================================
   function applyFieldToItem(item, now) {
     var s = window.labsTransform.get(item.el);
@@ -433,10 +354,6 @@
       targetX += Math.sin(now * NOISE_CONFIG.wobbleSpeed + item.seed) * mag * 0.5;
       targetY += Math.cos(now * NOISE_CONFIG.wobbleSpeed * 0.8 + item.seed * 1.7) * mag * 0.5;
       targetR += Math.sin(now * NOISE_CONFIG.wobbleSpeed + item.seed) * mag * NOISE_CONFIG.rotateScale;
-
-      if (dist < FIELD_RADIUS * NOISE_CONFIG.innerRadiusRatio) {
-        maybeTriggerTextFx(item, now);
-      }
     }
 
     for (var i = 0; i < pulses.length; i++) {
@@ -488,7 +405,6 @@
       applyFieldToItem(targets[i], timestamp);
     }
 
-    updateGrain(timestamp);
     maybeTriggerTear(timestamp);
     prunePulses(timestamp);
 
@@ -503,8 +419,6 @@
 
     collectTargets();
     ensureTearStrips();
-    ensureGrain();
-    if (grainCanvas) grainCanvas.classList.add("is-active");
 
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     window.addEventListener("pointerdown", onPointerDown, { passive: true });
@@ -528,7 +442,8 @@
     window.removeEventListener("resize", scheduleRefresh);
 
     targets.forEach(function (item) {
-      forceRestoreTextFx(item);
+      stopScramble(item);
+      detachScrambleHover(item);
       if (item.applied) {
         window.labsTransform.clearNoise(item.el);
         item.applied = false;
@@ -546,7 +461,6 @@
       strip.classList.remove("is-active");
     });
 
-    if (grainCanvas) grainCanvas.classList.remove("is-active");
     window.labsSetActive("noise", false);
   }
 

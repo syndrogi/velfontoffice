@@ -955,27 +955,10 @@ html.labs-blueprint body::after {
    (js/labs/noise.js). Individual header/hero/labs/footer elements get a
    tiny transform jitter composed through js/transform.js's noise-only
    offset (never touching translate/rotate/scale owned by other Labs);
-   the two rules below only cover the small overlay pieces that trail
-   the pointer — a local grain patch and the rare horizontal tear line.
-   Both stay invisible whenever Noise is off. */
-.labs-noise-grain {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 550;
-  image-rendering: pixelated;
-  mix-blend-mode: multiply;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 200ms var(--ease);
-  -webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.35) 45%, transparent 72%);
-  mask-image: radial-gradient(circle, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.35) 45%, transparent 72%);
-}
-
-.labs-noise-grain.is-active {
-  opacity: 1;
-}
-
+   hovering one directly scrambles its text (no CSS of its own — it's a
+   plain textContent swap). The rule below covers the one overlay piece
+   that trails the pointer — a rare horizontal tear line — invisible
+   whenever Noise is off. */
 .labs-noise-tear {
   position: fixed;
   left: 0;
@@ -1100,6 +1083,40 @@ html.labs-blueprint body::after {
   background: var(--color-fg);
   padding: 2px 6px;
   white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Select — hover/drag affordance on the hero's selectable blocks, and
+   the marquee/bounding-box UI (js/labs/select.js). --color-hover instead
+   of Scale's --color-fg outline so the two labs read as visually
+   distinct if both happen to be on at once. */
+body.labs-select-active .hero-title,
+body.labs-select-active .hero-subtitle {
+  cursor: grab;
+  user-select: none;
+}
+
+body.labs-select-dragging {
+  cursor: grabbing;
+}
+
+body.labs-select-dragging .hero-title,
+body.labs-select-dragging .hero-subtitle {
+  cursor: grabbing;
+}
+
+.labs-select-box {
+  position: fixed;
+  z-index: 593;
+  outline: 1px solid var(--color-hover);
+  pointer-events: none;
+}
+
+.labs-select-marquee {
+  position: fixed;
+  z-index: 594;
+  border: 1px dashed var(--color-hover);
+  background: rgba(224, 38, 31, 0.08); /* var(--color-hover) at low alpha */
   pointer-events: none;
 }
 

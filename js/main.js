@@ -93,11 +93,26 @@
     if (!e.matches) closeMenu();
   });
 
-  // Active-section highlighting for in-page anchor links (Office/Archive/About).
+  // In-page anchor links (Office/Archive/About) — scrolled to with JS
+  // instead of the browser's native anchor-jump so the URL stays plain
+  // (no #archive appended). scroll-margin-top on .section-placeholder
+  // already accounts for the fixed header, so scrollIntoView needs no
+  // extra offset math.
   var anchorLinks = document.querySelectorAll(
     '.main-nav a[href^="#"], .mobile-nav a[href^="#"]'
   );
-  if (!anchorLinks.length || !("IntersectionObserver" in window)) return;
+  if (!anchorLinks.length) return;
+
+  anchorLinks.forEach(function (link) {
+    link.addEventListener("click", function (e) {
+      var target = document.getElementById(link.getAttribute("href").slice(1));
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: "smooth" });
+    });
+  });
+
+  if (!("IntersectionObserver" in window)) return;
 
   var linksByTarget = {};
   anchorLinks.forEach(function (link) {
@@ -184,8 +199,11 @@
     el.addEventListener("pointerdown", function (e) {
       // While gravity is active, physics owns dragging for every body
       // (see gravity.js) — this handler would otherwise fight it for
-      // control of the same transform every frame.
-      if (window.__gravityActive) return;
+      // control of the same transform every frame. While Select is
+      // active, a pointerdown on a letter should select/drag its whole
+      // .hero-title/.hero-subtitle block instead of just that one glyph
+      // (see js/labs/select.js).
+      if (window.__gravityActive || window.__multiSelectActive) return;
       dragging = true;
       baseX = offsetX;
       baseY = offsetY;

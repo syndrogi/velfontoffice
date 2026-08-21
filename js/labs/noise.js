@@ -132,6 +132,10 @@
   ].join(", ");
 
   var targets = [];
+  // Tracks which elements are already in `targets`, so a mutation that
+  // re-parents an existing target (Gravity moving a letter to <body>)
+  // doesn't get pushed in a second time by domObserver below.
+  var trackedEls = new WeakSet();
 
   function findTextNode(el) {
     for (var i = el.childNodes.length - 1; i >= 0; i--) {
@@ -141,38 +145,75 @@
     return null;
   }
 
+  function targetsMax() {
+    return isCoarsePointer ? NOISE_CONFIG.maxTargetsMobile : NOISE_CONFIG.maxTargetsDesktop;
+  }
+
+  // Builds one target item for `el` and adds it, unless it's already
+  // tracked, too small to matter (0×0, e.g. still off-screen mid-layout),
+  // or the list is already at its cap. Shared by collectTargets() (initial
+  // sweep) and domObserver (elements that show up afterward — see below).
+  function addTarget(el) {
+    if (trackedEls.has(el) || targets.length >= targetsMax()) return;
+    var rect = el.getBoundingClientRect();
+    if (!(rect.width > 0 && rect.height > 0)) return;
+    var s = window.labsTransform.get(el);
+    var item = {
+      el: el,
+      // Un-transformed layout position — any tx/ty another lab already
+      // has on this element (Gravity mid-fall, Physics drifting it) is
+      // backed out here, then re-added live every frame from the
+      // transform state (see applyFieldToItem) instead of re-measuring
+      // the DOM, so Noise tracks wherever the element currently is
+      // without ever calling getBoundingClientRect() in the hot path.
+      originCx: rect.left + rect.width / 2 - s.tx,
+      originCy: rect.top + rect.height / 2 - s.ty,
+      cx: 0,
+      cy: 0,
+      nx: 0,
+      ny: 0,
+      nr: 0,
+      applied: false,
+      seed: Math.random() * Math.PI * 2,
+      textNode: findTextNode(el),
+      scrambleTimer: null,
+      textOriginal: undefined,
+    };
+    if (item.textNode) attachScrambleHover(item);
+    trackedEls.add(el);
+    targets.push(item);
+  }
+
   function collectTargets() {
     targets = [];
-    var max = isCoarsePointer ? NOISE_CONFIG.maxTargetsMobile : NOISE_CONFIG.maxTargetsDesktop;
+    trackedEls = new WeakSet();
     var els = document.querySelectorAll(TARGET_SELECTOR);
-    for (var i = 0; i < els.length && targets.length < max; i++) {
-      var el = els[i];
-      var rect = el.getBoundingClientRect();
-      if (!(rect.width > 0 && rect.height > 0)) continue;
-      var s = window.labsTransform.get(el);
-      var item = {
-        el: el,
-        // Un-transformed layout position — any tx/ty another lab already
-        // has on this element (Gravity mid-fall, Physics drifting it) is
-        // backed out here, then re-added live every frame from the
-        // transform state (see applyFieldToItem) instead of re-measuring
-        // the DOM, so Noise tracks wherever the element currently is
-        // without ever calling getBoundingClientRect() in the hot path.
-        originCx: rect.left + rect.width / 2 - s.tx,
-        originCy: rect.top + rect.height / 2 - s.ty,
-        cx: 0,
-        cy: 0,
-        nx: 0,
-        ny: 0,
-        nr: 0,
-        applied: false,
-        seed: Math.random() * Math.PI * 2,
-        textNode: findTextNode(el),
-        scrambleTimer: null,
-        textOriginal: undefined,
-      };
-      if (item.textNode) attachScrambleHover(item);
-      targets.push(item);
+    for (var i = 0; i < els.length && targets.length < targetsMax(); i++) {
+      addTarget(els[i]);
+    }
+  }
+
+  // The hero-subtitle is typed in letter-by-letter (main.js), each letter
+  // its own late-appended `.letter` span — enabling Noise mid-type (or
+  // mid-hero-title-spin) means collectTargets()'s one-time sweep above
+  // simply predates most of those spans. This watches for exactly that:
+  // any new element matching TARGET_SELECTOR added anywhere under <body>
+  // while Noise is active gets picked up the moment it lands, instead of
+  // staying invisible to Noise until the next full enable()/disable().
+  var domObserver = null;
+
+  function onDomMutations(mutations) {
+    for (var m = 0; m < mutations.length; m++) {
+      var added = mutations[m].addedNodes;
+      for (var i = 0; i < added.length; i++) {
+        var node = added[i];
+        if (node.nodeType !== 1) continue;
+        if (node.matches && node.matches(TARGET_SELECTOR)) addTarget(node);
+        if (node.querySelectorAll) {
+          var nested = node.querySelectorAll(TARGET_SELECTOR);
+          for (var j = 0; j < nested.length; j++) addTarget(nested[j]);
+        }
+      }
     }
   }
 
@@ -425,6 +466,9 @@
     collectTargets();
     ensureTearStrips();
 
+    domObserver = new MutationObserver(onDomMutations);
+    domObserver.observe(document.body, { childList: true, subtree: true });
+
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     window.addEventListener("pointerdown", onPointerDown, { passive: true });
     window.addEventListener("scroll", scheduleRefresh, { passive: true });
@@ -439,6 +483,11 @@
     if (rafId) {
       cancelAnimationFrame(rafId);
       rafId = null;
+    }
+
+    if (domObserver) {
+      domObserver.disconnect();
+      domObserver = null;
     }
 
     window.removeEventListener("pointermove", onPointerMove);

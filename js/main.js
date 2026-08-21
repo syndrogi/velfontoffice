@@ -345,6 +345,10 @@
   var heroTitle = document.querySelector(".hero-title");
   var heroTitleVisual = document.querySelector(".hero-title-visual");
   var heroSubtitle = document.querySelector(".hero-subtitle");
+  // Captured once, before the first spin ever runs, so it stays the
+  // reliable "back to English" target even after Roulette (js/labs/roulette.js)
+  // has landed the reel on something else.
+  var HERO_ORIGINAL_TEXT = heroTitleVisual ? heroTitleVisual.textContent : "";
 
   navLinks.forEach(function (link, i) {
     setTimeout(function () {
@@ -375,22 +379,11 @@
     });
   }
 
-  // Spins "VELFONT OFFICE" through its other-language renderings like a
-  // slot machine reel — quick ticks at first, slowing down near the end
-  // — with the English original itself as the final tick, so landing is
-  // just the reel's last stop rather than a separate reveal animation.
-  function spinHeroTitle(visual, onDone) {
-    var sequence = [];
-    for (var loop = 0; loop < HERO_SPIN_LOOPS; loop++) {
-      HERO_SPIN_ORDER.forEach(function (code) {
-        sequence.push(HERO_LANGS[code]);
-      });
-    }
-    HERO_LANDING_ORDER.forEach(function (code) {
-      sequence.push(HERO_LANGS[code]);
-    });
-    sequence.push(visual.textContent); // "Velfont Office", as authored in the HTML
-
+  // Runs a given text sequence through the hero title like a slot machine
+  // reel — quick ticks at first, slowing down near the end. Shared by the
+  // first-paint spin below and by Roulette's re-triggerable spin
+  // (window.spinHeroTitleRoulette, called from js/labs/roulette.js).
+  function runHeroReel(visual, sequence, onDone) {
     var i = 0;
 
     function tick() {
@@ -426,6 +419,52 @@
     visual.classList.add("is-spinning");
     tick();
   }
+
+  // Spins "VELFONT OFFICE" through its other-language renderings, with the
+  // English original itself as the final tick, so landing is just the
+  // reel's last stop rather than a separate reveal animation.
+  function spinHeroTitle(visual, onDone) {
+    var sequence = [];
+    for (var loop = 0; loop < HERO_SPIN_LOOPS; loop++) {
+      HERO_SPIN_ORDER.forEach(function (code) {
+        sequence.push(HERO_LANGS[code]);
+      });
+    }
+    HERO_LANDING_ORDER.forEach(function (code) {
+      sequence.push(HERO_LANGS[code]);
+    });
+    sequence.push(HERO_ORIGINAL_TEXT);
+    runHeroReel(visual, sequence, onDone);
+  }
+
+  // Re-triggerable version of the spin for the Roulette lab — same reel
+  // mechanics, but lands on a random language other than whatever the
+  // title currently shows (English included as one of the possible
+  // outcomes). No-ops while a reel is already spinning.
+  window.spinHeroTitleRoulette = function (onDone) {
+    if (!heroTitle || !heroTitleVisual) return;
+    if (heroTitleVisual.classList.contains("is-spinning")) return;
+
+    var current = heroTitleVisual.textContent;
+    var pool = HERO_SPIN_ORDER.map(function (code) {
+      return HERO_LANGS[code];
+    });
+    pool.push(HERO_ORIGINAL_TEXT);
+    pool = pool.filter(function (text) {
+      return text !== current;
+    });
+    var target = pool[Math.floor(Math.random() * pool.length)];
+
+    var shuffled = HERO_SPIN_ORDER.slice().sort(function () {
+      return Math.random() - 0.5;
+    });
+    var sequence = shuffled.map(function (code) {
+      return HERO_LANGS[code];
+    });
+    sequence.push(target);
+
+    runHeroReel(heroTitleVisual, sequence, onDone);
+  };
 
   setTimeout(function () {
     if (heroTitle && heroTitleVisual) {

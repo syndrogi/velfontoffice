@@ -24,6 +24,7 @@ const dots = document.querySelectorAll(".member-dot");
 const brand = document.getElementById("brand");
 const passphrasePanel = document.getElementById("passphrase-panel");
 const passphraseInput = document.getElementById("passphrase");
+const passphraseToggle = document.getElementById("passphrase-toggle");
 const enterButton = document.getElementById("enter-btn");
 const deniedMessage = document.getElementById("denied");
 const flash = document.getElementById("flash");
@@ -47,6 +48,7 @@ function selectMember(memberId) {
   selectedMemberId = memberId;
   clearDenied();
   passphraseInput.value = "";
+  hidePassphrase();
 
   dots.forEach((dot) => {
     dot.classList.toggle("dimmed", dot.dataset.member !== memberId);
@@ -60,8 +62,25 @@ function closeSelection() {
   selectedMemberId = null;
   clearDenied();
   passphraseInput.value = "";
+  hidePassphrase();
   passphrasePanel.classList.remove("open");
   dots.forEach((dot) => dot.classList.remove("dimmed"));
+}
+
+function hidePassphrase() {
+  passphraseInput.type = "password";
+  passphraseToggle.textContent = "SHOW";
+  passphraseToggle.setAttribute("aria-label", "Show passphrase");
+  passphraseToggle.setAttribute("aria-pressed", "false");
+}
+
+function togglePassphraseVisibility() {
+  const willShow = passphraseInput.type === "password";
+  passphraseInput.type = willShow ? "text" : "password";
+  passphraseToggle.textContent = willShow ? "HIDE" : "SHOW";
+  passphraseToggle.setAttribute("aria-label", willShow ? "Hide passphrase" : "Show passphrase");
+  passphraseToggle.setAttribute("aria-pressed", String(willShow));
+  passphraseInput.focus();
 }
 
 function clearDenied() {
@@ -82,6 +101,7 @@ function handleEnter() {
 
 function authenticate(memberId, member) {
   passphraseInput.disabled = true;
+  passphraseToggle.disabled = true;
   enterButton.disabled = true;
   flashSuccess(memberId, member);
 }
@@ -130,6 +150,7 @@ function denyAccess() {
 }
 
 enterButton.addEventListener("click", handleEnter);
+passphraseToggle.addEventListener("click", togglePassphraseVisibility);
 
 passphraseInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {

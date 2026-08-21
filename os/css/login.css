@@ -197,8 +197,13 @@ body {
   margin-bottom: 8px;
 }
 
-.underline-input {
+.passphrase-input-wrap {
+  position: relative;
   width: 160px;
+}
+
+.underline-input {
+  width: 100%;
   background: none;
   border: none;
   border-bottom: 1px solid #fff;
@@ -207,13 +212,37 @@ body {
   font-family: "IBM Plex Mono", "SF Mono", Menlo, Monaco, monospace;
   font-size: 14px;
   text-align: center;
-  padding: 4px 0;
+  padding: 4px 28px 4px 0;
   outline: none;
 }
 
 .underline-input:disabled {
   color: #888;
   border-bottom-color: #888;
+}
+
+.passphrase-toggle {
+  position: absolute;
+  right: 0;
+  bottom: 8px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: #888;
+  font-family: "IBM Plex Mono", "SF Mono", Menlo, Monaco, monospace;
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+}
+
+.passphrase-toggle:hover,
+.passphrase-toggle:focus-visible {
+  color: #fff;
+}
+
+.passphrase-toggle:disabled {
+  color: #555;
+  cursor: default;
 }
 
 .denied {

@@ -31,7 +31,10 @@
         </div>
         <div class="passphrase-panel" id="passphrase-panel">
           <label for="passphrase" class="passphrase-label">PASSPHRASE</label>
-          <input id="passphrase" class="underline-input" type="password" autocomplete="off">
+          <div class="passphrase-input-wrap">
+            <input id="passphrase" class="underline-input" type="password" autocomplete="off">
+            <button class="passphrase-toggle" type="button" id="passphrase-toggle" aria-label="Show passphrase" aria-pressed="false">SHOW</button>
+          </div>
           <div class="denied" id="denied">ACCESS DENIED</div>
           <button class="enter" type="button" id="enter-btn">ENTER</button>
         </div>

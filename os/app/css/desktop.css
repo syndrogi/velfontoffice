@@ -328,6 +328,12 @@ body {
   margin-bottom: 12px;
 }
 
+.card-meta {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 12px;
+}
+
 .chip-row {
   display: flex;
   flex-wrap: wrap;

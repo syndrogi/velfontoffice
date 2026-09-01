@@ -940,12 +940,40 @@ svg {
 
 .product-showcase-head h2 {
   margin: 0;
-  text-align: center;
-  font-family: "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
-  font-size: clamp(38px, 3.7vw, 58px);
-  font-weight: 500;
-  line-height: 0.9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
+  font-size: clamp(42px, 4.25vw, 68px);
+  font-weight: 900;
+  line-height: 0.78;
   letter-spacing: 0;
+}
+
+.product-showcase-title-copy {
+  display: block;
+  font-stretch: condensed;
+  transform: scaleX(0.84);
+  transform-origin: right center;
+}
+
+.product-showcase-title-mark {
+  position: relative;
+  display: block;
+  padding: 0.09em 0.14em 0.07em;
+  border: 2px solid #111;
+  background: #111;
+  color: #f4f4f2;
+  line-height: 0.72;
+}
+
+.product-showcase-title-mark::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(244, 244, 242, 0.42);
+  pointer-events: none;
 }
 
 .product-showcase-edition,
@@ -1829,9 +1857,10 @@ svg {
   .product-showcase-head h2 {
     grid-column: 1 / -1;
     grid-row: 1;
+    justify-content: flex-start;
+    gap: 8px;
     margin-bottom: 22px;
-    text-align: left;
-    font-size: 40px;
+    font-size: 36px;
   }
 
   .product-showcase-grid {

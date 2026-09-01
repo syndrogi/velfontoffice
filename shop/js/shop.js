@@ -80,6 +80,45 @@ function archiveBlockHtml(block) {
   `;
 }
 
+function productShowcaseCardHtml(product, index) {
+  const images = getProductImages(product.id);
+  const imagePaths = images.length ? images.map((row) => row.image) : [product.thumbnail];
+  const imageUrls = imagePaths.filter(Boolean).slice(0, 2).map((path) => resolveImageUrl(path));
+  const soldOut = product.status === "sold_out";
+
+  return `
+    <a class="product-showcase-card" href="product.html?slug=${product.slug}">
+      <span class="product-showcase-media">
+        ${imageUrls.map((url, imageIndex) => `<img class="product-showcase-image${imageIndex === 0 ? " is-primary" : " is-secondary"}" src="${url}" alt="${imageIndex === 0 ? product.name : ""}" loading="eager"${imageIndex > 0 ? ' aria-hidden="true"' : ""}>`).join("")}
+      </span>
+      <span class="product-showcase-meta">
+        <span class="product-showcase-index">${String(index + 1).padStart(2, "0")}</span>
+        <span class="product-showcase-copy">
+          <strong>${product.name}</strong>
+          <small>${product.category || "Collection"}</small>
+        </span>
+        <span class="product-showcase-price">${soldOut ? t("product.soldOutLabel") : formatPrice(product.price)}</span>
+      </span>
+    </a>
+  `;
+}
+
+function renderProductShowcase() {
+  const showcase = document.getElementById("productShowcase");
+  const grid = document.getElementById("productShowcaseGrid");
+  const count = document.getElementById("productShowcaseCount");
+  if (!showcase || !grid || getProductsLoadError()) return;
+
+  const products = getProducts();
+  if (!products.length) return;
+
+  const featured = products.filter((product) => product.featured);
+  const selected = (featured.length ? featured : products).slice(0, 3);
+  grid.innerHTML = selected.map(productShowcaseCardHtml).join("");
+  if (count) count.textContent = `${selected.length} SELECTED OBJECT${selected.length === 1 ? "" : "S"}`;
+  showcase.hidden = false;
+}
+
 // Swaps straight to the card's last stage image on hover — product_images
 // rows are inserted white-first then black-last (see supabase/*.sql), so
 // the last image is that product's black colorway. Crossfades via the
@@ -282,7 +321,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.addEventListener("DOMContentLoaded", async () => {
   await Promise.all([productsReady, archiveBlocksReady]);
+  renderProductShowcase();
   renderCollection();
   setupFloatingNav();
-  onCurrencyChange(renderCollection);
+  onCurrencyChange(() => {
+    renderProductShowcase();
+    renderCollection();
+  });
 });

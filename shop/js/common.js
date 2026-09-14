@@ -332,10 +332,16 @@ function setupLoginModal() {
 // Header stays solid white at the very top of the page; past a small
 // scroll threshold it drops its background (see .site-header.is-scrolled
 // in style.css) so the logo/nav text keep floating over the page while
-// the header itself turns transparent. rAF-throttled since scroll fires
-// continuously.
+// the header itself turns transparent. Separately, .is-over-banner tracks
+// whether the promo banner is still at least partially behind it — that's
+// what actually gates the white/blend-mode ink (see style.css): once the
+// banner has scrolled fully out from under the header, the ink should
+// fall back to its normal solid color instead of staying difference-
+// blended against whatever (grid, footer) happens to be there next.
+// rAF-throttled since scroll fires continuously.
 function setupHeaderScroll() {
   const header = document.querySelector(".site-header");
+  const banner = document.getElementById("promoBanner");
   if (!header) return;
 
   const SCROLL_THRESHOLD = 24;
@@ -343,6 +349,8 @@ function setupHeaderScroll() {
 
   function update() {
     header.classList.toggle("is-scrolled", window.scrollY > SCROLL_THRESHOLD);
+    const overBanner = !!banner && banner.getBoundingClientRect().bottom > header.offsetHeight;
+    header.classList.toggle("is-over-banner", overBanner);
     ticking = false;
   }
 

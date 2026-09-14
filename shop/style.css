@@ -67,30 +67,36 @@ svg {
    past the header's own height — at that point .site-header is pinned
    (position: sticky) like a fixed header, so dropping its background
    here lets whatever has scrolled up underneath show through, leaving
-   only the logo/nav text visible. mix-blend-mode: difference (not a
-   drop-shadow — that only outlines an edge, it doesn't fix a same-tone
-   fill disappearing into a same-tone patch of whatever photo is behind
-   it) forces contrast against literally any backdrop: white ink flips
-   to black over a light patch and stays white over a dark one, since
-   difference-blending white against color C always renders as C's
-   inverse. Needs the ink actually set to white below — difference
-   against the previous #111 ink would have stayed dark-on-dark. */
+   only the logo/nav text visible. */
 .site-header.is-scrolled {
   background: transparent;
   border-bottom-color: transparent;
 }
 
-.site-header.is-scrolled .header-side,
-.site-header.is-scrolled .logo {
+/* .is-over-banner (also set by setupHeaderScroll(), while the promo
+   banner is still at least partially behind the header) is what actually
+   gates the ink below — mix-blend-mode: difference (not a drop-shadow —
+   that only outlines an edge, it doesn't fix a same-tone fill
+   disappearing into a same-tone patch of the photo behind it) forces
+   contrast against literally any backdrop: white ink flips to black over
+   a light patch and stays white over a dark one, since difference-
+   blending white against color C always renders as C's inverse. Needs
+   the ink actually set to white below — difference against the normal
+   #111 ink would have stayed dark-on-dark. Scoped to the banner
+   specifically (not every scrolled state) so the header falls back to
+   its plain #111 ink once the banner's scrolled out from under it,
+   instead of staying difference-blended against the grid/footer next. */
+.site-header.is-scrolled.is-over-banner .header-side,
+.site-header.is-scrolled.is-over-banner .logo {
   mix-blend-mode: difference;
   color: #fff;
 }
 
-.site-header.is-scrolled .logo-mark {
+.site-header.is-scrolled.is-over-banner .logo-mark {
   background-color: #fff;
 }
 
-.site-header.is-scrolled .lang-toggle {
+.site-header.is-scrolled.is-over-banner .lang-toggle {
   color: #fff;
 }
 

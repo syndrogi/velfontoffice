@@ -333,11 +333,14 @@ function setupLoginModal() {
 // scroll threshold it drops its background (see .site-header.is-scrolled
 // in style.css) so the logo/nav text keep floating over the page while
 // the header itself turns transparent. Separately, .is-over-banner tracks
-// whether the promo banner is still at least partially behind it — that's
-// what actually gates the white/blend-mode ink (see style.css): once the
-// banner has scrolled fully out from under the header, the ink should
-// fall back to its normal solid color instead of staying difference-
-// blended against whatever (grid, footer) happens to be there next.
+// whether any of the promo banner is still visible on screen at all —
+// that's what actually gates the white/blend-mode ink (see style.css):
+// while it's set, mix-blend-mode does its own real per-pixel work (only
+// the glyph pixels actually over the photo invert — text past the
+// photo's edge, if any, blends against plain white and reads black on
+// its own). Once the banner has scrolled fully off-screen, this class
+// drops and the ink falls back to its normal solid color instead of
+// staying difference-blended against whatever (grid, footer) comes next.
 // rAF-throttled since scroll fires continuously.
 function setupHeaderScroll() {
   const header = document.querySelector(".site-header");
@@ -349,7 +352,14 @@ function setupHeaderScroll() {
 
   function update() {
     header.classList.toggle("is-scrolled", window.scrollY > SCROLL_THRESHOLD);
-    const overBanner = !!banner && banner.getBoundingClientRect().bottom > header.offsetHeight;
+    // The header (fixed at the very top, y 0–headerHeight) is over the
+    // banner as long as *any* of the banner is still on screen at all —
+    // bottom > headerHeight was wrong: that goes false the moment the
+    // banner shrinks to header-height-or-less of remaining visible
+    // height, which happens while the header is still fully covering
+    // banner pixels top to bottom, not once it's actually scrolled out
+    // from under it. bottom > 0 is the real "still visible at all" test.
+    const overBanner = !!banner && banner.getBoundingClientRect().bottom > 0;
     header.classList.toggle("is-over-banner", overBanner);
     ticking = false;
   }

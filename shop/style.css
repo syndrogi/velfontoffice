@@ -75,29 +75,40 @@ svg {
 
 /* .is-over-banner (also set by setupHeaderScroll(), while the promo
    banner is still at least partially behind the header) is what actually
-   gates the ink below — mix-blend-mode: difference (not a drop-shadow —
-   that only outlines an edge, it doesn't fix a same-tone fill
-   disappearing into a same-tone patch of the photo behind it) forces
-   contrast against literally any backdrop: white ink flips to black over
-   a light patch and stays white over a dark one, since difference-
-   blending white against color C always renders as C's inverse. Needs
-   the ink actually set to white below — difference against the normal
-   #111 ink would have stayed dark-on-dark. Scoped to the banner
-   specifically (not every scrolled state) so the header falls back to
-   its plain #111 ink once the banner's scrolled out from under it,
-   instead of staying difference-blended against the grid/footer next. */
-.site-header.is-scrolled.is-over-banner .header-side,
-.site-header.is-scrolled.is-over-banner .logo {
-  mix-blend-mode: difference;
+   gates the white ink below. This used to be mix-blend-mode: difference,
+   but that blends against the banner photo's *actual* colors — white
+   difference-blended against this banner's blue tones renders yellow,
+   not white, which is a real defect, not a stylistic one, since the ask
+   is literally "white over the photo." So instead the ink is forced to a
+   plain, non-adaptive white/#111 split. The split itself still has to be
+   pixel-accurate even when the banner's bottom edge cuts through the
+   header row (part of the same word over the photo, part over the page
+   below it) — a single `color` toggle can't do that within one element,
+   so each ink element gets a hard-stop vertical gradient instead, clipped
+   to its own text (or, for .logo-mark, its own mask) via background-clip.
+   --ink-split (0%–100%, set per element by updateInkSplit() in
+   common.js from that element's own getBoundingClientRect() vs. the
+   banner's bottom edge) is where the gradient's hard stop sits, so the
+   portion still over the banner reads white and the rest reads #111
+   within the very same element. Small icons (nav-toggle, lang-toggle)
+   keep a plain binary color swap — splitting an 18px glyph isn't
+   perceptible and isn't worth the background-clip treatment. */
+.site-header.is-scrolled.is-over-banner .nav-toggle,
+.site-header.is-scrolled.is-over-banner .lang-toggle {
   color: #fff;
 }
 
 .site-header.is-scrolled.is-over-banner .logo-mark {
-  background-color: #fff;
+  background-color: transparent;
+  background-image: linear-gradient(to bottom, #fff 0%, #fff var(--ink-split, 0%), #111 var(--ink-split, 0%), #111 100%);
 }
 
-.site-header.is-scrolled.is-over-banner .lang-toggle {
-  color: #fff;
+.site-header.is-scrolled.is-over-banner .header-text-btn,
+.site-header.is-scrolled.is-over-banner .header-text-btn * {
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  background-image: linear-gradient(to bottom, #fff 0%, #fff var(--ink-split, 0%), #111 var(--ink-split, 0%), #111 100%);
 }
 
 .header-side {

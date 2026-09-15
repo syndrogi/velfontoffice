@@ -334,14 +334,27 @@ function setupLoginModal() {
 // in style.css) so the logo/nav text keep floating over the page while
 // the header itself turns transparent. Separately, .is-over-banner tracks
 // whether any of the promo banner is still visible on screen at all —
-// that's what actually gates the white/blend-mode ink (see style.css):
-// while it's set, mix-blend-mode does its own real per-pixel work (only
-// the glyph pixels actually over the photo invert — text past the
-// photo's edge, if any, blends against plain white and reads black on
-// its own). Once the banner has scrolled fully off-screen, this class
-// drops and the ink falls back to its normal solid color instead of
-// staying difference-blended against whatever (grid, footer) comes next.
-// rAF-throttled since scroll fires continuously.
+// that's what gates the white ink (see style.css): each ink element's
+// --ink-split custom property is kept in sync with exactly how much of
+// that element still overlaps the banner, so a hard-stop gradient (not a
+// blend mode — the banner photo has real color in it, so blending would
+// tint the ink instead of turning it white) can render white above the
+// split and #111 below it within the very same element, even when the
+// banner's edge cuts through the header row itself. Once the banner has
+// scrolled fully off-screen, .is-over-banner drops and the ink falls
+// back to its normal solid color. rAF-throttled since scroll fires
+// continuously.
+const INK_SPLIT_SELECTOR = ".logo-mark, .header-text-btn";
+
+function updateInkSplit(bannerBottom) {
+  document.querySelectorAll(INK_SPLIT_SELECTOR).forEach((el) => {
+    const rect = el.getBoundingClientRect();
+    if (!rect.height) return;
+    const splitPx = Math.min(Math.max(bannerBottom - rect.top, 0), rect.height);
+    el.style.setProperty("--ink-split", `${(splitPx / rect.height) * 100}%`);
+  });
+}
+
 function setupHeaderScroll() {
   const header = document.querySelector(".site-header");
   const banner = document.getElementById("promoBanner");
@@ -359,8 +372,10 @@ function setupHeaderScroll() {
     // height, which happens while the header is still fully covering
     // banner pixels top to bottom, not once it's actually scrolled out
     // from under it. bottom > 0 is the real "still visible at all" test.
-    const overBanner = !!banner && banner.getBoundingClientRect().bottom > 0;
+    const bannerBottom = banner ? banner.getBoundingClientRect().bottom : -Infinity;
+    const overBanner = bannerBottom > 0;
     header.classList.toggle("is-over-banner", overBanner);
+    if (overBanner) updateInkSplit(bannerBottom);
     ticking = false;
   }
 

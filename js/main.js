@@ -461,12 +461,12 @@
 
 /**
  * VELFONT OFFICE — Cross-section Page Transition
- * Fades a veil in before handing off to /shop/ (white — another section
- * of the same site) or the 5th Ave. Bipolar Kids Figma site (black — a
- * sharper break, since that link leaves VELFONT entirely), then
- * navigates, so the jump feels like one continuous motion rather than a
- * hard cut — still a full page load (separate static HTML/site, not a
- * shared SPA route) either way.
+ * Fades a veil in before handing off to /shop/ or /hyungrokson/ (white —
+ * other sections of the same site) or the 5th Ave. Bipolar Kids Figma
+ * site (black — a sharper break, since that link leaves VELFONT
+ * entirely), then navigates, so the jump feels like one continuous
+ * motion rather than a hard cut — still a full page load (separate
+ * static HTML/site, not a shared SPA route) either way.
  */
 (function () {
   var veil = document.querySelector(".page-veil");
@@ -480,7 +480,7 @@
   var DARK_IDS = ["fifthAveLink", "fifthAveLinkMobile"];
 
   var links = document.querySelectorAll(
-    'a[href^="/shop/"], #fifthAveLink, #fifthAveLinkMobile'
+    'a[href^="/shop/"], a[href^="/hyungrokson/"], #fifthAveLink, #fifthAveLinkMobile'
   );
 
   Array.prototype.forEach.call(links, function (link) {

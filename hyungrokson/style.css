@@ -1,0 +1,129 @@
+/* ==========================================================================
+   Hyungrok (Roy) Son — Portfolio
+   Same minimal design language as velfontoffice.com (Helvetica Bold,
+   black on white, one red accent), kept in its own stylesheet the same
+   way /shop/ and /os/ each own theirs — this section can evolve on its
+   own without touching the main site.
+   ========================================================================== */
+
+:root {
+  --color-bg: #ffffff;
+  --color-fg: #000000;
+  --color-fg-muted: rgba(0, 0, 0, 0.55);
+  --color-line: #e5e5e5;
+  --color-hover: #e0261f;
+
+  --font-body: "Helvetica Bold", Helvetica, "Helvetica Neue", Arial, sans-serif;
+
+  --edge: 56px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background: var(--color-bg);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-body);
+  font-weight: 700;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.001ms !important;
+  }
+}
+
+.site-header {
+  padding: 24px var(--edge);
+}
+
+.back-link {
+  display: inline-block;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-fg-muted);
+  transition: color 180ms var(--ease);
+}
+
+.back-link:hover {
+  color: var(--color-hover);
+}
+
+main {
+  padding: 0 var(--edge) 120px;
+  max-width: 1000px;
+}
+
+.intro {
+  padding: 40px 0 100px;
+}
+
+.name {
+  font-size: clamp(48px, 9vw, 112px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-fg-muted);
+  margin-bottom: 24px;
+}
+
+.project-list {
+  list-style: none;
+  border-top: 1px solid var(--color-line);
+}
+
+.project-item {
+  display: flex;
+  align-items: center;
+  padding: 28px 0;
+  border-bottom: 1px solid var(--color-line);
+  font-size: clamp(24px, 4vw, 40px);
+  letter-spacing: -0.01em;
+  transition: color 180ms var(--ease);
+}
+
+.project-item:hover {
+  color: var(--color-hover);
+}
+
+.site-footer {
+  padding: 40px var(--edge);
+  border-top: 1px solid var(--color-line);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: var(--color-fg-muted);
+}
+
+@media (max-width: 640px) {
+  :root {
+    --edge: 28px;
+  }
+
+  .intro {
+    padding: 24px 0 64px;
+  }
+}

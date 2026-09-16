@@ -1,10 +1,12 @@
 /**
  * VELFONT OFFICE — Header "More" Menu
- * The "+" button in the header right turns into a "−" (its vertical bar
- * fades out via CSS — see .more.is-open in style.css) and reveals a
- * small dropdown (Members Only, 5th Ave. Bipolar Kids) below it — same
- * open/close/outside-click/Escape shape as Labs (js/labs.js), just
- * anchored under the header instead of floating in the hero corner.
+ * Starts open on load — the "+" button shows as "−" from the first
+ * paint (its vertical bar fades out via CSS — see .more.is-open in
+ * style.css) with the dropdown (Members Only, 5th Ave. Bipolar Kids)
+ * already visible below it. Clicking now closes it first. Only the
+ * toggle button itself closes it — same shape as Labs (js/labs.js):
+ * no outside-click/Escape dismiss, since a background click closing it
+ * would just make it (and the dropdown links) disappear unexpectedly.
  */
 (function () {
   var root = document.getElementById("more");
@@ -43,11 +45,8 @@
     if (e.target.tagName === "A") closeMenu();
   });
 
-  document.addEventListener("click", function (e) {
-    if (isOpen && !root.contains(e.target)) closeMenu();
-  });
-
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && isOpen) closeMenu();
-  });
+  // Static markup (both menu links are already in the HTML, not
+  // registered piecemeal like Labs) — no need to wait for anything else
+  // to load first.
+  openMenu();
 })();

@@ -1,14 +1,15 @@
 /**
  * VELFONT OFFICE — Labs / Physics
  * An ambient (non-destructive) counterpart to Gravity: header links
- * and hero letters gently drift away from the pointer and ease back
- * when it moves off, instead of falling once and staying fallen.
- * Click Physics again to turn it off and let everything settle back.
+ * and the wordmark's letters gently drift away from the pointer and
+ * ease back when it moves off, instead of falling once and staying
+ * fallen. Click Physics again to turn it off and let everything settle
+ * back.
  */
 (function () {
   if (typeof registerLab !== "function") return;
 
-  var TARGET_SELECTOR = "header a, header button, .hero-content .letter";
+  var TARGET_SELECTOR = "header a, header button, .hero-title .letter";
   var RADIUS = 140;
   var STRENGTH = 40;
   var EASE = 0.15;

@@ -199,11 +199,8 @@
     el.addEventListener("pointerdown", function (e) {
       // While gravity is active, physics owns dragging for every body
       // (see gravity.js) — this handler would otherwise fight it for
-      // control of the same transform every frame. While Select is
-      // active, a pointerdown on a letter should select/drag its whole
-      // .hero-title/.hero-subtitle block instead of just that one glyph
-      // (see js/labs/select.js).
-      if (window.__gravityActive || window.__multiSelectActive) return;
+      // control of the same transform every frame.
+      if (window.__gravityActive) return;
       dragging = true;
       baseX = offsetX;
       baseY = offsetY;
@@ -344,7 +341,6 @@
   var navLinks = document.querySelectorAll(".main-nav a");
   var heroTitle = document.querySelector(".hero-title");
   var heroTitleVisual = document.querySelector(".hero-title-visual");
-  var heroSubtitle = document.querySelector(".hero-subtitle");
   // Captured once, before the first spin ever runs, so it stays the
   // reliable "back to English" target even after Roulette (js/labs/roulette.js)
   // has landed the reel on something else.
@@ -356,17 +352,9 @@
     }, i * 60);
   });
 
-  function revealSubtitle() {
-    typeElement(heroSubtitle, {
-      speed: 8,
-      letterSpans: true,
-      draggable: true,
-    });
-  }
-
   // Swaps the landed text for real letter spans — same draggable-letter
-  // treatment as every other typed element on the page (see hero-subtitle
-  // above), just built in one shot instead of typed in.
+  // treatment as every other typed element on the page, just built in
+  // one shot instead of typed in.
   function buildHeroLetters(visual) {
     var text = visual.textContent;
     visual.textContent = "";
@@ -467,11 +455,7 @@
   };
 
   setTimeout(function () {
-    if (heroTitle && heroTitleVisual) {
-      spinHeroTitle(heroTitleVisual, revealSubtitle);
-    } else {
-      revealSubtitle();
-    }
+    if (heroTitle && heroTitleVisual) spinHeroTitle(heroTitleVisual);
   }, 200);
 })();
 

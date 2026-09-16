@@ -110,4 +110,12 @@
     labs.push(lab);
     renderItem(lab);
   };
+
+  // Starts open — every lab is visible immediately on load instead of
+  // waiting for a click; the toggle button now closes it first, same
+  // open/close pair as before just flipped which state is "resting".
+  // Deferred to DOMContentLoaded so every other labs/*.js module (each
+  // its own <script defer>, still loading while this file's own IIFE
+  // runs) has already registerLab()'d before the menu opens.
+  document.addEventListener("DOMContentLoaded", openMenu);
 })();

@@ -81,7 +81,7 @@ a {
   animation: fadeIn 1s var(--ease) both;
 }
 
-.logo,
+.header-left,
 .nav-link,
 .social-icon,
 .more,
@@ -89,8 +89,8 @@ a {
   pointer-events: auto;
 }
 
-/* Logo left, nav right. Side padding uses --edge so the logo's left
-   edge lines up with the hero title's left edge below it. */
+/* Logo + wordmark left, nav right. Side padding uses --edge so the
+   logo's left edge lines up with the section grids below it. */
 .header-inner {
   height: 100%;
   display: flex;
@@ -99,10 +99,23 @@ a {
   padding: 0 var(--edge);
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
 .logo {
   display: inline-flex;
   align-items: center;
   position: relative;
+  /* Optical correction — logo.png's own artwork carries a few px of
+     transparent padding the "−" more-toggle's SVG doesn't, so at an
+     identical box inset (--edge) the logo's actual ink sits visibly
+     further from the left wall than the toggle's ink sits from the
+     right. A relative offset (not a margin) nudges just the logo
+     without dragging the wordmark next to it out of the flex flow. */
+  left: -6px;
 }
 
 .logo:focus-visible {
@@ -239,8 +252,8 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   background: none;
   border: none;
   padding: 0;
@@ -250,8 +263,8 @@ a {
 }
 
 .more-toggle svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
 }
 
 .more-toggle-v {
@@ -263,8 +276,7 @@ a {
   opacity: 0;
 }
 
-.more-toggle:hover,
-.more.is-open .more-toggle {
+.more-toggle:hover {
   color: var(--color-hover);
 }
 
@@ -360,8 +372,8 @@ a {
   display: none;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   background: none;
   border: none;
   padding: 0;
@@ -371,8 +383,8 @@ a {
 }
 
 .menu-toggle svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
 }
 
 .menu-toggle-v {
@@ -506,24 +518,17 @@ a {
   pointer-events: none;
 }
 
-/* Hero copy — upper-left third. Typography is the main visual, not an image. */
-.hero-content {
-  position: absolute;
-  left: var(--edge);
-  top: 30%;
-  z-index: 3;
-  max-width: min(90vw, 860px);
-  animation: fadeUp 1.2s 0.15s var(--ease) both;
-}
-
+/* Wordmark — sits in the header, right of the logo (see .header-left).
+   Still the same spinning/draggable-letter element it always was, just
+   sized to stand shoulder-to-shoulder with .logo-mark's 80px instead of
+   hero-sized display type. */
 .hero-title {
   display: inline-block;
   position: relative;
-  margin-bottom: 40px;
-  font-size: clamp(40px, 8vw, 96px);
+  font-size: clamp(28px, 6vw, 80px);
   font-weight: 700;
   letter-spacing: -0.01em;
-  line-height: 1.05;
+  line-height: 1;
 }
 
 /* `unicode-bidi: plaintext` reads each spun-through language's own
@@ -553,14 +558,7 @@ a {
   60% { opacity: 1; transform: translateY(0); }
 }
 
-.hero-subtitle {
-  font-size: clamp(15px, 1.6vw, 19px);
-  line-height: 1.7;
-  letter-spacing: 0;
-  color: var(--color-fg);
-}
-
-/* Plain `.letter` (not a `.hero-title`/`.hero-subtitle` descendant
+/* Plain `.letter` (not a `.hero-title` descendant
    selector) so hover/drag styling still matches after the gravity
    effect re-parents a letter out to <body>. */
 .letter {
@@ -608,8 +606,7 @@ a {
   transition: color 180ms var(--ease);
 }
 
-.labs-toggle:hover,
-.labs.is-open .labs-toggle {
+.labs-toggle:hover {
   color: var(--color-hover);
 }
 
@@ -914,9 +911,7 @@ a {
    of only the original, static container outline being visible. */
 html.labs-blueprint header,
 html.labs-blueprint main,
-html.labs-blueprint .hero-content,
 html.labs-blueprint .hero-title,
-html.labs-blueprint .hero-subtitle,
 html.labs-blueprint .main-nav,
 html.labs-blueprint .section-grid,
 html.labs-blueprint .section-label,
@@ -1086,40 +1081,6 @@ html.labs-blueprint body::after {
   pointer-events: none;
 }
 
-/* Select — hover/drag affordance on the hero's selectable blocks, and
-   the marquee/bounding-box UI (js/labs/select.js). --color-hover instead
-   of Scale's --color-fg outline so the two labs read as visually
-   distinct if both happen to be on at once. */
-body.labs-select-active .hero-title,
-body.labs-select-active .hero-subtitle {
-  cursor: grab;
-  user-select: none;
-}
-
-body.labs-select-dragging {
-  cursor: grabbing;
-}
-
-body.labs-select-dragging .hero-title,
-body.labs-select-dragging .hero-subtitle {
-  cursor: grabbing;
-}
-
-.labs-select-box {
-  position: fixed;
-  z-index: 593;
-  outline: 1px solid var(--color-hover);
-  pointer-events: none;
-}
-
-.labs-select-marquee {
-  position: fixed;
-  z-index: 594;
-  border: 1px dashed var(--color-hover);
-  background: rgba(224, 38, 31, 0.08); /* var(--color-hover) at low alpha */
-  pointer-events: none;
-}
-
 /* ==========================================================================
    Motion
    ========================================================================== */
@@ -1146,8 +1107,7 @@ body.labs-select-dragging .hero-subtitle {
    reduced motion, so with JS off or motion reduced this rule never
    applies and the text just shows normally. */
 html.js-typing .main-nav a,
-html.js-typing .hero-title,
-html.js-typing .hero-subtitle {
+html.js-typing .hero-title {
   visibility: hidden;
 }
 
@@ -1271,7 +1231,7 @@ html.js-typing .hero-subtitle {
 
 /* Header — collapse inline nav into the off-canvas mobile menu.
    Height stays fixed at 127px; side padding follows --edge, same as
-   the hero title and section grid below it. */
+   the section grid below it. */
 @media (max-width: 768px) {
   .main-nav {
     display: none;
@@ -1309,8 +1269,11 @@ html.js-typing .hero-subtitle {
     height: 56px;
   }
 
-  .hero-content {
-    max-width: calc(100% - 56px);
+  /* Logo + icon + hamburger already fill a phone-width header — the
+     wordmark next to the logo (see .header-left) is the first thing
+     to give up its space. */
+  .hero-title {
+    display: none;
   }
 
   .labs {

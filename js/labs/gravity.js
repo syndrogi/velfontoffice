@@ -1,16 +1,16 @@
 /**
  * VELFONT OFFICE — Labs / Gravity
- * Pulls every header button, hero letter, and hero image out of normal
+ * Pulls every header link/button and hero-title letter out of normal
  * layout — from wherever it currently sits on screen — and hands it to
  * Matter.js as a falling body. One-shot: once an element has fallen it
- * moves out of header/.hero-content, so nothing is left to grab on a
- * second run. Behavior is unchanged from the original standalone
- * Gravity button; only how it's triggered has moved.
+ * moves out of header, so nothing is left to grab on a second run.
+ * Behavior is unchanged from the original standalone Gravity button;
+ * only how it's triggered has moved.
  *
- * Targets are matched by tag/role inside `header` and `.hero-content`
- * (any a/button/img there, plus per-letter spans) rather than a fixed
- * list of classes, so new text or images dropped into those areas
- * later are picked up automatically.
+ * Targets are matched by tag/role inside `header` (any a/button there,
+ * plus the wordmark's per-letter spans) rather than a fixed list of
+ * classes, so new links dropped into the header later are picked up
+ * automatically.
  */
 (function () {
   if (typeof registerLab !== "function" || !window.Matter) return;
@@ -18,8 +18,7 @@
   var TARGET_SELECTOR = [
     "header a",
     "header button",
-    ".hero-content .letter",
-    ".hero-content img",
+    ".hero-title .letter",
     ".labs-logo-mark",
   ].join(", ");
 

@@ -73,11 +73,10 @@
     pulseMaxDisplacement: 10,
 
     // targets / perf — must clear header (~7) + hero-title letters (14) +
-    // the full hero-subtitle paragraph (~295 letters) + labs-toggle +
-    // labs-menu-btn (one per registered lab) + footer-copy, or
-    // collectTargets() silently drops whatever comes after the cap in DOM
-    // order — i.e. the tail end of the subtitle. Per-target frame cost is
-    // just a distance check (no DOM reads), so headroom here is cheap.
+    // labs-toggle + labs-menu-btn (one per registered lab) + footer-copy,
+    // or collectTargets() silently drops whatever comes after the cap in
+    // DOM order. Per-target frame cost is just a distance check (no DOM
+    // reads), so headroom here is cheap regardless.
     maxTargetsDesktop: 400,
     maxTargetsMobile: 400,
   };
@@ -119,13 +118,13 @@
 
   // ==== NoiseTargets ========================================================
   // header covers the logo, nav links, lang/instagram/more/menu toggles and
-  // the more-menu links; .hero-content .letter is the hero title + subtitle
-  // (already split one span per character by main.js's typewriter); the labs
-  // trigger/menu and the footer line round out the spec's target list.
+  // the more-menu links; .hero-title .letter is the wordmark (already split
+  // one span per character by main.js's spin/reveal); the labs trigger/menu
+  // and the footer line round out the spec's target list.
   var TARGET_SELECTOR = [
     "header a",
     "header button",
-    ".hero-content .letter",
+    ".hero-title .letter",
     ".labs-toggle",
     ".labs-menu-btn",
     ".footer-copy",
@@ -193,10 +192,10 @@
     }
   }
 
-  // The hero-subtitle is typed in letter-by-letter (main.js), each letter
-  // its own late-appended `.letter` span — enabling Noise mid-type (or
-  // mid-hero-title-spin) means collectTargets()'s one-time sweep above
-  // simply predates most of those spans. This watches for exactly that:
+  // The hero-title's letters are only built once its spin lands (main.js's
+  // buildHeroLetters), each its own late-appended `.letter` span —
+  // enabling Noise mid-spin means collectTargets()'s one-time sweep above
+  // simply predates all of them. This watches for exactly that:
   // any new element matching TARGET_SELECTOR added anywhere under <body>
   // while Noise is active gets picked up the moment it lands, instead of
   // staying invisible to Noise until the next full enable()/disable().

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DT Map — Playing Field | Roy Son</title>
+<meta name="description" content="An evolving map of the sounds, garments, objects, technologies, and ideas shaping Roy Son's creative practice.">
+<link rel="canonical" href="https://velfontoffice.com/hyungrokson/dt-map/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="dt-map.css">
+<link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+<link rel="icon" href="/favicon.ico">
+<link rel="manifest" href="/site.webmanifest">
+</head>
+<body>
+
+<a class="dtm-skip" href="#dtmStage">Skip to map</a>
+
+<header class="dtm-header">
+  <a href="/hyungrokson/" class="dtm-back">&larr; ROY SON</a>
+  <div class="dtm-title-block">
+    <p class="dtm-eyebrow">ROY SON &nbsp;/&nbsp; CORE STUDIO OBJECTS: CT &nbsp;/&nbsp; FALL 2026</p>
+    <h1 class="dtm-title">DT MAP — PLAYING FIELD</h1>
+    <p class="dtm-desc">An evolving map of the sounds, garments, objects, technologies, and ideas shaping my creative practice.</p>
+  </div>
+</header>
+
+<div class="dtm-toolbar" role="toolbar" aria-label="Map controls">
+  <div class="dtm-filters" id="dtmFilters" role="group" aria-label="Filter by category"></div>
+  <div class="dtm-actions">
+    <div class="dtm-action-group">
+      <button type="button" class="dtm-btn" id="dtmZoomOut" aria-label="Zoom out">&minus;</button>
+      <button type="button" class="dtm-btn" id="dtmZoomIn" aria-label="Zoom in">+</button>
+      <button type="button" class="dtm-btn" id="dtmReset">Reset View</button>
+    </div>
+    <div class="dtm-action-group">
+      <button type="button" class="dtm-btn" id="dtmDevToggle" aria-expanded="false" aria-controls="dtmDrawer">In Development</button>
+      <button type="button" class="dtm-btn" id="dtmPresentToggle" aria-pressed="false">Presentation Mode</button>
+      <button type="button" class="dtm-btn" id="dtmSourcesToggle" aria-expanded="false" aria-controls="dtmSources">Sources</button>
+      <button type="button" class="dtm-btn" id="dtmPrint">Print / PDF View</button>
+    </div>
+  </div>
+</div>
+
+<div class="dtm-present-nav" id="dtmPresentNav" hidden>
+  <button type="button" class="dtm-btn" id="dtmPresentPrev">&larr; Prev</button>
+  <span class="dtm-present-label" id="dtmPresentLabel"></span>
+  <button type="button" class="dtm-btn" id="dtmPresentNext">Next &rarr;</button>
+  <button type="button" class="dtm-btn" id="dtmPresentExit">Exit</button>
+</div>
+
+<main id="dtmStage" class="dtm-stage" aria-label="DT Map network">
+  <div class="dtm-viewport" id="dtmViewport">
+    <div class="dtm-canvas" id="dtmCanvas">
+      <svg class="dtm-lines" id="dtmLines" aria-hidden="true"></svg>
+      <div class="dtm-nodes" id="dtmNodes"></div>
+    </div>
+  </div>
+  <p class="dtm-hint">
+    <span class="dtm-hint-full">Two-finger move or drag to pan &middot; pinch or Ctrl-scroll to zoom &middot; click a node for detail</span>
+    <span class="dtm-hint-short">Pan &amp; pinch to explore &middot; click for detail</span>
+  </p>
+</main>
+
+<section id="dtmArchive" class="dtm-archive" aria-label="DT Map archive"></section>
+
+<section id="dtmSources" class="dtm-sources" aria-label="Sources" hidden></section>
+
+<!-- Planned / unfinished slots (status: "planned") — kept out of the
+     curated map so they never affect its initial zoom or layout, but
+     still reachable here. See dt-map.js's PLANNED_DRAWER. -->
+<section id="dtmDrawer" class="dtm-drawer" aria-label="In development" hidden></section>
+
+<div class="dtm-panel-backdrop" id="dtmPanelBackdrop" hidden></div>
+<aside class="dtm-panel" id="dtmPanel" aria-hidden="true" aria-label="Node detail" tabindex="-1">
+  <button type="button" class="dtm-panel-close" id="dtmPanelClose" aria-label="Close detail">&times;</button>
+  <div class="dtm-panel-body" id="dtmPanelBody"></div>
+</aside>
+
+<!-- Print / PDF view — see dt-map.js buildPrintView(). Off-screen for
+     normal browsing, shown when "Print / PDF View" is clicked, and
+     always what @media print renders regardless of that toggle. -->
+<section id="dtmPrintView" class="dtm-print-view" aria-hidden="true"></section>
+
+<footer class="dtm-footer">
+  <span>Velfont Office &mdash; velfontoffice.com/hyungrokson/dt-map/</span>
+</footer>
+
+<script src="dt-map-data.js" defer></script>
+<script src="dt-map.js" defer></script>
+</body>
+</html>

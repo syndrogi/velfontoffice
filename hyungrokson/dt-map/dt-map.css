@@ -1,0 +1,1123 @@
+/* ==========================================================================
+   DT MAP — PLAYING FIELD
+   Same restrained language as the rest of Velfont Office — Helvetica
+   Bold, black on white, one red accent — with IBM Plex Mono for the
+   archival/coordinate-like labels (status tags, node types, meta),
+   the same way js/labs/developer.js's overlay reads on the main site.
+   No gradients, no rounded SaaS cards, no glassmorphism.
+   ========================================================================== */
+
+:root {
+  --color-bg: #ffffff;
+  --color-fg: #000000;
+  --color-fg-muted: rgba(0, 0, 0, 0.55);
+  --color-fg-faint: rgba(0, 0, 0, 0.32);
+  --color-line: #d8d8d8;
+  --color-accent: #e0261f;
+
+  --font-body: "Helvetica Bold", Helvetica, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+
+  --edge: 56px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background: var(--color-bg);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-body);
+  font-weight: 700;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+.dtm-skip {
+  position: fixed;
+  top: -60px;
+  left: 12px;
+  z-index: 999;
+  background: var(--color-fg);
+  color: var(--color-bg);
+  padding: 10px 16px;
+  font-size: 13px;
+  font-family: var(--font-mono);
+  transition: top 150ms var(--ease);
+}
+
+.dtm-skip:focus {
+  top: 12px;
+}
+
+/* ==========================================================================
+   Header
+   ========================================================================== */
+
+.dtm-header {
+  padding: 14px var(--edge) 16px;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.dtm-back {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--color-fg-muted);
+  margin-bottom: 8px;
+  transition: color 180ms var(--ease);
+}
+
+.dtm-back:hover {
+  color: var(--color-accent);
+}
+
+.dtm-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-fg-muted);
+  margin-bottom: 4px;
+}
+
+.dtm-title {
+  font-size: clamp(20px, 2.6vw, 32px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.dtm-desc {
+  max-width: 640px;
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--color-fg-muted);
+}
+
+/* ==========================================================================
+   Toolbar
+   ========================================================================== */
+
+.dtm-toolbar {
+  position: relative;
+  z-index: 40;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px var(--edge);
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.dtm-filters {
+  /* flex:1 (not the default 0-shrink) plus min-width:0 is what lets
+     this column actually shrink below its own content width instead
+     of forcing the whole toolbar to overflow — without min-width:0 a
+     flex item's default min-width:auto refuses to shrink past its
+     content, which is what was pushing "CONCEPTS & PROBLEMS" etc.
+     off-screen instead of into this row's own scroll area. */
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  /* Fades the last chip toward transparent as a standing hint that
+     the row scrolls, instead of a hard, ambiguous edge cut. */
+  mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
+}
+
+.dtm-filter-chip {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--color-fg-muted);
+  border: 1px solid var(--color-line);
+  padding: 5px 9px;
+  transition: color 150ms var(--ease), border-color 150ms var(--ease), background 150ms var(--ease);
+}
+
+.dtm-filter-chip:hover {
+  color: var(--color-fg);
+  border-color: var(--color-fg);
+}
+
+.dtm-filter-chip.is-active {
+  color: var(--color-bg);
+  background: var(--color-fg);
+  border-color: var(--color-fg);
+}
+
+.dtm-actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.dtm-action-group {
+  display: flex;
+  flex-shrink: 0;
+  gap: 6px;
+}
+
+.dtm-btn {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--color-fg);
+  border: 1px solid var(--color-fg);
+  padding: 5px 10px;
+  transition: color 150ms var(--ease), background 150ms var(--ease);
+}
+
+.dtm-btn:hover {
+  color: var(--color-bg);
+  background: var(--color-fg);
+}
+
+.dtm-btn[aria-expanded="true"],
+.dtm-btn[aria-pressed="true"] {
+  color: var(--color-bg);
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.dtm-present-nav {
+  position: relative;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 8px var(--edge);
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-line);
+}
+
+/* The [hidden] attribute alone loses to the class rule's own
+   `display: flex` above (higher specificity) — this restates it so
+   toggling the `hidden` attribute in JS actually hides the bar. */
+.dtm-present-nav[hidden] {
+  display: none;
+}
+
+.dtm-present-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  min-width: 220px;
+  text-align: center;
+}
+
+/* ==========================================================================
+   Stage — desktop pan/zoom network
+   ========================================================================== */
+
+.dtm-stage {
+  position: relative;
+  /* dt-map.js's sizeStage() measures the real remaining space and
+     overrides this inline on load/resize — this is just the value
+     used for the very first paint before JS runs. */
+  height: calc(100vh - 170px);
+  min-height: 520px;
+  overflow: hidden;
+  background:
+    linear-gradient(var(--color-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-line) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-position: center;
+}
+
+.dtm-viewport {
+  position: absolute;
+  inset: 0;
+  cursor: grab;
+  touch-action: none;
+}
+
+.dtm-viewport.is-panning {
+  cursor: grabbing;
+}
+
+.dtm-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2800px;
+  height: 1550px;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.dtm-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2800px;
+  height: 1550px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* Structural — core-to-cluster, the map's permanent backbone (six
+   lines, always on; see dt-map.js's renderStructuralLines). */
+.dtm-line-structural {
+  stroke: var(--color-fg-muted);
+  stroke-width: 1.5;
+  opacity: 1;
+  transition: opacity 150ms var(--ease);
+}
+
+.dtm-line-structural.is-dimmed-line {
+  opacity: 0.25;
+}
+
+/* Secondary — the real relatedIds data. Nearly invisible by default
+   so the default view stays a clean diagram, not a spiderweb; a
+   hover/selection reveals just that node's own edges (is-active-line)
+   and pushes everything else further down (is-dimmed-line). */
+.dtm-line-secondary {
+  stroke: var(--color-accent);
+  stroke-width: 1.75;
+  opacity: 0;
+  transition: opacity 150ms var(--ease);
+}
+
+.dtm-line-secondary.is-active-line {
+  opacity: 1;
+}
+
+.dtm-nodes {
+  position: absolute;
+  inset: 0;
+}
+
+.dtm-hint {
+  position: absolute;
+  left: var(--edge);
+  bottom: 16px;
+  z-index: 5;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--color-fg-muted);
+  pointer-events: none;
+}
+
+.dtm-hint-short {
+  display: none;
+}
+
+@media (max-width: 1200px) {
+  .dtm-hint-full {
+    display: none;
+  }
+
+  .dtm-hint-short {
+    display: inline;
+  }
+}
+
+/* ---- Nodes ---------------------------------------------------------------
+   Only the central identity + the confirmed cluster members render as
+   cards (see dt-map.js's TIER2_IDS) — 15 cards total, never more, so
+   there's no scenario where the primary map gets crowded by content
+   that hasn't been confirmed yet. -------------------------------------- */
+
+:root {
+  --accent-sound: #55666f;
+  --accent-fashion: #7c6a52;
+  --accent-art: #6a6b4c;
+}
+
+.dtm-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 216px;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+  border: 1px solid var(--color-fg);
+  border-top-width: 3px;
+  text-align: left;
+  transition: border-color 150ms var(--ease), opacity 150ms var(--ease);
+}
+
+.dtm-node:hover,
+.dtm-node:focus-visible {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+.dtm-node:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+
+.dtm-node--sound { border-top-color: var(--accent-sound); }
+.dtm-node--fashion { border-top-color: var(--accent-fashion); }
+.dtm-node--art { border-top-color: var(--accent-art); }
+
+/* Level 1 — visually dominant, filled, no image/index — it's the
+   identity hub, not a reference card. */
+.dtm-node--core {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 285px;
+  padding: 30px 22px;
+  border: 3px solid var(--color-fg);
+  background: var(--color-fg);
+  color: var(--color-bg);
+  text-align: center;
+  align-items: center;
+}
+
+.dtm-node--core:hover,
+.dtm-node--core:focus-visible {
+  border-color: var(--color-accent);
+}
+
+.dtm-node--core .dtm-node-name {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  line-height: 1.3;
+}
+
+/* Level 2 card anatomy: art area (placeholder until a real image is
+   added) + body (index, name, role, keywords, status). */
+.dtm-node-art {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  width: 100%;
+  /* ~24% shorter than a 4/3 placeholder (0.75 -> 0.57 height/width) —
+     once a real image is added, drop the aspect-ratio override
+     entirely (or set it to the image's own ratio) to use the full
+     4/3-or-whatever presentation instead of this reduced stand-in. */
+  aspect-ratio: 7 / 4;
+  padding: 6px;
+  border-bottom: 1px solid var(--color-line);
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--color-line),
+    var(--color-line) 1px,
+    transparent 1px,
+    transparent 9px
+  );
+}
+
+.dtm-node-code {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--color-fg-muted);
+  background: var(--color-bg);
+  padding: 2px 5px;
+}
+
+.dtm-node-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px 12px;
+}
+
+.dtm-node-index {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-fg-faint);
+}
+
+.dtm-node-name {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+}
+
+.dtm-node-role {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--color-fg-muted);
+}
+
+.dtm-node-keywords {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--color-fg-muted);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+.dtm-status-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border: 1px solid currentColor;
+  width: fit-content;
+  margin-top: 4px;
+}
+
+.dtm-status-tag--draft {
+  color: var(--color-fg-muted);
+}
+
+.dtm-status-tag--planned {
+  color: var(--color-accent);
+  border-style: dashed;
+}
+
+.dtm-node.is-highlighted {
+  border-color: var(--color-accent);
+  z-index: 3;
+}
+
+.dtm-node.is-dimmed {
+  opacity: 0.25;
+}
+
+.dtm-node.is-filtered-out {
+  display: none;
+}
+
+/* Level 3 — pale background typography naming each cluster; not a
+   card, never a click target. */
+.dtm-cluster-label {
+  position: absolute;
+  transform: translate(-50%, 0);
+  width: 360px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: var(--color-fg-faint);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Mobile archive — vertical, grouped by category (and People subgroup)
+   ========================================================================== */
+
+.dtm-archive {
+  display: none;
+  padding: 32px var(--edge) 80px;
+}
+
+.dtm-archive-category {
+  padding-top: 40px;
+}
+
+.dtm-archive-category:first-child {
+  padding-top: 0;
+}
+
+.dtm-archive-category-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-fg-muted);
+  border-bottom: 1px solid var(--color-line);
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+}
+
+.dtm-archive-group-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-fg-faint);
+  padding: 18px 0 6px;
+}
+
+.dtm-archive-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 20px 14px;
+  margin-bottom: 8px;
+  border: 1px solid var(--color-line);
+  border-left-width: 3px;
+  text-align: left;
+  transition: border-color 150ms var(--ease);
+}
+
+.dtm-archive-item:hover,
+.dtm-archive-item:focus-visible {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+.dtm-archive-item-name {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+}
+
+.dtm-archive-item-type {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-fg-muted);
+  text-align: right;
+}
+
+/* ==========================================================================
+   Sources
+   ========================================================================== */
+
+.dtm-sources {
+  padding: 32px var(--edge) 60px;
+  border-top: 1px solid var(--color-line);
+}
+
+.dtm-sources-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-fg-muted);
+  margin-bottom: 20px;
+}
+
+.dtm-source-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-line);
+  font-size: 13px;
+}
+
+.dtm-source-name {
+  font-weight: 700;
+  min-width: 220px;
+}
+
+.dtm-source-link {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-accent);
+  word-break: break-all;
+}
+
+.dtm-source-flag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-fg-faint);
+}
+
+/* ==========================================================================
+   In Development drawer — every status:"planned" node, off the
+   curated map by design (see dt-map.js's Layout comment).
+   ========================================================================== */
+
+.dtm-drawer {
+  padding: 32px var(--edge) 60px;
+  border-top: 1px solid var(--color-line);
+  background: #fafafa;
+}
+
+.dtm-drawer-group {
+  padding-top: 24px;
+}
+
+.dtm-drawer-group:first-of-type {
+  padding-top: 0;
+}
+
+/* ==========================================================================
+   Detail panel
+   ========================================================================== */
+
+.dtm-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms var(--ease);
+}
+
+.dtm-panel-backdrop.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dtm-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 91;
+  width: min(460px, 100vw);
+  background: var(--color-bg);
+  border-left: 1px solid var(--color-fg);
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform 260ms var(--ease);
+}
+
+.dtm-panel.is-open {
+  transform: translateX(0);
+}
+
+.dtm-panel-close {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 44px;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-line);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.dtm-panel-close:hover {
+  color: var(--color-accent);
+}
+
+.dtm-panel-body {
+  padding: 28px 28px 60px;
+}
+
+.dtm-panel-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-fg-muted);
+  margin-bottom: 10px;
+}
+
+.dtm-panel-title {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.dtm-panel-role {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-fg-muted);
+  margin-bottom: 18px;
+}
+
+.dtm-panel-image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border: 1px solid var(--color-line);
+  margin-bottom: 20px;
+  display: block;
+}
+
+.dtm-panel-image-placeholder {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  margin-bottom: 20px;
+  border: 1px solid var(--color-line);
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--color-line),
+    var(--color-line) 1px,
+    transparent 1px,
+    transparent 10px
+  );
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 10px;
+}
+
+.dtm-panel-image-placeholder span {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--color-fg-muted);
+  background: var(--color-bg);
+  padding: 3px 6px;
+}
+
+.dtm-panel-field {
+  padding: 14px 0;
+  border-top: 1px solid var(--color-line);
+}
+
+.dtm-panel-field-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-fg-muted);
+  margin-bottom: 6px;
+}
+
+.dtm-panel-field-value {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.65;
+}
+
+.dtm-panel-related {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dtm-panel-related-link {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  border: 1px solid var(--color-line);
+  padding: 5px 9px;
+  transition: border-color 150ms var(--ease), color 150ms var(--ease);
+}
+
+.dtm-panel-related-link:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.dtm-panel-source-link {
+  font-size: 13px;
+  color: var(--color-accent);
+  word-break: break-all;
+}
+
+.dtm-panel-empty {
+  padding: 40px 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-fg-faint);
+  text-align: center;
+}
+
+/* ==========================================================================
+   Print / PDF view
+   ========================================================================== */
+
+.dtm-print-view {
+  display: none;
+}
+
+body.is-print-view .dtm-header,
+body.is-print-view .dtm-toolbar,
+body.is-print-view .dtm-present-nav,
+body.is-print-view .dtm-stage,
+body.is-print-view .dtm-archive,
+body.is-print-view .dtm-sources,
+body.is-print-view .dtm-drawer,
+body.is-print-view .dtm-footer {
+  display: none;
+}
+
+body.is-print-view .dtm-print-view {
+  display: block;
+  padding: 40px var(--edge) 100px;
+}
+
+.dtm-print-exit {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--color-fg);
+  padding: 8px 14px;
+  margin-bottom: 32px;
+}
+
+.dtm-print-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.dtm-print-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-fg-muted);
+  margin-bottom: 24px;
+}
+
+.dtm-print-desc {
+  max-width: 640px;
+  font-size: 14px;
+  line-height: 1.7;
+  font-weight: 400;
+  color: var(--color-fg-muted);
+  margin-bottom: 40px;
+}
+
+.dtm-print-category {
+  padding-top: 32px;
+  border-top: 2px solid var(--color-fg);
+  break-inside: avoid;
+}
+
+.dtm-print-category-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.dtm-print-node {
+  padding: 14px 0;
+  border-top: 1px solid var(--color-line);
+  break-inside: avoid;
+}
+
+.dtm-print-node-name {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+
+.dtm-print-node-role {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-fg-muted);
+  margin-bottom: 6px;
+}
+
+.dtm-print-node-desc {
+  font-size: 12.5px;
+  line-height: 1.6;
+  font-weight: 400;
+  margin-bottom: 6px;
+}
+
+.dtm-print-node-related,
+.dtm-print-node-source {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-fg-muted);
+  word-break: break-all;
+}
+
+.dtm-print-footer {
+  margin-top: 48px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-line);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-fg-muted);
+}
+
+@media print {
+  .dtm-header,
+  .dtm-toolbar,
+  .dtm-present-nav,
+  .dtm-stage,
+  .dtm-archive,
+  .dtm-sources,
+  .dtm-drawer,
+  .dtm-footer,
+  .dtm-panel,
+  .dtm-panel-backdrop,
+  .dtm-skip {
+    display: none !important;
+  }
+
+  .dtm-print-view {
+    display: block !important;
+    padding: 0;
+  }
+
+  .dtm-print-exit {
+    display: none;
+  }
+
+  body {
+    background: #fff;
+  }
+}
+
+/* ==========================================================================
+   Presentation Mode — collapses the intro copy and non-essential
+   controls, enlarges the map. Still the same interactive canvas
+   underneath (see dt-map.js) — this is layout only.
+   ========================================================================== */
+
+body.is-presentation .dtm-back,
+body.is-presentation .dtm-eyebrow,
+body.is-presentation .dtm-desc,
+body.is-presentation .dtm-filters,
+body.is-presentation .dtm-hint,
+body.is-presentation .dtm-archive,
+body.is-presentation .dtm-sources,
+body.is-presentation .dtm-drawer,
+body.is-presentation .dtm-footer {
+  display: none;
+}
+
+body.is-presentation .dtm-header {
+  padding: 10px var(--edge);
+}
+
+body.is-presentation .dtm-title {
+  font-size: 18px;
+  margin-bottom: 0;
+}
+
+body.is-presentation .dtm-toolbar {
+  justify-content: flex-end;
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+
+.dtm-footer {
+  padding: 32px var(--edge);
+  border-top: 1px solid var(--color-line);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--color-fg-muted);
+}
+
+/* ==========================================================================
+   Toolbar at narrower desktop widths — two restrained rows (filters,
+   then utility controls) instead of letting either column clip. Above
+   this the single-row layout (filters flexing/scrolling, actions
+   fixed — see .dtm-filters/.dtm-actions above) has enough room.
+   ========================================================================== */
+
+@media (max-width: 1300px) {
+  .dtm-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .dtm-filters {
+    flex-basis: 100%;
+  }
+
+  .dtm-actions {
+    flex-basis: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+}
+
+/* ==========================================================================
+   Responsive — below this, the pan/zoom stage gives way to the vertical
+   archive. A cramped, force-fit network at phone width would just
+   mean pinch-zooming to read anything; a plain list reads better.
+   ========================================================================== */
+
+@media (max-width: 860px) {
+  :root {
+    --edge: 24px;
+  }
+
+  .dtm-stage,
+  .dtm-hint {
+    display: none;
+  }
+
+  .dtm-archive {
+    display: block;
+  }
+
+  /* Pan/zoom/presentation controls have no canvas to act on down here
+     — the archive is the whole story on mobile (see brief section 8). */
+  #dtmZoomIn,
+  #dtmZoomOut,
+  #dtmReset,
+  #dtmPresentToggle,
+  .dtm-present-nav {
+    display: none;
+  }
+
+  .dtm-toolbar {
+    position: static;
+  }
+
+  .dtm-panel {
+    width: 100%;
+    border-left: none;
+  }
+}

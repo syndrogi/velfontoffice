@@ -529,8 +529,14 @@ a {
   transition: color 180ms var(--ease);
 }
 
-.labs-toggle:hover {
+.labs-toggle:hover,
+.labs-toggle:focus-visible {
   color: var(--color-hover);
+}
+
+.labs-toggle:focus-visible {
+  outline: 1px solid var(--color-fg-muted);
+  outline-offset: 6px;
 }
 
 .labs-menu {
@@ -570,8 +576,14 @@ a {
   transition: color 180ms var(--ease);
 }
 
-.labs-menu-btn:hover {
+.labs-menu-btn:hover,
+.labs-menu-btn:focus-visible {
   color: var(--color-hover);
+}
+
+.labs-menu-btn:focus-visible {
+  outline: 1px solid var(--color-fg-muted);
+  outline-offset: 6px;
 }
 
 .labs-menu-btn.is-active {

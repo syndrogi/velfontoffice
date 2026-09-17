@@ -1168,7 +1168,9 @@ html.js-typing .hero-title {
   /* Sits directly below the fixed header (margin-top matches its
      height, same trick .mobile-nav's old drawer padding used) so every
      link is visible on first paint instead of behind a toggle. Wraps
-     to a second line on narrow phones rather than overflowing. */
+     to a second line on narrow phones rather than overflowing. Same
+     fadeIn timing as .labs (below), so both first-paint reveals read
+     as one consistent animation instead of two different ones. */
   .mobile-nav {
     display: flex;
     flex-wrap: wrap;
@@ -1177,6 +1179,7 @@ html.js-typing .hero-title {
     margin-top: var(--header-height);
     padding: 16px var(--edge);
     border-bottom: 1px solid var(--color-line);
+    animation: fadeIn 1.2s 0.4s var(--ease) both;
   }
 
   .section-placeholder {

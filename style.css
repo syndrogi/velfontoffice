@@ -808,20 +808,21 @@ a {
 
 /* Labs / VFO Logo Vol.1 — the header's stroke-drawn intro (.logo-draw,
    fetched/animated by js/labs/logo.js reusing the exact same technique
-   as js/logo-draw.js) replayed at hero scale in the hero's empty right
-   side. .logo-draw's own CSS above already positions/animates it
+   as js/logo-draw.js) replayed at hero scale in the hero's bottom-left
+   corner. .logo-draw's own CSS above already positions/animates it
    relative to whatever contains it, so this only needs to size and
    place that container — the stroke-width override compensates for
    vector-effect: non-scaling-stroke keeping the drawn line a constant
    screen-pixel width, which reads as too hairline-thin once the mark
-   itself is ~6x the header's size. */
+   itself is ~6x the header's size. bottom/left match .labs's own
+   bottom-right placement (style.css above) so both sit the same
+   distance off the hero's edges. */
 .labs-logo-display {
   position: fixed;
-  top: 50%;
-  right: var(--edge);
+  left: var(--edge);
+  bottom: 40px;
   z-index: 40;
   width: min(46vw, 640px);
-  transform: translateY(-50%);
   opacity: 0;
   pointer-events: none;
   transition: opacity 400ms var(--ease);

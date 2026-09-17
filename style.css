@@ -364,19 +364,20 @@ a {
   border-bottom-color: var(--color-fg);
 }
 
-/* Mobile nav — a plain, always-visible bar directly under the fixed
-   header (see the max-width: 768px rule below for its layout), not an
-   off-canvas drawer, so shop/office/archive/about/etc. are all on
-   screen from first paint on mobile instead of behind a toggle. Hidden
-   entirely above that breakpoint, where .main-nav/.more cover the same
-   links inline in the header. */
+/* Mobile nav — always visible (see the max-width: 768px rule below,
+   where it joins .labs in .hero-nav-stack), not an off-canvas drawer,
+   so shop/office/archive/about/etc. are all on screen from first paint
+   on mobile instead of behind a toggle. Hidden entirely above that
+   breakpoint, where .main-nav/.more cover the same links in the
+   header. */
 .mobile-nav {
   display: none;
 }
 
 .mobile-nav a {
-  font-size: 13px;
-  letter-spacing: 0.12em;
+  font-size: clamp(15px, 1.6vw, 19px);
+  font-weight: 700;
+  letter-spacing: 0.08em;
   color: var(--color-fg);
   transition: color 180ms var(--ease);
 }
@@ -502,13 +503,28 @@ a {
   color: var(--color-hover);
 }
 
-/* Labs — a hidden experimental playground, bottom right. Deliberately
-   quiet: small type, no box, no color — meant to be found, not sold. */
-.labs {
+/* Wraps Labs (always) and the mobile nav (≤768px only, see below) so
+   they stack as one continuous bottom-right column — .mobile-nav is
+   display: none above that breakpoint, so on desktop this is just
+   .labs's own old position/size, unchanged. column-reverse means DOM
+   order is bottom-to-top: .labs (with the labs toggle itself pinned to
+   the very bottom via its own column-reverse) sits first, so .labs
+   growing taller as its menu opens pushes .mobile-nav up rather than
+   the two overlapping. */
+.hero-nav-stack {
   position: absolute;
   right: var(--edge);
   bottom: 40px;
   z-index: 20;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-end;
+  gap: 18px;
+}
+
+/* Labs — a hidden experimental playground, bottom right. Deliberately
+   quiet: small type, no box, no color — meant to be found, not sold. */
+.labs {
   display: flex;
   flex-direction: column-reverse;
   align-items: flex-end;
@@ -1165,18 +1181,14 @@ html.js-typing .hero-title {
     display: none;
   }
 
-  /* Sits directly below the fixed header (margin-top matches its
-     height, same trick .mobile-nav's old drawer padding used) so every
-     link is visible on first paint instead of behind a toggle. Wraps
-     to a second line on narrow phones rather than overflowing. */
+  /* Joins .labs in .hero-nav-stack (above) instead of a hidden drawer,
+     so every link is visible on first paint — same right-aligned
+     column, same typography, just its own list above the labs one. */
   .mobile-nav {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 12px 20px;
-    margin-top: var(--header-height);
-    padding: 16px var(--edge);
-    border-bottom: 1px solid var(--color-line);
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
   }
 
   .section-placeholder {
@@ -1210,7 +1222,7 @@ html.js-typing .hero-title {
     display: none;
   }
 
-  .labs {
+  .hero-nav-stack {
     bottom: 40px;
   }
 

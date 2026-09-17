@@ -88,20 +88,6 @@
   </div>
 </header>
 
-<nav id="mobile-nav" class="mobile-nav" aria-label="Mobile">
-  <a href="/shop/">shop</a>
-  <a href="#office">office</a>
-  <a href="#archive">archive</a>
-  <a href="#about">about</a>
-  <a href="#" class="js-contact-toggle" aria-haspopup="true" aria-expanded="false" aria-controls="contactPanel">contact</a>
-  <a href="/os/">members only</a>
-  <a
-    href="https://revel-trace-46441903.figma.site/"
-    id="fifthAveLinkMobile"
-  >5th ave. bipolar kids</a>
-  <a href="/hyungrokson/">Hyungrok(Roy) Son</a>
-</nav>
-
 <main>
   <section class="hero" id="hero" data-total-slides="5">
     <div class="hero-slider">
@@ -114,16 +100,35 @@
 
     <div class="hero-overlay"></div>
 
-    <div class="labs" id="labs">
-      <button
-        type="button"
-        class="labs-toggle"
-        id="labsToggle"
-        aria-haspopup="true"
-        aria-expanded="false"
-        aria-controls="labsMenu"
-      >labs</button>
-      <ul class="labs-menu" id="labsMenu" aria-hidden="true"></ul>
+    <!-- Mobile nav lists directly above Labs, same bottom-right corner
+         and right-aligned typography, so both read as one continuous
+         stack on mobile (see .hero-nav-stack in style.css). -->
+    <div class="hero-nav-stack">
+      <div class="labs" id="labs">
+        <button
+          type="button"
+          class="labs-toggle"
+          id="labsToggle"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="labsMenu"
+        >labs</button>
+        <ul class="labs-menu" id="labsMenu" aria-hidden="true"></ul>
+      </div>
+
+      <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile">
+        <a href="/shop/">shop</a>
+        <a href="#office">office</a>
+        <a href="#archive">archive</a>
+        <a href="#about">about</a>
+        <a href="#" class="js-contact-toggle" aria-haspopup="true" aria-expanded="false" aria-controls="contactPanel">contact</a>
+        <a href="/os/">members only</a>
+        <a
+          href="https://revel-trace-46441903.figma.site/"
+          id="fifthAveLinkMobile"
+        >5th ave. bipolar kids</a>
+        <a href="/hyungrokson/">Hyungrok(Roy) Son</a>
+      </nav>
     </div>
 
     <div class="contact-panel" id="contactPanel" aria-hidden="true">

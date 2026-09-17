@@ -84,8 +84,7 @@ a {
 .header-left,
 .nav-link,
 .social-icon,
-.more,
-.menu-toggle {
+.more {
   pointer-events: auto;
 }
 
@@ -365,96 +364,20 @@ a {
   border-bottom-color: var(--color-fg);
 }
 
-/* Mobile menu toggle — hidden until the nav collapses. Same SVG cross as
-   the desktop More toggle (.more-toggle) — it opens the mobile drawer,
-   which now carries the merged contents of both. */
-.menu-toggle {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--color-fg);
-  cursor: pointer;
-  transition: color 180ms var(--ease);
-}
-
-.menu-toggle svg {
-  width: 18px;
-  height: 18px;
-}
-
-.menu-toggle-v {
-  transform-origin: center;
-  transition: opacity 180ms var(--ease);
-}
-
-.menu-toggle.is-open .menu-toggle-v {
-  opacity: 0;
-}
-
-.menu-toggle:hover,
-.menu-toggle.is-open {
-  color: var(--color-hover);
-}
-
-.menu-toggle:focus-visible {
-  outline: 1px solid var(--color-fg-muted);
-  outline-offset: 6px;
-}
-
-/* Backdrop behind the mobile drawer */
-.nav-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 95;
-  background: rgba(0, 0, 0, 0.5);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 300ms var(--ease);
-}
-
-.nav-backdrop.is-visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* Mobile drawer nav — off-canvas, slides in from the right.
-   max-width keeps a 140px clearance on the left at any viewport width
-   so the drawer never reaches under the header logo (its widest case,
-   80px tall, extends to ~175px from the left edge). */
+/* Mobile nav — a plain, always-visible bar directly under the fixed
+   header (see the max-width: 768px rule below for its layout), not an
+   off-canvas drawer, so shop/office/archive/about/etc. are all on
+   screen from first paint on mobile instead of behind a toggle. Hidden
+   entirely above that breakpoint, where .main-nav/.more cover the same
+   links inline in the header. */
 .mobile-nav {
-  position: fixed;
-  top: 0;
-  right: 0;
-  z-index: 96;
-  width: min(78vw, 320px);
-  max-width: calc(100% - 140px);
-  height: 100vh;
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 28px;
-  padding: calc(var(--header-height) + 24px) 32px 40px;
-  background: var(--color-bg);
-  border-left: 1px solid var(--color-line);
-  transform: translateX(100%);
-  transition: transform 350ms var(--ease);
-}
-
-.mobile-nav.is-open {
-  transform: translateX(0);
+  display: none;
 }
 
 .mobile-nav a {
   font-size: 13px;
   letter-spacing: 0.12em;
   color: var(--color-fg);
-  text-align: right;
   transition: color 180ms var(--ease);
 }
 
@@ -920,7 +843,7 @@ html.labs-blueprint .section-body,
 html.labs-blueprint .logo,
 html.labs-blueprint .nav-link,
 html.labs-blueprint .social-icon,
-html.labs-blueprint .menu-toggle,
+html.labs-blueprint .mobile-nav a,
 html.labs-blueprint main img {
   outline: 1px dashed rgba(0, 0, 0, 0.35);
   outline-offset: -1px;
@@ -1230,7 +1153,7 @@ html.js-typing .hero-title {
   }
 }
 
-/* Header — collapse inline nav into the off-canvas mobile menu.
+/* Header — collapse the inline nav into a plain bar under the header.
    Height stays fixed at 127px; side padding follows --edge, same as
    the section grid below it. */
 @media (max-width: 768px) {
@@ -1242,8 +1165,18 @@ html.js-typing .hero-title {
     display: none;
   }
 
-  .menu-toggle {
-    display: inline-flex;
+  /* Sits directly below the fixed header (margin-top matches its
+     height, same trick .mobile-nav's old drawer padding used) so every
+     link is visible on first paint instead of behind a toggle. Wraps
+     to a second line on narrow phones rather than overflowing. */
+  .mobile-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 20px;
+    margin-top: var(--header-height);
+    padding: 16px var(--edge);
+    border-bottom: 1px solid var(--color-line);
   }
 
   .section-placeholder {

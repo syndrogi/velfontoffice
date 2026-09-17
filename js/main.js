@@ -38,61 +38,12 @@
 
 /**
  * VELFONT OFFICE — Header Navigation
- * Mobile off-canvas drawer + scroll-driven active-link state.
+ * Scroll-driven active-link state. The mobile nav is a plain, always-
+ * visible bar below the header (see .mobile-nav in style.css) rather
+ * than an off-canvas drawer, so there's no open/close state to wire up
+ * here — just the shared anchor-scroll/active-link behavior below.
  */
 (function () {
-  var header = document.querySelector(".site-header");
-  var toggle = document.querySelector(".menu-toggle");
-  var drawer = document.getElementById("mobile-nav");
-  var backdrop = document.querySelector(".nav-backdrop");
-  if (!header || !toggle || !drawer || !backdrop) return;
-
-  var mobileMedia = window.matchMedia("(max-width: 768px)");
-
-  function openMenu() {
-    drawer.classList.add("is-open");
-    drawer.removeAttribute("inert");
-    backdrop.classList.add("is-visible");
-    backdrop.hidden = false;
-    toggle.setAttribute("aria-expanded", "true");
-    toggle.classList.add("is-open");
-    document.body.style.overflow = "hidden";
-  }
-
-  function closeMenu() {
-    drawer.classList.remove("is-open");
-    drawer.setAttribute("inert", "");
-    backdrop.classList.remove("is-visible");
-    toggle.setAttribute("aria-expanded", "false");
-    toggle.classList.remove("is-open");
-    document.body.style.overflow = "";
-    window.setTimeout(function () {
-      if (!drawer.classList.contains("is-open")) backdrop.hidden = true;
-    }, 350);
-  }
-
-  toggle.addEventListener("click", function () {
-    if (drawer.classList.contains("is-open")) {
-      closeMenu();
-    } else {
-      openMenu();
-    }
-  });
-
-  backdrop.addEventListener("click", closeMenu);
-
-  drawer.addEventListener("click", function (e) {
-    if (e.target.tagName === "A") closeMenu();
-  });
-
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && drawer.classList.contains("is-open")) closeMenu();
-  });
-
-  mobileMedia.addEventListener("change", function (e) {
-    if (!e.matches) closeMenu();
-  });
-
   // In-page anchor links (Office/Archive/About) — scrolled to with JS
   // instead of the browser's native anchor-jump so the URL stays plain
   // (no #archive appended). scroll-margin-top on .section-placeholder

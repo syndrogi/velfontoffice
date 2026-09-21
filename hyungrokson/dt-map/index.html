@@ -32,15 +32,15 @@
 <div class="dtm-toolbar" role="toolbar" aria-label="Map controls">
   <div class="dtm-filters" id="dtmFilters" role="group" aria-label="Filter by category"></div>
   <div class="dtm-actions">
-    <div class="dtm-action-group">
+    <div class="dtm-action-group" role="group" aria-label="View controls">
       <button type="button" class="dtm-btn" id="dtmZoomOut" aria-label="Zoom out">&minus;</button>
       <button type="button" class="dtm-btn" id="dtmZoomIn" aria-label="Zoom in">+</button>
       <button type="button" class="dtm-btn" id="dtmReset">Reset View</button>
     </div>
-    <div class="dtm-action-group">
-      <button type="button" class="dtm-btn" id="dtmDevToggle" aria-expanded="false" aria-controls="dtmDrawer">In Development</button>
+    <div class="dtm-action-group" role="group" aria-label="Secondary actions">
+      <button type="button" class="dtm-btn" id="dtmDevToggle" aria-expanded="false" aria-controls="dtmDrawer" aria-label="Open in-development items">In Development</button>
       <button type="button" class="dtm-btn" id="dtmPresentToggle" aria-pressed="false">Presentation Mode</button>
-      <button type="button" class="dtm-btn" id="dtmSourcesToggle" aria-expanded="false" aria-controls="dtmSources">Sources</button>
+      <button type="button" class="dtm-btn" id="dtmSourcesToggle" aria-expanded="false" aria-controls="dtmSources" aria-label="Open sources list">Sources</button>
       <button type="button" class="dtm-btn" id="dtmPrint">Print / PDF View</button>
     </div>
   </div>
@@ -60,6 +60,7 @@
       <div class="dtm-nodes" id="dtmNodes"></div>
     </div>
   </div>
+  <p class="dtm-empty-state" id="dtmEmptyState" hidden>No categories selected — turn one on above to see nodes.</p>
   <p class="dtm-hint">
     <span class="dtm-hint-full">Two-finger move or drag to pan &middot; pinch or Ctrl-scroll to zoom &middot; click a node for detail</span>
     <span class="dtm-hint-short">Pan &amp; pinch to explore &middot; click for detail</span>
@@ -68,15 +69,15 @@
 
 <section id="dtmArchive" class="dtm-archive" aria-label="DT Map archive"></section>
 
-<section id="dtmSources" class="dtm-sources" aria-label="Sources" hidden></section>
+<section id="dtmSources" class="dtm-side-drawer dtm-sources" aria-label="Sources list" role="dialog" aria-modal="true" tabindex="-1" hidden></section>
 
-<!-- Planned / unfinished slots (status: "planned") — kept out of the
-     curated map so they never affect its initial zoom or layout, but
-     still reachable here. See dt-map.js's PLANNED_DRAWER. -->
-<section id="dtmDrawer" class="dtm-drawer" aria-label="In development" hidden></section>
+<!-- Draft / planned nodes not positioned on the curated map — kept out
+     so they never affect its initial zoom or layout, but still
+     reachable here. See dt-map.js's renderDrawer(). -->
+<section id="dtmDrawer" class="dtm-side-drawer dtm-drawer" aria-label="In-development items" role="dialog" aria-modal="true" tabindex="-1" hidden></section>
 
 <div class="dtm-panel-backdrop" id="dtmPanelBackdrop" hidden></div>
-<aside class="dtm-panel" id="dtmPanel" aria-hidden="true" aria-label="Node detail" tabindex="-1">
+<aside class="dtm-panel" id="dtmPanel" aria-hidden="true" aria-label="Node detail" role="dialog" aria-modal="true" tabindex="-1">
   <button type="button" class="dtm-panel-close" id="dtmPanelClose" aria-label="Close detail">&times;</button>
   <div class="dtm-panel-body" id="dtmPanelBody"></div>
 </aside>

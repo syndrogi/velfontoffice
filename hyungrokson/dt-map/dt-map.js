@@ -61,9 +61,12 @@
     "kim-ximya", "aphex-twin", "brutalismus-3000",
     "yumin-ha", "dongjoon-lim", "vivienne-westwood",
     "banksy", "mschf", "teenage-engineering",
-    "love-is-in-the-bin", "field-system",
-    "programming-languages", "english-communication",
-    "higgsfield-ai",
+    "love-is-in-the-bin", "field-system", "roys-airplane-series", "dt-map-website",
+    "definition-of-ct",
+    "programming-languages", "ai-image-video",
+    "photoshop-illustrator", "drawing",
+    "interest-fashion", "interest-music", "interest-exercise",
+    "creative-authorship-ai", "subculture-commercialization",
   ];
   var TIER2_SET = {};
   TIER2_IDS.forEach(function (id) { TIER2_SET[id] = true; });
@@ -72,29 +75,36 @@
     return id === "core" || !!TIER2_SET[id];
   }
 
-  var CORE_POS = { x: 950, y: 560 };
+  var CORE_POS = { x: 1000, y: 560 };
 
-  // One entry per one of the six main category groups the brief asks
-  // for. `label` is the pale background typography; `members` are the
-  // TIER2_IDS that belong to it, laid out as a tight row centered on
-  // (cx, cy). Moving a cluster, or how far apart its members sit, is
-  // just editing the numbers here.
+  // One entry per curated group. `label` is the pale background
+  // typography; `members` are the TIER2_IDS that belong to it, laid
+  // out as a tight row centered on (cx, cy). Moving a cluster, or how
+  // far apart its members sit, is just editing the numbers here.
   //
   // The spread between clusters is deliberately TIGHT relative to card
-  // size: resetView() fits this whole footprint to ~80% of the
+  // size: resetView() fits this whole footprint to ~85% of the
   // viewport (see RESET_FILL below), so a wide-open composition
   // doesn't just look sparser — it forces a smaller fit scale and
   // every card physically renders smaller on screen. Keeping cluster
   // centers close together is what makes the cards themselves read as
   // large; if the composition ever needs more breathing room, prefer
   // nudging RESET_FILL down over spreading these back out.
+  //
+  // "definition" is a one-member cluster rather than a special case —
+  // it sits close under core (see brief: "a meaningful position near
+  // the central node") in the vertical gap between core's row and the
+  // New Tech / Existing Skills row below it.
   var CLUSTERS = [
-    { id: "sound", label: "SOUND", cx: 380, cy: 220, gap: 240, members: ["kim-ximya", "aphex-twin", "brutalismus-3000"] },
-    { id: "fashion", label: "FASHION", cx: 1520, cy: 220, gap: 240, members: ["yumin-ha", "dongjoon-lim", "vivienne-westwood"] },
-    { id: "art", label: "ART, DESIGN & CREATIVE PRACTICE", cx: 380, cy: 560, gap: 240, members: ["banksy", "mschf", "teenage-engineering"] },
-    { id: "projects", label: "INSPIRING PROJECTS", cx: 1520, cy: 560, gap: 255, members: ["love-is-in-the-bin", "field-system"] },
-    { id: "new-tech", label: "TECHNOLOGIES & SKILLS", cx: 660, cy: 900, gap: 255, members: ["programming-languages", "english-communication"] },
-    { id: "existing-skills", label: "SKILLS TO IMPROVE", cx: 1240, cy: 900, gap: 0, members: ["higgsfield-ai"] },
+    { id: "sound", label: "SOUND", cx: 380, cy: 220, gap: 260, members: ["kim-ximya", "aphex-twin", "brutalismus-3000"] },
+    { id: "fashion", label: "FASHION", cx: 1520, cy: 220, gap: 260, members: ["yumin-ha", "dongjoon-lim", "vivienne-westwood"] },
+    { id: "art", label: "ART, DESIGN & CREATIVE PRACTICE", cx: 380, cy: 560, gap: 260, members: ["banksy", "mschf", "teenage-engineering"] },
+    { id: "projects", label: "INSPIRING PROJECTS", cx: 1700, cy: 560, gap: 260, members: ["love-is-in-the-bin", "field-system", "roys-airplane-series", "dt-map-website"] },
+    { id: "definition", label: "DEFINITION OF CREATIVE TECHNOLOGY", cx: 1000, cy: 660, gap: 0, members: ["definition-of-ct"] },
+    { id: "new-tech", label: "NEW TECHNOLOGIES & SKILLS", cx: 700, cy: 880, gap: 270, members: ["programming-languages", "ai-image-video"] },
+    { id: "existing-skills", label: "EXISTING SKILLS TO IMPROVE", cx: 1300, cy: 880, gap: 270, members: ["photoshop-illustrator", "drawing"] },
+    { id: "personal-interests", label: "PERSONAL INTERESTS OUTSIDE DT", cx: 650, cy: 1220, gap: 260, members: ["interest-fashion", "interest-music", "interest-exercise"] },
+    { id: "concepts", label: "CONCEPTS & PROBLEMS", cx: 1350, cy: 1220, gap: 270, members: ["creative-authorship-ai", "subculture-commercialization"] },
   ];
 
   var positions = {}; // id -> {x, y} — only core + TIER2_IDS ever get an entry
@@ -123,6 +133,7 @@
   var elLines = document.getElementById("dtmLines");
   var elNodes = document.getElementById("dtmNodes");
   var elArchive = document.getElementById("dtmArchive");
+  var elEmptyState = document.getElementById("dtmEmptyState");
   var elSources = document.getElementById("dtmSources");
   var elSourcesToggle = document.getElementById("dtmSourcesToggle");
   var elPanelBackdrop = document.getElementById("dtmPanelBackdrop");
@@ -156,6 +167,7 @@
     var allChip = document.createElement("button");
     allChip.type = "button";
     allChip.className = "dtm-filter-chip is-active";
+    allChip.setAttribute("aria-pressed", "true");
     allChip.textContent = "All";
     allChip.addEventListener("click", function () {
       CATEGORIES.forEach(function (c) { activeCategories[c.id] = true; });
@@ -169,6 +181,7 @@
       var chip = document.createElement("button");
       chip.type = "button";
       chip.className = "dtm-filter-chip is-active";
+      chip.setAttribute("aria-pressed", "true");
       chip.textContent = c.label;
       chip.dataset.category = c.id;
       chip.addEventListener("click", function () {
@@ -186,9 +199,12 @@
     chips.forEach(function (chip) {
       var on = !!activeCategories[chip.dataset.category];
       chip.classList.toggle("is-active", on);
+      chip.setAttribute("aria-pressed", String(on));
       if (!on) allOn = false;
     });
-    elFilters.querySelector(".dtm-filter-chip:not([data-category])").classList.toggle("is-active", allOn);
+    var allChip = elFilters.querySelector(".dtm-filter-chip:not([data-category])");
+    allChip.classList.toggle("is-active", allOn);
+    allChip.setAttribute("aria-pressed", String(allOn));
   }
 
   function applyFilters() {
@@ -203,6 +219,8 @@
       var hidden = (a && a.classList.contains("is-filtered-out")) || (b && b.classList.contains("is-filtered-out"));
       line.style.display = hidden ? "none" : "";
     });
+    var anyOn = CATEGORIES.some(function (c) { return c.filterable !== false && activeCategories[c.id]; });
+    if (elEmptyState) elEmptyState.hidden = anyOn;
     renderArchive();
   }
 
@@ -213,7 +231,17 @@
 
   // A short category code for the placeholder art area — "SND-01"
   // reads as an intentional archival index, not a missing asset.
-  var CLUSTER_CODE = { sound: "SND", fashion: "FSH", art: "ART", projects: "PRJ", "new-tech": "TCH", "existing-skills": "IMP" };
+  var CLUSTER_CODE = {
+    sound: "SND", fashion: "FSH", art: "ART", projects: "PRJ",
+    definition: "DEF", "new-tech": "TCH", "existing-skills": "IMP",
+    "personal-interests": "INT", concepts: "CPT",
+  };
+
+  // Concepts & Problems nodes carry their "core question" in `role`
+  // (shown as a proper subtitle in the detail panel, where there's
+  // room for it) — too long to also fit on the small map card face,
+  // so the card just omits it there rather than overflowing.
+  var CARD_ROLE_MAX = 60;
 
   function clusterOf(id) {
     for (var i = 0; i < CLUSTERS.length; i++) {
@@ -245,28 +273,36 @@
       name.textContent = n.name;
       btn.appendChild(name);
     } else {
-      var art = document.createElement("span");
-      art.className = "dtm-node-art";
-      var code = document.createElement("span");
-      code.className = "dtm-node-code";
-      code.textContent = cluster ? CLUSTER_CODE[cluster.id] + "-" + String(index + 1).padStart(2, "0") : "";
-      art.appendChild(code);
-      btn.appendChild(art);
+      // The Definition node sits right under core and is a single
+      // statement, not a reference card — it skips the art/code area
+      // that every other card uses to stay compact at that close range.
+      var skipArt = n.id === "definition-of-ct";
+      if (skipArt) btn.classList.add("dtm-node--compact");
+
+      if (!skipArt) {
+        var art = document.createElement("span");
+        art.className = "dtm-node-art";
+        var code = document.createElement("span");
+        code.className = "dtm-node-code";
+        code.textContent = cluster ? CLUSTER_CODE[cluster.id] + "-" + String(index + 1).padStart(2, "0") : "";
+        art.appendChild(code);
+        btn.appendChild(art);
+      }
 
       var body = document.createElement("span");
       body.className = "dtm-node-body";
 
-      var idx = document.createElement("span");
-      idx.className = "dtm-node-index";
-      idx.textContent = String(index + 1).padStart(2, "0");
-      body.appendChild(idx);
-
+      // No separate index number here — the art-area code badge above
+      // ("SND-01" etc.) already carries it, at the lowest visual
+      // priority by design (see brief: title > role > keywords > id).
+      // A second "01" in the body would just duplicate it at a higher
+      // position in the reading order.
       var name2 = document.createElement("span");
       name2.className = "dtm-node-name";
       name2.textContent = n.name;
       body.appendChild(name2);
 
-      if (n.role) {
+      if (n.role && n.role.length < CARD_ROLE_MAX) {
         var role = document.createElement("span");
         role.className = "dtm-node-role";
         role.textContent = n.role.split(" — ")[0].split(" (")[0];
@@ -316,17 +352,47 @@
   }
 
   // ==========================================================================
-  // Connection lines — two kinds. STRUCTURAL lines (core → each of the
+  // Connection lines — three kinds. STRUCTURAL lines (core → each of the
   // six cluster centers) are the map's stable backbone and always
-  // visible. SECONDARY lines are the real relatedIds data, but only
-  // drawn between two nodes that both have a position (i.e. both
-  // TIER2_IDS) — a relationship pointing at an off-map concept/
-  // placeholder node just shows up as text in that node's "Connected
-  // to" list instead of a dangling line. Secondary lines stay almost
-  // invisible until a hover/selection asks for them (see Highlight).
+  // visible. The real relatedIds data then splits into two further
+  // tiers, both only drawn between two nodes that already have a
+  // position (i.e. both TIER2_IDS) — a relationship pointing at an
+  // off-map concept/placeholder node just shows up as text in that
+  // node's "Connected to" list instead of a dangling line:
+  //   - PRIMARY (solid): a direct maker/creator relationship — a
+  //     project whose own `role` field reads "Maker: X" pointing back
+  //     at X. This is the only classification rule; nothing here is
+  //     editorial judgment, it's read straight off the data.
+  //   - SECONDARY (dashed): every other relatedIds pair — thematic or
+  //     associative connections (shared references, inspirations,
+  //     collaborations) rather than authorship.
+  // Both tiers render at a low-but-visible resting opacity so the
+  // network reads as connected at a glance, not just on hover.
   // ==========================================================================
 
-  var edgeList = []; // [idA, idB]
+  var edgeList = []; // [{ from, to, tier }]
+
+  function normalizeMakerName(name) {
+    return String(name || "").trim().toLowerCase();
+  }
+
+  function edgeTier(idA, idB) {
+    var a = NODE_BY_ID[idA];
+    var b = NODE_BY_ID[idB];
+    if (!a || !b) return "secondary";
+
+    function makes(project, maker) {
+      if (project.category !== "projects" || typeof project.role !== "string") return false;
+      var m = project.role.match(/^Maker:\s*(.+)$/);
+      if (!m) return false;
+      var makerName = normalizeMakerName(m[1]);
+      if (makerName === normalizeMakerName(maker.name)) return true;
+      if (makerName === "roy son" && maker.id === "core") return true;
+      return false;
+    }
+
+    return makes(a, b) || makes(b, a) ? "primary" : "secondary";
+  }
 
   function buildEdges() {
     var seen = {};
@@ -336,7 +402,7 @@
         var key = [n.id, otherId].sort().join("|");
         if (seen[key]) return;
         seen[key] = true;
-        edgeList.push([n.id, otherId]);
+        edgeList.push({ from: n.id, to: otherId, tier: edgeTier(n.id, otherId) });
       });
     });
   }
@@ -355,18 +421,19 @@
   }
 
   function renderLines() {
-    edgeList.forEach(function (pair) {
-      var a = positions[pair[0]];
-      var b = positions[pair[1]];
+    edgeList.forEach(function (edge) {
+      var a = positions[edge.from];
+      var b = positions[edge.to];
       if (!a || !b) return;
       var line = document.createElementNS(SVG_NS, "line");
       line.setAttribute("x1", a.x);
       line.setAttribute("y1", a.y);
       line.setAttribute("x2", b.x);
       line.setAttribute("y2", b.y);
-      line.setAttribute("class", "dtm-line-secondary");
-      line.dataset.from = pair[0];
-      line.dataset.to = pair[1];
+      line.setAttribute("class", "dtm-line-" + edge.tier);
+      line.dataset.from = edge.from;
+      line.dataset.to = edge.to;
+      line.dataset.tier = edge.tier;
       elLines.appendChild(line);
     });
   }
@@ -401,9 +468,10 @@
       el.classList.toggle("is-dimmed", !relatedSet[other.id]);
     });
 
-    elLines.querySelectorAll(".dtm-line-secondary").forEach(function (line) {
+    elLines.querySelectorAll(".dtm-line-primary, .dtm-line-secondary").forEach(function (line) {
       var active = relatedSet[line.dataset.from] && relatedSet[line.dataset.to];
       line.classList.toggle("is-active-line", !!active);
+      line.classList.toggle("is-dimmed-line", !active);
     });
 
     // The hovered/selected node's own cluster line stays at full
@@ -423,11 +491,8 @@
       if (!el) return;
       el.classList.remove("is-highlighted", "is-dimmed");
     });
-    elLines.querySelectorAll(".dtm-line-secondary").forEach(function (line) {
-      line.classList.remove("is-active-line");
-    });
-    elLines.querySelectorAll(".dtm-line-structural").forEach(function (line) {
-      line.classList.remove("is-dimmed-line");
+    elLines.querySelectorAll(".dtm-line-primary, .dtm-line-secondary, .dtm-line-structural").forEach(function (line) {
+      line.classList.remove("is-active-line", "is-dimmed-line");
     });
   }
 
@@ -464,13 +529,16 @@
   // The node cards' own footprint (plus the cluster label sitting
   // above each group) around each position, so "fit to content"
   // doesn't clip the edge cards flush against the viewport border.
-  var NODE_PADDING = 170;
+  // Kept tight — with 24 cards now on the curated map (up from 17),
+  // every extra pixel of padding costs legibility across the whole
+  // composition once resetView divides it back down to fit.
+  var NODE_PADDING = 130;
 
   // Reset frames the curated content at this fraction of the viewport
-  // (not a full edge-to-edge 100% fit) — the brief asks for ~70-80%
-  // occupied, leaving a deliberate margin instead of cards touching
-  // the frame.
-  var RESET_FILL = 0.8;
+  // (not a full edge-to-edge 100% fit) — 0.9 leaves a small margin
+  // instead of cards touching the frame, while still using nearly all
+  // of a classroom projector's screen for legibility.
+  var RESET_FILL = 0.9;
 
   function contentBounds() {
     var xs = Object.keys(positions).map(function (id) { return positions[id].x; });
@@ -627,6 +695,100 @@
   }
 
   // ==========================================================================
+  // Overlay shell — shared by the node detail panel, Sources, and In
+  // Development. Only one of the three is ever open at once (opening
+  // one closes whichever else was open) and they share a single
+  // backdrop/scroll-lock/focus-trap implementation instead of each
+  // panel reinventing it. This is what fixes "opening Sources or In
+  // Development used to push the whole page's height around" — all
+  // three now render as fixed-position sheets outside document flow.
+  // ==========================================================================
+
+  var activeOverlay = null; // "panel" | "sources" | "drawer" | null
+  var overlayReturnFocus = null;
+  var savedScrollY = 0;
+
+  function overlayEl(which) {
+    if (which === "panel") return elPanel;
+    if (which === "sources") return elSources;
+    if (which === "drawer") return elDrawer;
+    return null;
+  }
+
+  function lockBodyScroll() {
+    savedScrollY = window.scrollY;
+    document.body.classList.add("dtm-scroll-locked");
+    document.body.style.top = -savedScrollY + "px";
+  }
+
+  function unlockBodyScroll() {
+    document.body.classList.remove("dtm-scroll-locked");
+    document.body.style.top = "";
+    window.scrollTo(0, savedScrollY);
+  }
+
+  function trapFocus(container, e) {
+    if (e.key !== "Tab") return;
+    var focusables = container.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    if (!focusables.length) return;
+    var first = focusables[0];
+    var last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
+  function openOverlay(which, triggerEl) {
+    if (activeOverlay && activeOverlay !== which) closeOverlay();
+    if (activeOverlay === which) return;
+    activeOverlay = which;
+    overlayReturnFocus = triggerEl || document.activeElement;
+    lockBodyScroll();
+
+    var el = overlayEl(which);
+    el.hidden = false;
+    elPanelBackdrop.hidden = false;
+    requestAnimationFrame(function () {
+      el.classList.add("is-open");
+      elPanelBackdrop.classList.add("is-visible");
+    });
+
+    elDevToggle.setAttribute("aria-expanded", String(which === "drawer"));
+    elSourcesToggle.setAttribute("aria-expanded", String(which === "sources"));
+    if (which === "panel") el.setAttribute("aria-hidden", "false");
+
+    window.setTimeout(function () { el.focus(); }, 260);
+  }
+
+  function closeOverlay() {
+    if (!activeOverlay) return;
+    var which = activeOverlay;
+    var el = overlayEl(which);
+    el.classList.remove("is-open");
+    elPanelBackdrop.classList.remove("is-visible");
+    elDevToggle.setAttribute("aria-expanded", "false");
+    elSourcesToggle.setAttribute("aria-expanded", "false");
+    if (which === "panel") el.setAttribute("aria-hidden", "true");
+    activeOverlay = null;
+    unlockBodyScroll();
+
+    window.setTimeout(function () {
+      el.hidden = true;
+      if (which === "panel") setSelected(null);
+    }, 260);
+
+    var toFocus = overlayReturnFocus;
+    overlayReturnFocus = null;
+    if (toFocus && document.body.contains(toFocus)) toFocus.focus();
+  }
+
+  // ==========================================================================
   // Detail panel
   // ==========================================================================
 
@@ -669,10 +831,10 @@
       v.textContent = "Roy's reflection — personal experience, no external source needed.";
       wrap.appendChild(v);
     } else {
-      var v2 = document.createElement("div");
-      v2.className = "dtm-panel-field-value";
-      v2.textContent = "SOURCE TO BE ADDED";
-      wrap.appendChild(v2);
+      var tag = document.createElement("span");
+      tag.className = "dtm-status-tag dtm-status-tag--draft";
+      tag.textContent = "Source pending";
+      wrap.appendChild(tag);
     }
     return wrap;
   }
@@ -680,6 +842,7 @@
   function openPanel(id) {
     var n = NODE_BY_ID[id];
     if (!n) return;
+    var trigger = document.activeElement;
     elPanelBody.innerHTML = "";
 
     var category = CATEGORY_BY_ID[n.category];
@@ -713,12 +876,12 @@
         img.alt = n.name;
         img.src = n.image;
         img.onerror = function () {
-          var ph = buildImagePlaceholder(n.image);
+          var ph = buildImagePlaceholder(n.imagePlaceholderText);
           img.replaceWith(ph);
         };
         elPanelBody.appendChild(img);
       } else if (n.category === "people" || n.category === "projects") {
-        elPanelBody.appendChild(buildImagePlaceholder(null));
+        elPanelBody.appendChild(buildImagePlaceholder(n.imagePlaceholderText));
       }
 
       [
@@ -746,6 +909,8 @@
       n.relatedIds.forEach(function (rid) {
         var rn = NODE_BY_ID[rid];
         if (!rn) return;
+        var row = document.createElement("div");
+        row.className = "dtm-panel-related-row";
         var chip = document.createElement("button");
         chip.type = "button";
         chip.className = "dtm-panel-related-link";
@@ -754,7 +919,19 @@
           selectNode(rid);
           focusNode(rid);
         });
-        relList.appendChild(chip);
+        row.appendChild(chip);
+        // Tier label is only meaningful for pairs that actually have an
+        // edge drawn on the map (both positioned) — see edgeTier(): a
+        // real, data-derived signal (project.role reading "Maker: X"),
+        // not an invented interpretation of the relationship.
+        if (isPositioned(n.id) && isPositioned(rid)) {
+          var tier = edgeTier(n.id, rid);
+          var tag = document.createElement("span");
+          tag.className = "dtm-panel-related-tier dtm-panel-related-tier--" + tier;
+          tag.textContent = tier === "primary" ? "Maker" : "Thematic";
+          row.appendChild(tag);
+        }
+        relList.appendChild(row);
       });
       relWrap.appendChild(relList);
       elPanelBody.appendChild(relWrap);
@@ -762,28 +939,21 @@
 
     if (n.id !== "core") elPanelBody.appendChild(sourceBlock(n));
 
-    elPanel.classList.add("is-open");
-    elPanel.setAttribute("aria-hidden", "false");
-    elPanelBackdrop.hidden = false;
-    requestAnimationFrame(function () { elPanelBackdrop.classList.add("is-visible"); });
-    elPanel.focus();
+    openOverlay("panel", trigger);
   }
 
-  function buildImagePlaceholder(expectedPath) {
+  // Never surfaces the raw expected file path to visitors — that's an
+  // implementation detail for whoever edits dt-map-data.js, not
+  // something a reader needs to see spelled out on the page. A node
+  // can set its own `imagePlaceholderText` (e.g. "PREVIOUS DRAWING TO
+  // BE ADDED") for a more specific placeholder than the generic default.
+  function buildImagePlaceholder(text) {
     var ph = document.createElement("div");
     ph.className = "dtm-panel-image-placeholder";
     var span = document.createElement("span");
-    span.textContent = expectedPath ? "IMAGE PENDING — " + expectedPath : "NO IMAGE YET";
+    span.textContent = text || "Image forthcoming";
     ph.appendChild(span);
     return ph;
-  }
-
-  function closePanel() {
-    elPanel.classList.remove("is-open");
-    elPanel.setAttribute("aria-hidden", "true");
-    elPanelBackdrop.classList.remove("is-visible");
-    window.setTimeout(function () { elPanelBackdrop.hidden = true; }, 200);
-    setSelected(null);
   }
 
   function focusNode(id) {
@@ -795,18 +965,16 @@
     applyView();
   }
 
-  elPanelClose.addEventListener("click", closePanel);
-  elPanelBackdrop.addEventListener("click", closePanel);
+  elPanelClose.addEventListener("click", closeOverlay);
+  elPanelBackdrop.addEventListener("click", closeOverlay);
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
-      if (elPanel.classList.contains("is-open")) closePanel();
+      if (activeOverlay) closeOverlay();
       if (document.body.classList.contains("is-print-view")) exitPrintView();
       if (document.body.classList.contains("is-presentation")) exitPresentation();
-      if (!elDrawer.hidden) {
-        elDrawer.hidden = true;
-        elDevToggle.setAttribute("aria-expanded", "false");
-      }
+      return;
     }
+    if (activeOverlay) trapFocus(overlayEl(activeOverlay), e);
   });
 
   // ==========================================================================
@@ -845,6 +1013,13 @@
 
       elArchive.appendChild(section);
     });
+
+    if (!elArchive.children.length) {
+      var empty = document.createElement("p");
+      empty.className = "dtm-empty-state";
+      empty.textContent = "No categories selected — turn one on above to see nodes.";
+      elArchive.appendChild(empty);
+    }
   }
 
   function archiveItem(n) {
@@ -867,48 +1042,81 @@
   // Sources
   // ==========================================================================
 
+  function sourceRow(n) {
+    var row = document.createElement("div");
+    row.className = "dtm-source-item";
+    var name = document.createElement("span");
+    name.className = "dtm-source-name";
+    name.textContent = n.name;
+    row.appendChild(name);
+
+    if (n.sourceUrl) {
+      var a = document.createElement("a");
+      a.className = "dtm-source-link";
+      a.href = n.sourceUrl;
+      a.textContent = n.sourceUrl;
+      if (/^https?:\/\//.test(n.sourceUrl)) {
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.setAttribute("aria-label", n.name + " — opens source in a new tab");
+      }
+      row.appendChild(a);
+    } else if (n.sourceStatus === "reflection") {
+      var flag = document.createElement("span");
+      flag.className = "dtm-source-flag";
+      flag.textContent = "Roy's reflection — no external source needed";
+      row.appendChild(flag);
+    } else {
+      var flag2 = document.createElement("span");
+      flag2.className = "dtm-source-flag dtm-source-flag--needed";
+      flag2.textContent = "Source to be added";
+      row.appendChild(flag2);
+    }
+    return row;
+  }
+
+  // Grouped so completion status reads at a glance instead of a single
+  // flat list repeating "Source to be added" between the few that
+  // actually have one.
   function renderSources() {
     elSources.innerHTML = "";
+
+    var close = document.createElement("button");
+    close.type = "button";
+    close.className = "dtm-side-drawer-close";
+    close.setAttribute("aria-label", "Close sources");
+    close.innerHTML = "&times;";
+    close.addEventListener("click", closeOverlay);
+    elSources.appendChild(close);
+
     var title = document.createElement("div");
     title.className = "dtm-sources-title";
     title.textContent = "Sources";
     elSources.appendChild(title);
 
-    NODES.forEach(function (n) {
-      if (n.id === "core" || n.type === "Group") return;
-      if (n.status === "planned") return;
-      var row = document.createElement("div");
-      row.className = "dtm-source-item";
-      var name = document.createElement("span");
-      name.className = "dtm-source-name";
-      name.textContent = n.name;
-      row.appendChild(name);
+    var citable = NODES.filter(function (n) { return n.id !== "core" && n.type !== "Group" && n.status !== "planned"; });
+    var groups = [
+      { label: "External Sources", items: citable.filter(function (n) { return !!n.sourceUrl; }) },
+      { label: "Personal Reflections — No External Source Required", items: citable.filter(function (n) { return !n.sourceUrl && n.sourceStatus === "reflection"; }) },
+      { label: "Sources Needed", items: citable.filter(function (n) { return !n.sourceUrl && n.sourceStatus !== "reflection"; }) },
+    ];
 
-      if (n.sourceUrl) {
-        var a = document.createElement("a");
-        a.className = "dtm-source-link";
-        a.href = n.sourceUrl;
-        a.textContent = n.sourceUrl;
-        if (/^https?:\/\//.test(n.sourceUrl)) {
-          a.target = "_blank";
-          a.rel = "noopener";
-        }
-        row.appendChild(a);
-      } else {
-        var flag = document.createElement("span");
-        flag.className = "dtm-source-flag";
-        flag.textContent = n.sourceStatus === "reflection" ? "Roy's reflection — no external source needed" : "Source to be added";
-        row.appendChild(flag);
-      }
-      elSources.appendChild(row);
+    groups.forEach(function (group) {
+      if (!group.items.length) return;
+      var section = document.createElement("div");
+      section.className = "dtm-sources-group";
+      var label = document.createElement("div");
+      label.className = "dtm-archive-category-label";
+      label.textContent = group.label + " (" + group.items.length + ")";
+      section.appendChild(label);
+      group.items.forEach(function (n) { section.appendChild(sourceRow(n)); });
+      elSources.appendChild(section);
     });
   }
 
   elSourcesToggle.addEventListener("click", function () {
-    var open = elSources.hidden;
-    elSources.hidden = !open;
-    elSourcesToggle.setAttribute("aria-expanded", String(open));
-    if (open) elSources.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (activeOverlay === "sources") closeOverlay();
+    else openOverlay("sources", elSourcesToggle);
   });
 
   // ==========================================================================
@@ -1024,86 +1232,238 @@
   });
 
   // ==========================================================================
-  // In Development drawer — every status:"planned" node (the brief's
-  // "unconfirmed" slots), grouped by category. Kept off the curated
-  // map entirely (see Layout) so it can never affect the initial fit;
-  // this is the only place it's browsable on desktop besides the
-  // Sources/Print views, which already list everything regardless.
+  // In Development drawer — the content decisions are final (every
+  // node is status:"complete"), so this is no longer a list of
+  // unfinished NODES. It's a checklist of outstanding ASSETS: images
+  // whose file hasn't been dropped in yet, and citations still owed.
+  // Computed from the data itself (an `image` path with sourceStatus
+  // "to-be-added", etc.) rather than a separately hand-maintained
+  // list, so it can never drift out of sync with what's actually
+  // missing.
   // ==========================================================================
+
+  function drawerRow(name, note) {
+    var row = document.createElement("div");
+    row.className = "dtm-source-item";
+    var nameEl = document.createElement("span");
+    nameEl.className = "dtm-source-name";
+    nameEl.textContent = name;
+    row.appendChild(nameEl);
+    var flag = document.createElement("span");
+    flag.className = "dtm-source-flag dtm-source-flag--needed";
+    flag.textContent = note;
+    row.appendChild(flag);
+    return row;
+  }
 
   function renderDrawer() {
     elDrawer.innerHTML = "";
+
+    var close = document.createElement("button");
+    close.type = "button";
+    close.className = "dtm-side-drawer-close";
+    close.setAttribute("aria-label", "Close in-development items");
+    close.innerHTML = "&times;";
+    close.addEventListener("click", closeOverlay);
+    elDrawer.appendChild(close);
+
     var title = document.createElement("div");
     title.className = "dtm-sources-title";
-    title.textContent = "In Development — not yet written";
+    title.textContent = "In Development — outstanding assets & sources";
     elDrawer.appendChild(title);
 
-    var planned = NODES.filter(function (n) { return n.status === "planned"; });
-    var byCategory = {};
-    planned.forEach(function (n) {
-      (byCategory[n.category] = byCategory[n.category] || []).push(n);
-    });
+    var realNodes = NODES.filter(function (n) { return n.id !== "core" && n.type !== "Group"; });
+    var pendingImages = realNodes.filter(function (n) { return !!n.image; });
+    var pendingSources = realNodes.filter(function (n) { return !n.sourceUrl && n.sourceStatus !== "reflection"; });
 
-    CATEGORIES.forEach(function (cat) {
-      var items = byCategory[cat.id];
-      if (!items || !items.length) return;
-      var group = document.createElement("div");
-      group.className = "dtm-drawer-group";
-      var label = document.createElement("div");
-      label.className = "dtm-archive-category-label";
-      label.textContent = cat.label;
-      group.appendChild(label);
-      items.forEach(function (n) { group.appendChild(archiveItem(n)); });
-      elDrawer.appendChild(group);
-    });
+    if (pendingImages.length) {
+      var imgGroup = document.createElement("div");
+      imgGroup.className = "dtm-drawer-group";
+      var imgLabel = document.createElement("div");
+      imgLabel.className = "dtm-archive-category-label";
+      imgLabel.textContent = "Reference Images Needed (" + pendingImages.length + ")";
+      imgGroup.appendChild(imgLabel);
+      pendingImages.forEach(function (n) {
+        imgGroup.appendChild(drawerRow(n.name, n.imagePlaceholderText || "Image expected — file not yet added"));
+      });
+      elDrawer.appendChild(imgGroup);
+    }
+
+    if (pendingSources.length) {
+      var srcGroup = document.createElement("div");
+      srcGroup.className = "dtm-drawer-group";
+      var srcLabel = document.createElement("div");
+      srcLabel.className = "dtm-archive-category-label";
+      srcLabel.textContent = "Sources Needed (" + pendingSources.length + ")";
+      srcGroup.appendChild(srcLabel);
+      pendingSources.forEach(function (n) {
+        srcGroup.appendChild(drawerRow(n.name, "Verified source not yet added"));
+      });
+      elDrawer.appendChild(srcGroup);
+    }
+
+    if (!pendingImages.length && !pendingSources.length) {
+      var empty = document.createElement("p");
+      empty.className = "dtm-panel-empty";
+      empty.textContent = "Nothing outstanding — every node has its expected assets and sources.";
+      elDrawer.appendChild(empty);
+    }
   }
 
   elDevToggle.addEventListener("click", function () {
-    var open = elDrawer.hidden;
-    elDrawer.hidden = !open;
-    elDevToggle.setAttribute("aria-expanded", String(open));
-    if (open) elDrawer.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (activeOverlay === "drawer") closeOverlay();
+    else openOverlay("drawer", elDevToggle);
   });
 
   // ==========================================================================
-  // Presentation Mode — collapses the intro/controls and enlarges the
-  // map, starting from the same curated reset framing. Prev/Next just
-  // pan-and-zoom to one cluster at a time; it's still the same
-  // interactive map underneath, not a slideshow.
+  // Presentation Mode — the finalized ten-step sequence: central
+  // identity + definition, the three People groups, Inspiring
+  // Projects, New Technologies & Skills, Existing Skills to Improve,
+  // Personal Interests, Concepts & Problems, and a closing "final
+  // connected overview" that reveals the whole relationship graph at
+  // once. Each category stop is followed by its own member nodes, one
+  // at a time, before moving to the next category. Each stop
+  // pans/zooms to frame its own subject and dims everything not
+  // currently relevant, reusing the exact same highlight machinery as
+  // a hover/selection on the normal map. The viewer's own pan/zoom
+  // from before entering is restored on exit rather than snapping
+  // back to the default reset framing.
   // ==========================================================================
 
-  var PRESENT_STOPS = [{ id: "core", label: "ROY SON / VELFONT OFFICE" }].concat(
-    CLUSTERS.map(function (c) { return { id: c.id, label: c.label }; })
-  );
-  var presentIndex = 0;
+  var PRESENT_CATEGORY_ORDER = [
+    "sound", "fashion", "art", "projects",
+    "new-tech", "existing-skills", "personal-interests", "concepts",
+  ];
 
-  function focusCluster(stop) {
+  var PRESENT_STOPS = (function () {
+    var stops = [{ type: "identity" }];
+    PRESENT_CATEGORY_ORDER.forEach(function (clusterId) {
+      var cluster = CLUSTERS.filter(function (c) { return c.id === clusterId; })[0];
+      if (!cluster) return;
+      stops.push({ type: "cluster", cluster: cluster });
+      cluster.members.forEach(function (id) { stops.push({ type: "node", id: id }); });
+    });
+    stops.push({ type: "final-overview" });
+    return stops;
+  })();
+
+  var presentIndex = 0;
+  var prePresentView = null;
+  var IDENTITY_IDS = ["core", "definition-of-ct"];
+
+  function boundsFor(ids) {
+    var xs = ids.map(function (id) { return positions[id].x; });
+    var ys = ids.map(function (id) { return positions[id].y; });
+    return {
+      minX: Math.min.apply(null, xs) - NODE_PADDING,
+      maxX: Math.max.apply(null, xs) + NODE_PADDING,
+      minY: Math.min.apply(null, ys) - NODE_PADDING,
+      maxY: Math.max.apply(null, ys) + NODE_PADDING,
+    };
+  }
+
+  function fitToIds(ids, fill) {
     var rect = elViewport.getBoundingClientRect();
-    var target = stop.id === "core" ? CORE_POS : (function () {
-      var c = CLUSTERS.filter(function (x) { return x.id === stop.id; })[0];
-      return { x: c.cx, y: c.cy + 40 };
-    })();
-    view.scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, 1));
-    view.x = rect.width / 2 - target.x * view.scale;
-    view.y = rect.height / 2 - target.y * view.scale;
+    var b = boundsFor(ids);
+    var contentW = b.maxX - b.minX;
+    var contentH = b.maxY - b.minY;
+    var scale = Math.min(rect.width / contentW, rect.height / contentH) * fill;
+    scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale));
+    var cx = (b.minX + b.maxX) / 2;
+    var cy = (b.minY + b.maxY) / 2;
+    view.scale = scale;
+    view.x = rect.width / 2 - cx * scale;
+    view.y = rect.height / 2 - cy * scale;
     applyView();
-    elPresentLabel.textContent = stop.label;
+  }
+
+  function focusNodeZoomed(id, scale) {
+    var pos = positions[id];
+    if (!pos) return;
+    var rect = elViewport.getBoundingClientRect();
+    view.scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale));
+    view.x = rect.width / 2 - pos.x * view.scale;
+    view.y = rect.height / 2 - pos.y * view.scale;
+    applyView();
+  }
+
+  // Highlights an arbitrary set of ids (used for both the identity
+  // stop — core + definition — and each category's cluster stop),
+  // generalizing the same is-highlighted/is-dimmed treatment a
+  // hover/selection applies to a single node.
+  function highlightSet(ids, ownClusterId) {
+    var set = {};
+    ids.forEach(function (id) { set[id] = true; });
+    NODES.forEach(function (n) {
+      var el = document.getElementById("dtm-node-" + n.id);
+      if (!el) return;
+      el.classList.toggle("is-highlighted", !!set[n.id]);
+      el.classList.toggle("is-dimmed", !set[n.id]);
+    });
+    elLines.querySelectorAll(".dtm-line-primary, .dtm-line-secondary").forEach(function (line) {
+      var active = set[line.dataset.from] && set[line.dataset.to];
+      line.classList.toggle("is-active-line", !!active);
+      line.classList.toggle("is-dimmed-line", !active);
+    });
+    elLines.querySelectorAll(".dtm-line-structural").forEach(function (line) {
+      line.classList.toggle("is-dimmed-line", !ownClusterId || line.dataset.cluster !== ownClusterId);
+    });
+  }
+
+  function stopLabel(stop) {
+    if (stop.type === "identity") return "CENTRAL IDENTITY & DEFINITION";
+    if (stop.type === "cluster") return stop.cluster.label;
+    if (stop.type === "node") return NODE_BY_ID[stop.id].name;
+    return "FINAL CONNECTED OVERVIEW";
+  }
+
+  function goToStop(index) {
+    presentIndex = Math.min(Math.max(index, 0), PRESENT_STOPS.length - 1);
+    var stop = PRESENT_STOPS[presentIndex];
+    elPresentLabel.textContent = stopLabel(stop);
+    document.body.classList.toggle("dtm-present-show-all-lines", stop.type === "final-overview");
+
+    if (stop.type === "identity") {
+      highlightSet(IDENTITY_IDS, "definition");
+      fitToIds(IDENTITY_IDS, 0.5);
+    } else if (stop.type === "cluster") {
+      highlightSet(["core"].concat(stop.cluster.members), stop.cluster.id);
+      fitToIds(stop.cluster.members, 0.78);
+    } else if (stop.type === "node") {
+      applyHighlight(stop.id);
+      focusNodeZoomed(stop.id, 1.3);
+    } else {
+      clearHighlightClasses();
+      fitToIds(Object.keys(positions), RESET_FILL);
+    }
+
+    elPresentPrev.disabled = presentIndex === 0;
+    elPresentPrev.setAttribute("aria-disabled", String(presentIndex === 0));
+    elPresentNext.disabled = presentIndex === PRESENT_STOPS.length - 1;
+    elPresentNext.setAttribute("aria-disabled", String(presentIndex === PRESENT_STOPS.length - 1));
   }
 
   function enterPresentation() {
+    prePresentView = { x: view.x, y: view.y, scale: view.scale };
     document.body.classList.add("is-presentation");
     elPresentToggle.setAttribute("aria-pressed", "true");
     elPresentNav.hidden = false;
-    presentIndex = 0;
-    resetView();
-    elPresentLabel.textContent = "OVERVIEW";
+    goToStop(0);
   }
 
   function exitPresentation() {
     document.body.classList.remove("is-presentation");
+    document.body.classList.remove("dtm-present-show-all-lines");
     elPresentToggle.setAttribute("aria-pressed", "false");
     elPresentNav.hidden = true;
-    resetView();
+    applyHighlight(selectedId);
+    if (prePresentView) {
+      view = prePresentView;
+      applyView();
+      prePresentView = null;
+    } else {
+      resetView();
+    }
   }
 
   elPresentToggle.addEventListener("click", function () {
@@ -1111,13 +1471,13 @@
     else enterPresentation();
   });
   elPresentExit.addEventListener("click", exitPresentation);
-  elPresentNext.addEventListener("click", function () {
-    presentIndex = (presentIndex + 1) % PRESENT_STOPS.length;
-    focusCluster(PRESENT_STOPS[presentIndex]);
-  });
-  elPresentPrev.addEventListener("click", function () {
-    presentIndex = (presentIndex - 1 + PRESENT_STOPS.length) % PRESENT_STOPS.length;
-    focusCluster(PRESENT_STOPS[presentIndex]);
+  elPresentNext.addEventListener("click", function () { goToStop(presentIndex + 1); });
+  elPresentPrev.addEventListener("click", function () { goToStop(presentIndex - 1); });
+
+  document.addEventListener("keydown", function (e) {
+    if (!document.body.classList.contains("is-presentation")) return;
+    if (e.key === "ArrowRight") goToStop(presentIndex + 1);
+    else if (e.key === "ArrowLeft") goToStop(presentIndex - 1);
   });
 
   // ==========================================================================

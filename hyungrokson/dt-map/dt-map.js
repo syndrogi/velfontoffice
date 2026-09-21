@@ -475,9 +475,19 @@
     }
     var n = NODE_BY_ID[id];
     if (!n) return;
-    var related = [id].concat(n.relatedIds || []);
     var relatedSet = {};
-    related.forEach(function (r) { relatedSet[r] = true; });
+    if (id === "core") {
+      // Roy Son / Velfont Office is the map's own stated center — its
+      // own description reads "the fixed point every other node on
+      // this map is drawn in relation to" — so selecting it treats the
+      // entire map as connected instead of only core's own explicit
+      // relatedIds. This also lights up every relationship line below
+      // (both endpoints are always in this set), not just core's own.
+      NODES.forEach(function (other) { relatedSet[other.id] = true; });
+    } else {
+      var related = [id].concat(n.relatedIds || []);
+      related.forEach(function (r) { relatedSet[r] = true; });
+    }
 
     NODES.forEach(function (other) {
       var el = document.getElementById("dtm-node-" + other.id);

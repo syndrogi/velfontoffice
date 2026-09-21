@@ -460,7 +460,7 @@
         },
       ],
       keywords: "code / systems / AI direction / interaction / creative control",
-      image: "",
+      image: "images/skills/programming-languages.jpg",
       sourceUrl: null,
       sourceStatus: "reflection",
       relatedIds: ["aphex-twin", "teenage-engineering", "field-system", "dt-map-website", "core", "creative-authorship-ai"],
@@ -691,7 +691,7 @@
         },
       ],
       keywords: "subculture / commerce / authenticity / visibility / appropriation / identity",
-      image: "",
+      image: "images/concepts/subculture-commercialization.jpg",
       sourceUrl: null,
       sourceStatus: "reflection",
       relatedIds: [

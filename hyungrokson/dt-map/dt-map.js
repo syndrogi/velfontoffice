@@ -96,15 +96,15 @@
   // the central node") in the vertical gap between core's row and the
   // New Tech / Existing Skills row below it.
   var CLUSTERS = [
-    { id: "sound", label: "SOUND", cx: 380, cy: 220, gap: 260, members: ["kim-ximya", "aphex-twin", "brutalismus-3000"] },
-    { id: "fashion", label: "FASHION", cx: 1520, cy: 220, gap: 260, members: ["yumin-ha", "dongjoon-lim", "vivienne-westwood"] },
+    { id: "sound", label: "SOUND", cx: 380, cy: 120, gap: 260, members: ["kim-ximya", "aphex-twin", "brutalismus-3000"] },
+    { id: "fashion", label: "FASHION", cx: 1520, cy: 120, gap: 260, members: ["yumin-ha", "dongjoon-lim", "vivienne-westwood"] },
     { id: "art", label: "ART, DESIGN & CREATIVE PRACTICE", cx: 380, cy: 560, gap: 260, members: ["banksy", "mschf", "teenage-engineering"] },
     { id: "projects", label: "INSPIRING PROJECTS", cx: 1700, cy: 560, gap: 260, members: ["love-is-in-the-bin", "field-system", "roys-airplane-series", "dt-map-website"] },
-    { id: "definition", label: "DEFINITION OF CREATIVE TECHNOLOGY", cx: 1000, cy: 660, gap: 0, members: ["definition-of-ct"] },
-    { id: "new-tech", label: "NEW TECHNOLOGIES & SKILLS", cx: 700, cy: 880, gap: 270, members: ["programming-languages", "ai-image-video"] },
-    { id: "existing-skills", label: "EXISTING SKILLS TO IMPROVE", cx: 1300, cy: 880, gap: 270, members: ["photoshop-illustrator", "drawing"] },
-    { id: "personal-interests", label: "PERSONAL INTERESTS OUTSIDE DT", cx: 650, cy: 1220, gap: 260, members: ["interest-fashion", "interest-music", "interest-exercise"] },
-    { id: "concepts", label: "CONCEPTS & PROBLEMS", cx: 1350, cy: 1220, gap: 270, members: ["creative-authorship-ai", "subculture-commercialization"] },
+    { id: "definition", label: "DEFINITION OF CREATIVE TECHNOLOGY", cx: 1000, cy: 640, gap: 0, members: ["definition-of-ct"] },
+    { id: "new-tech", label: "NEW TECHNOLOGIES & SKILLS", cx: 700, cy: 1050, gap: 270, members: ["programming-languages", "ai-image-video"] },
+    { id: "existing-skills", label: "EXISTING SKILLS TO IMPROVE", cx: 1300, cy: 1050, gap: 270, members: ["photoshop-illustrator", "drawing"] },
+    { id: "personal-interests", label: "PERSONAL INTERESTS OUTSIDE DT", cx: 650, cy: 1450, gap: 260, members: ["interest-fashion", "interest-music", "interest-exercise"] },
+    { id: "concepts", label: "CONCEPTS & PROBLEMS", cx: 1350, cy: 1450, gap: 270, members: ["creative-authorship-ai", "subculture-commercialization"] },
   ];
 
   var positions = {}; // id -> {x, y} — only core + TIER2_IDS ever get an entry
@@ -282,6 +282,24 @@
       if (!skipArt) {
         var art = document.createElement("span");
         art.className = "dtm-node-art";
+
+        if (n.image) {
+          art.classList.add("has-image");
+          var thumb = document.createElement("img");
+          thumb.className = "dtm-node-thumb";
+          thumb.src = n.image;
+          thumb.alt = n.name;
+          thumb.loading = "lazy";
+          // Falls back to the plain hatch placeholder — same "never a
+          // broken-image icon" rule the detail panel already follows
+          // (see buildImagePlaceholder) — rather than a missing thumb.
+          thumb.onerror = function () {
+            art.classList.remove("has-image");
+            thumb.remove();
+          };
+          art.appendChild(thumb);
+        }
+
         var code = document.createElement("span");
         code.className = "dtm-node-code";
         code.textContent = cluster ? CLUSTER_CODE[cluster.id] + "-" + String(index + 1).padStart(2, "0") : "";
@@ -874,6 +892,7 @@
         var img = document.createElement("img");
         img.className = "dtm-panel-image";
         img.alt = n.name;
+        img.loading = "lazy";
         img.src = n.image;
         img.onerror = function () {
           var ph = buildImagePlaceholder(n.imagePlaceholderText);
@@ -1235,11 +1254,13 @@
   // In Development drawer — the content decisions are final (every
   // node is status:"complete"), so this is no longer a list of
   // unfinished NODES. It's a checklist of outstanding ASSETS: images
-  // whose file hasn't been dropped in yet, and citations still owed.
-  // Computed from the data itself (an `image` path with sourceStatus
-  // "to-be-added", etc.) rather than a separately hand-maintained
-  // list, so it can never drift out of sync with what's actually
-  // missing.
+  // whose file hasn't actually loaded yet, and citations still owed.
+  // "Needed" images are verified at runtime (an Image() probe per
+  // candidate `image` path) rather than assumed from the path merely
+  // existing in the data — a path can be set and genuinely working
+  // (see dt-map-data.js's many now-real photos), so presence alone
+  // isn't "missing." Sources are still read straight from the data,
+  // since there's no equivalent runtime check for a citation.
   // ==========================================================================
 
   function drawerRow(name, note) {
@@ -1254,6 +1275,13 @@
     flag.textContent = note;
     row.appendChild(flag);
     return row;
+  }
+
+  function probeImage(src, cb) {
+    var probe = new Image();
+    probe.onload = function () { cb(true); };
+    probe.onerror = function () { cb(false); };
+    probe.src = src;
   }
 
   function renderDrawer() {
@@ -1272,42 +1300,67 @@
     title.textContent = "In Development — outstanding assets & sources";
     elDrawer.appendChild(title);
 
+    var checking = document.createElement("p");
+    checking.className = "dtm-panel-empty";
+    checking.textContent = "Checking assets…";
+    elDrawer.appendChild(checking);
+
     var realNodes = NODES.filter(function (n) { return n.id !== "core" && n.type !== "Group"; });
-    var pendingImages = realNodes.filter(function (n) { return !!n.image; });
+    var withImage = realNodes.filter(function (n) { return !!n.image; });
     var pendingSources = realNodes.filter(function (n) { return !n.sourceUrl && n.sourceStatus !== "reflection"; });
 
-    if (pendingImages.length) {
-      var imgGroup = document.createElement("div");
-      imgGroup.className = "dtm-drawer-group";
-      var imgLabel = document.createElement("div");
-      imgLabel.className = "dtm-archive-category-label";
-      imgLabel.textContent = "Reference Images Needed (" + pendingImages.length + ")";
-      imgGroup.appendChild(imgLabel);
-      pendingImages.forEach(function (n) {
-        imgGroup.appendChild(drawerRow(n.name, n.imagePlaceholderText || "Image expected — file not yet added"));
-      });
-      elDrawer.appendChild(imgGroup);
+    var pendingImages = [];
+    var remaining = withImage.length;
+
+    function finish() {
+      checking.remove();
+
+      if (pendingImages.length) {
+        var imgGroup = document.createElement("div");
+        imgGroup.className = "dtm-drawer-group";
+        var imgLabel = document.createElement("div");
+        imgLabel.className = "dtm-archive-category-label";
+        imgLabel.textContent = "Reference Images Needed (" + pendingImages.length + ")";
+        imgGroup.appendChild(imgLabel);
+        pendingImages.forEach(function (n) {
+          imgGroup.appendChild(drawerRow(n.name, n.imagePlaceholderText || "Image expected — file not yet added"));
+        });
+        elDrawer.appendChild(imgGroup);
+      }
+
+      if (pendingSources.length) {
+        var srcGroup = document.createElement("div");
+        srcGroup.className = "dtm-drawer-group";
+        var srcLabel = document.createElement("div");
+        srcLabel.className = "dtm-archive-category-label";
+        srcLabel.textContent = "Sources Needed (" + pendingSources.length + ")";
+        srcGroup.appendChild(srcLabel);
+        pendingSources.forEach(function (n) {
+          srcGroup.appendChild(drawerRow(n.name, "Verified source not yet added"));
+        });
+        elDrawer.appendChild(srcGroup);
+      }
+
+      if (!pendingImages.length && !pendingSources.length) {
+        var empty = document.createElement("p");
+        empty.className = "dtm-panel-empty";
+        empty.textContent = "Nothing outstanding — every node has its expected assets and sources.";
+        elDrawer.appendChild(empty);
+      }
     }
 
-    if (pendingSources.length) {
-      var srcGroup = document.createElement("div");
-      srcGroup.className = "dtm-drawer-group";
-      var srcLabel = document.createElement("div");
-      srcLabel.className = "dtm-archive-category-label";
-      srcLabel.textContent = "Sources Needed (" + pendingSources.length + ")";
-      srcGroup.appendChild(srcLabel);
-      pendingSources.forEach(function (n) {
-        srcGroup.appendChild(drawerRow(n.name, "Verified source not yet added"));
-      });
-      elDrawer.appendChild(srcGroup);
+    if (!withImage.length) {
+      finish();
+      return;
     }
 
-    if (!pendingImages.length && !pendingSources.length) {
-      var empty = document.createElement("p");
-      empty.className = "dtm-panel-empty";
-      empty.textContent = "Nothing outstanding — every node has its expected assets and sources.";
-      elDrawer.appendChild(empty);
-    }
+    withImage.forEach(function (n) {
+      probeImage(n.image, function (ok) {
+        if (!ok) pendingImages.push(n);
+        remaining--;
+        if (remaining === 0) finish();
+      });
+    });
   }
 
   elDevToggle.addEventListener("click", function () {

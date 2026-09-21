@@ -502,12 +502,15 @@ a {
   color: var(--color-hover);
 }
 
-/* Office Palette — a movable, minimizable/closable floating window
-   (js/office-palette.js owns its drag/resize/window-state logic;
+/* Office Palette — a movable, minimizable/maximizable/closable floating
+   window (js/office-palette.js owns its drag/resize/window-state logic;
    this file is purely presentation). Houses Labs (below) and any future
-   tool that used to live as its own header/hero trigger. Deliberately
-   plain — a bordered panel, not a SaaS-style card: no shadow-heavy
-   chrome, no rounded corners, same type scale as the rest of the site. */
+   tool that used to live as its own header/hero trigger.
+   Redesigned as a narrow, single-column vertical tool list — Adobe's
+   tool panels / an old desktop OS's small floating window / a lab
+   equipment control strip, not a SaaS card grid or a shop filter bar:
+   flat (no shadow), square-cornered, and every row is a full-width
+   button separated only by a 1px line, not its own boxed button. */
 .office-palette {
   position: fixed;
   z-index: 60;
@@ -515,7 +518,6 @@ a {
   flex-direction: column;
   background: var(--color-bg);
   border: 1px solid var(--color-fg);
-  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.08);
   animation: fadeIn 1.2s 0.4s var(--ease) both;
 }
 
@@ -528,23 +530,52 @@ a {
   cursor: grabbing !important;
 }
 
+/* Maximize/restore (js/office-palette.js's toggleMaximize) — CSS owns
+   the actual full-size geometry via this class; JS just remembers the
+   pre-maximize left/top/width/height to restore and skips writing its
+   own inline geometry while this class is set. */
+.office-palette.is-maximized {
+  /* Above the header (100) and its "more" dropdown (30, open by
+     default from first paint — see js/more-menu.js) — that dropdown's
+     own content runs a little past the header's own height, into the
+     16px gap left below it here, so without this the header would
+     still win hit-testing over the palette's own topmost controls
+     despite sitting visually behind them. */
+  z-index: 150;
+  left: var(--edge) !important;
+  top: calc(var(--header-height) + 16px) !important;
+  right: var(--edge);
+  bottom: 16px;
+  width: auto !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+.office-palette.is-maximized .office-palette__resize {
+  display: none;
+}
+
 .office-palette__titlebar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
   flex: none;
-  padding: 10px 10px 10px 14px;
+  height: 32px;
+  padding: 0 0 0 12px;
   border-bottom: 1px solid var(--color-line);
   cursor: grab;
   touch-action: none;
 }
 
+.office-palette.is-maximized .office-palette__titlebar {
+  cursor: default;
+}
+
 .office-palette__title {
   font-family: inherit;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-fg);
   white-space: nowrap;
@@ -552,43 +583,58 @@ a {
 
 .office-palette__controls {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  align-items: stretch;
+  align-self: stretch;
 }
 
 .office-palette__btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 100%;
   font-family: inherit;
   font-size: 13px;
   line-height: 1;
   color: var(--color-fg);
   background: none;
-  border: 1px solid var(--color-fg);
+  border: none;
+  border-left: 1px solid var(--color-line);
   padding: 0;
   cursor: pointer;
-  transition: color 180ms var(--ease), background-color 180ms var(--ease);
+  transition: color 140ms var(--ease), background-color 140ms var(--ease);
 }
 
 .office-palette__btn:hover {
   color: var(--color-bg);
   background: var(--color-hover);
-  border-color: var(--color-hover);
 }
 
 .office-palette__btn:focus-visible {
   outline: 1px solid var(--color-hover);
-  outline-offset: 2px;
+  outline-offset: -2px;
 }
 
 .office-palette__content {
   flex: 1;
-  overflow: auto;
-  padding: 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
   min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-fg-faint) transparent;
+}
+
+.office-palette__content::-webkit-scrollbar {
+  width: 5px;
+}
+
+.office-palette__content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.office-palette__content::-webkit-scrollbar-thumb {
+  background: var(--color-fg-faint);
 }
 
 .office-palette.is-minimized .office-palette__content,
@@ -596,69 +642,63 @@ a {
   display: none;
 }
 
-.office-palette__section-label {
-  display: block;
-  margin-bottom: 10px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-fg-muted);
-}
-
 .office-palette__grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
 }
 
+/* Every tool is a full-width row, not an independent boxed button —
+   only a 1px bottom rule separates them, so a long, growing list reads
+   as one continuous instrument strip. Casing is handled once in
+   js/labs.js (sentence case on the underlying label), not via
+   text-transform here. */
 .labs-menu-btn {
   display: flex;
   align-items: center;
-  justify-content: center;
-  min-height: 40px;
-  padding: 10px 8px;
+  justify-content: flex-start;
+  width: 100%;
+  min-height: 38px;
+  margin: 0;
+  padding: 0 12px;
   font-family: inherit;
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-align: center;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: left;
   color: var(--color-fg);
-  background: none;
-  border: 1px solid var(--color-line);
+  background: var(--color-bg);
+  border: none;
+  border-bottom: 1px solid var(--color-line);
   cursor: pointer;
-  transition: color 180ms var(--ease), background-color 180ms var(--ease), border-color 180ms var(--ease);
+  transition: color 140ms var(--ease), background-color 140ms var(--ease);
+}
+
+.labs-menu-btn:last-child {
+  border-bottom: none;
 }
 
 .labs-menu-btn:hover,
-.labs-menu-btn:focus-visible {
+.labs-menu-btn:focus-visible,
+.labs-menu-btn.is-active {
   color: var(--color-bg);
   background: var(--color-fg);
-  border-color: var(--color-fg);
 }
 
 .labs-menu-btn:focus-visible {
   outline: 1px solid var(--color-hover);
-  outline-offset: 2px;
-}
-
-.labs-menu-btn.is-active {
-  color: var(--color-bg);
-  background: var(--color-hover);
-  border-color: var(--color-hover);
+  outline-offset: -2px;
 }
 
 .labs-menu-icon {
-  margin-right: 6px;
+  margin-right: 8px;
 }
 
 .office-palette__resize {
   position: absolute;
   right: 0;
   bottom: 0;
-  width: 18px;
-  height: 18px;
+  width: 12px;
+  height: 12px;
   cursor: nwse-resize;
   touch-action: none;
 }
@@ -666,12 +706,12 @@ a {
 .office-palette__resize::before {
   content: "";
   position: absolute;
-  right: 4px;
-  bottom: 4px;
-  width: 7px;
-  height: 7px;
-  border-right: 1px solid var(--color-fg-muted);
-  border-bottom: 1px solid var(--color-fg-muted);
+  right: 3px;
+  bottom: 3px;
+  width: 5px;
+  height: 5px;
+  border-right: 1px solid var(--color-fg-faint);
+  border-bottom: 1px solid var(--color-fg-faint);
 }
 
 /* Small edge tab that reappears after Close — click to bring the

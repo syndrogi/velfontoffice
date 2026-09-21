@@ -23,6 +23,13 @@
   var noticeEl = null;
   var noticeTimer = null;
 
+  // Sentence case regardless of how each lab module happens to write its
+  // own `title` — a single place to keep every button's label consistent
+  // instead of relying on every js/labs/*.js file agreeing on casing.
+  function sentenceCase(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  }
+
   function renderItem(lab) {
     var btn = document.createElement("button");
     btn.type = "button";
@@ -34,7 +41,7 @@
       icon.textContent = lab.icon;
       btn.appendChild(icon);
     }
-    btn.appendChild(document.createTextNode(lab.title));
+    btn.appendChild(document.createTextNode(sentenceCase(lab.title)));
 
     btn.addEventListener("click", function () {
       if (typeof lab.action === "function") lab.action();

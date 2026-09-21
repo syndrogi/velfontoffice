@@ -666,7 +666,7 @@
         },
       ],
       keywords: "AI / authorship / control / intention / selection / responsibility",
-      image: "",
+      image: "images/concepts/creative-authorship-ai.jpg",
       sourceUrl: null,
       sourceStatus: "reflection",
       relatedIds: ["ai-image-video", "programming-languages", "photoshop-illustrator", "drawing", "mschf", "core"],

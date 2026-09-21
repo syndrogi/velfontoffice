@@ -485,13 +485,15 @@ body.dtm-scroll-locked {
 .dtm-node--fashion { border-top-color: var(--accent-fashion); }
 .dtm-node--art { border-top-color: var(--accent-art); }
 
-/* Level 1 — visually dominant, filled, no image/index — it's the
-   identity hub, not a reference card. */
+/* Level 1 — visually dominant, filled, no code/index — it's the
+   identity hub, not a reference card. Its own logo shows right on the
+   map (see .dtm-node-art--core below), not only behind a click into
+   the detail panel. */
 .dtm-node--core {
   position: absolute;
   transform: translate(-50%, -50%);
   width: 320px;
-  padding: 34px 26px;
+  padding: 24px 26px;
   /* One step heavier than a normal card's 1px/3px border pair — reads
      as the map's origin through weight and fill alone, no glow or
      shadow. */
@@ -512,6 +514,21 @@ body.dtm-scroll-locked {
   font-weight: 700;
   letter-spacing: -0.005em;
   line-height: 1.3;
+}
+
+/* The logo is black-on-white artwork sitting inside a solid black
+   card, so it keeps its own white backing rather than bleeding into
+   the fill — reads as an inset plate, not a boxed photo like the
+   other cards' thumbnails. */
+/* .has-image.dtm-node-art--core (not just .dtm-node-art--core) to
+   out-specificity .dtm-node-art.has-image's own aspect-ratio above —
+   two classes each, so source order alone wouldn't be enough to win. */
+.dtm-node-art.has-image.dtm-node-art--core {
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  margin-bottom: 16px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-bg);
 }
 
 /* Level 2 card anatomy: art area (real thumbnail once a node has an

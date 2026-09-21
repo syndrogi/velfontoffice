@@ -100,7 +100,7 @@
     { id: "fashion", label: "FASHION", cx: 1520, cy: 120, gap: 260, members: ["yumin-ha", "dongjoon-lim", "vivienne-westwood"] },
     { id: "art", label: "ART, DESIGN & CREATIVE PRACTICE", cx: 380, cy: 560, gap: 260, members: ["banksy", "mschf", "teenage-engineering"] },
     { id: "projects", label: "INSPIRING PROJECTS", cx: 1700, cy: 560, gap: 260, members: ["love-is-in-the-bin", "field-system", "roys-airplane-series", "dt-map-website"] },
-    { id: "definition", label: "DEFINITION OF CREATIVE TECHNOLOGY", cx: 1000, cy: 640, gap: 0, members: ["definition-of-ct"] },
+    { id: "definition", label: "DEFINITION OF CREATIVE TECHNOLOGY", cx: 1000, cy: 740, gap: 0, members: ["definition-of-ct"] },
     { id: "new-tech", label: "NEW TECHNOLOGIES & SKILLS", cx: 700, cy: 1050, gap: 270, members: ["programming-languages", "ai-image-video"] },
     { id: "existing-skills", label: "EXISTING SKILLS TO IMPROVE", cx: 1300, cy: 1050, gap: 270, members: ["photoshop-illustrator", "drawing"] },
     { id: "personal-interests", label: "PERSONAL INTERESTS OUTSIDE DT", cx: 650, cy: 1450, gap: 260, members: ["interest-fashion", "interest-music", "interest-exercise"] },
@@ -268,6 +268,22 @@
     btn.style.top = pos.y + "px";
 
     if (n.id === "core") {
+      // Shown right on the map card itself, not only behind a click
+      // into the detail panel — same has-image thumbnail mechanism
+      // every other card uses, just sized for the wider hub card.
+      if (n.image) {
+        var coreArt = document.createElement("span");
+        coreArt.className = "dtm-node-art has-image dtm-node-art--core";
+        var coreThumb = document.createElement("img");
+        coreThumb.className = "dtm-node-thumb";
+        coreThumb.src = n.image;
+        coreThumb.alt = n.name;
+        coreThumb.loading = "lazy";
+        coreThumb.onerror = function () { coreArt.remove(); };
+        coreArt.appendChild(coreThumb);
+        btn.appendChild(coreArt);
+      }
+
       var name = document.createElement("span");
       name.className = "dtm-node-name";
       name.textContent = n.name;
@@ -525,10 +541,18 @@
   }
 
   function previewHighlight(id) {
+    // Presentation Mode owns the highlight for its current stop
+    // (goToStop) — without this guard, panning/zooming the canvas
+    // during a stop transition can leave a stationary mouse cursor
+    // sitting over a *different* card than before the move, which
+    // fires a genuine mouseenter on it and would otherwise clobber the
+    // stop's own highlight with an incidental hover preview.
+    if (document.body.classList.contains("is-presentation")) return;
     applyHighlight(id);
   }
 
   function clearPreview() {
+    if (document.body.classList.contains("is-presentation")) return;
     applyHighlight(selectedId);
   }
 

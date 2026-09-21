@@ -96,8 +96,8 @@
   // the central node") in the vertical gap between core's row and the
   // New Tech / Existing Skills row below it.
   var CLUSTERS = [
-    { id: "sound", label: "SOUND", cx: 380, cy: 120, gap: 260, members: ["kim-ximya", "aphex-twin", "brutalismus-3000"] },
-    { id: "fashion", label: "FASHION", cx: 1520, cy: 120, gap: 260, members: ["yumin-ha", "dongjoon-lim", "vivienne-westwood"] },
+    { id: "sound", label: "SOUND", cx: 380, cy: 90, gap: 260, members: ["kim-ximya", "aphex-twin", "brutalismus-3000"] },
+    { id: "fashion", label: "FASHION", cx: 1520, cy: 90, gap: 260, members: ["yumin-ha", "dongjoon-lim", "vivienne-westwood"] },
     { id: "art", label: "ART, DESIGN & CREATIVE PRACTICE", cx: 380, cy: 560, gap: 260, members: ["banksy", "mschf", "teenage-engineering"] },
     { id: "projects", label: "INSPIRING PROJECTS", cx: 1700, cy: 560, gap: 260, members: ["love-is-in-the-bin", "field-system", "roys-airplane-series", "dt-map-website"] },
     { id: "definition", label: "DEFINITION OF CREATIVE TECHNOLOGY", cx: 1000, cy: 740, gap: 0, members: ["definition-of-ct"] },
@@ -269,20 +269,15 @@
 
     if (n.id === "core") {
       // Shown right on the map card itself, not only behind a click
-      // into the detail panel — same has-image thumbnail mechanism
-      // every other card uses, just sized for the wider hub card.
-      if (n.image) {
-        var coreArt = document.createElement("span");
-        coreArt.className = "dtm-node-art has-image dtm-node-art--core";
-        var coreThumb = document.createElement("img");
-        coreThumb.className = "dtm-node-thumb";
-        coreThumb.src = n.image;
-        coreThumb.alt = n.name;
-        coreThumb.loading = "lazy";
-        coreThumb.onerror = function () { coreArt.remove(); };
-        coreArt.appendChild(coreThumb);
-        btn.appendChild(coreArt);
-      }
+      // into the detail panel — a white silhouette of the actual
+      // Velfont Office mark (same mask-image technique as the main
+      // site header's own .logo-mark, see style.css), not a boxed
+      // photo, so it sits directly on the card's black fill.
+      var coreLogo = document.createElement("span");
+      coreLogo.className = "dtm-node-core-logo";
+      coreLogo.setAttribute("role", "img");
+      coreLogo.setAttribute("aria-label", n.name);
+      btn.appendChild(coreLogo);
 
       var name = document.createElement("span");
       name.className = "dtm-node-name";

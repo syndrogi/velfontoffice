@@ -487,7 +487,7 @@ body.dtm-scroll-locked {
 
 /* Level 1 — visually dominant, filled, no code/index — it's the
    identity hub, not a reference card. Its own logo shows right on the
-   map (see .dtm-node-art--core below), not only behind a click into
+   map (see .dtm-node-core-logo below), not only behind a click into
    the detail panel. */
 .dtm-node--core {
   position: absolute;
@@ -516,19 +516,25 @@ body.dtm-scroll-locked {
   line-height: 1.3;
 }
 
-/* The logo is black-on-white artwork sitting inside a solid black
-   card, so it keeps its own white backing rather than bleeding into
-   the fill — reads as an inset plate, not a boxed photo like the
-   other cards' thumbnails. */
-/* .has-image.dtm-node-art--core (not just .dtm-node-art--core) to
-   out-specificity .dtm-node-art.has-image's own aspect-ratio above —
-   two classes each, so source order alone wouldn't be enough to win. */
-.dtm-node-art.has-image.dtm-node-art--core {
+/* A white silhouette of the actual Velfont Office mark, not a boxed
+   photo — same mask-image technique as the main site header's own
+   .logo-mark (see /style.css): the source PNG's own black ink becomes
+   a mask shape, filled with --color-bg (white) so it sits directly on
+   this card's black fill instead of needing a white plate behind it. */
+.dtm-node-core-logo {
+  display: block;
   width: 100%;
-  aspect-ratio: 2 / 1;
+  aspect-ratio: 1080 / 725;
   margin-bottom: 16px;
-  background: var(--color-bg);
-  border: 1px solid var(--color-bg);
+  background-color: var(--color-bg);
+  -webkit-mask-image: url("../../images/logo.png");
+  mask-image: url("../../images/logo.png");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
 }
 
 /* Level 2 card anatomy: art area (real thumbnail once a node has an

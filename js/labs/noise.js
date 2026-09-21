@@ -119,13 +119,12 @@
   // ==== NoiseTargets ========================================================
   // header covers the logo, nav links, lang/instagram/more/menu toggles and
   // the more-menu links; .hero-title .letter is the wordmark (already split
-  // one span per character by main.js's spin/reveal); the labs trigger/menu
-  // and the footer line round out the spec's target list.
+  // one span per character by main.js's spin/reveal); the Office Palette's
+  // Labs grid buttons and the footer line round out the spec's target list.
   var TARGET_SELECTOR = [
     "header a",
     "header button",
     ".hero-title .letter",
-    ".labs-toggle",
     ".labs-menu-btn",
     ".footer-copy",
   ].join(", ");

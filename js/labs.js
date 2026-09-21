@@ -1,39 +1,29 @@
 /**
  * VELFONT OFFICE — Labs
- * A hidden experimental playground. This file only owns the menu shell
- * (open/close, stagger-in/out, outside-click/Escape) — it has no idea
- * what any individual experiment actually does.
+ * A hidden experimental playground. This file only owns the LABS grid
+ * inside the Office Palette (see js/office-palette.js for the window
+ * chrome around it) — it has no idea what any individual experiment
+ * actually does.
  *
  * Each experiment lives in its own module under js/labs/ and registers
  * itself once, at load time:
  *
  *   registerLab({ id, title, icon, action });
  *
- * `action` runs when the item is clicked (the menu closes first).
- * Adding a new experiment is just one more registerLab() call in one
- * more small file — nothing here needs to change.
+ * `action` runs when the item is clicked. Adding a new experiment is
+ * just one more registerLab() call in one more small file — nothing
+ * here needs to change.
  */
 (function () {
-  var STAGGER_MS = 30;
-
-  var root = document.getElementById("labs");
-  var toggleBtn = document.getElementById("labsToggle");
-  var menu = document.getElementById("labsMenu");
-  if (!root || !toggleBtn || !menu) return;
+  var grid = document.getElementById("labsMenu");
+  if (!grid) return;
 
   var labs = [];
-  var isOpen = false;
+  var buttonsById = {};
   var noticeEl = null;
   var noticeTimer = null;
-  var buttonsById = {};
 
   function renderItem(lab) {
-    var index = labs.length - 1;
-
-    var li = document.createElement("li");
-    li.className = "labs-menu-item";
-    li.style.transitionDelay = index * STAGGER_MS + "ms";
-
     var btn = document.createElement("button");
     btn.type = "button";
     btn.className = "labs-menu-btn";
@@ -50,8 +40,7 @@
       if (typeof lab.action === "function") lab.action();
     });
 
-    li.appendChild(btn);
-    menu.appendChild(li);
+    grid.appendChild(btn);
     buttonsById[lab.id] = btn;
   }
 
@@ -64,33 +53,8 @@
     btn.classList.toggle("is-active", !!isActive);
   };
 
-  function openMenu() {
-    isOpen = true;
-    root.classList.add("is-open");
-    toggleBtn.setAttribute("aria-expanded", "true");
-    menu.setAttribute("aria-hidden", "false");
-    requestAnimationFrame(function () {
-      menu.classList.add("is-visible");
-    });
-  }
-
-  function closeMenu() {
-    if (!isOpen) return;
-    isOpen = false;
-    root.classList.remove("is-open");
-    toggleBtn.setAttribute("aria-expanded", "false");
-    menu.setAttribute("aria-hidden", "true");
-    menu.classList.remove("is-visible");
-  }
-
-  toggleBtn.addEventListener("click", function (e) {
-    e.stopPropagation();
-    if (isOpen) closeMenu();
-    else openMenu();
-  });
-
   // Shared, minimal feedback for placeholder experiments — a quiet line
-  // of text in the same spot as the trigger, no box, no color.
+  // of text bottom-right, no box, no color.
   window.labsNotice = function (text) {
     if (!noticeEl) {
       noticeEl = document.createElement("div");
@@ -110,12 +74,4 @@
     labs.push(lab);
     renderItem(lab);
   };
-
-  // Starts open — every lab is visible immediately on load instead of
-  // waiting for a click; the toggle button now closes it first, same
-  // open/close pair as before just flipped which state is "resting".
-  // Deferred to DOMContentLoaded so every other labs/*.js module (each
-  // its own <script defer>, still loading while this file's own IIFE
-  // runs) has already registerLab()'d before the menu opens.
-  document.addEventListener("DOMContentLoaded", openMenu);
 })();

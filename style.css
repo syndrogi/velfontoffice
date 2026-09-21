@@ -502,96 +502,219 @@ a {
   color: var(--color-hover);
 }
 
-/* Labs — a hidden experimental playground, bottom right. Deliberately
-   quiet: small type, no box, no color — meant to be found, not sold. */
-.labs {
-  position: absolute;
-  right: var(--edge);
-  bottom: 40px;
-  z-index: 20;
+/* Office Palette — a movable, minimizable/closable floating window
+   (js/office-palette.js owns its drag/resize/window-state logic;
+   this file is purely presentation). Houses Labs (below) and any future
+   tool that used to live as its own header/hero trigger. Deliberately
+   plain — a bordered panel, not a SaaS-style card: no shadow-heavy
+   chrome, no rounded corners, same type scale as the rest of the site. */
+.office-palette {
+  position: fixed;
+  z-index: 60;
   display: flex;
-  flex-direction: column-reverse;
-  align-items: flex-end;
-  gap: 18px;
+  flex-direction: column;
+  background: var(--color-bg);
+  border: 1px solid var(--color-fg);
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.08);
   animation: fadeIn 1.2s 0.4s var(--ease) both;
 }
 
-.labs-toggle {
+.office-palette[hidden] {
+  display: none;
+}
+
+.office-palette.is-dragging,
+.office-palette.is-dragging * {
+  cursor: grabbing !important;
+}
+
+.office-palette__titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex: none;
+  padding: 10px 10px 10px 14px;
+  border-bottom: 1px solid var(--color-line);
+  cursor: grab;
+  touch-action: none;
+}
+
+.office-palette__title {
   font-family: inherit;
-  font-size: clamp(15px, 1.6vw, 19px);
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-fg);
+  white-space: nowrap;
+}
+
+.office-palette__controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.office-palette__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1;
   color: var(--color-fg);
   background: none;
-  border: none;
+  border: 1px solid var(--color-fg);
   padding: 0;
   cursor: pointer;
-  transition: color 180ms var(--ease);
+  transition: color 180ms var(--ease), background-color 180ms var(--ease);
 }
 
-.labs-toggle:hover,
-.labs-toggle:focus-visible {
-  color: var(--color-hover);
+.office-palette__btn:hover {
+  color: var(--color-bg);
+  background: var(--color-hover);
+  border-color: var(--color-hover);
 }
 
-.labs-toggle:focus-visible {
-  outline: 1px solid var(--color-fg-muted);
-  outline-offset: 6px;
+.office-palette__btn:focus-visible {
+  outline: 1px solid var(--color-hover);
+  outline-offset: 2px;
 }
 
-.labs-menu {
-  display: flex;
-  flex-direction: column-reverse;
-  align-items: flex-end;
-  gap: 14px;
-  list-style: none;
-  pointer-events: none;
+.office-palette__content {
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
+  min-height: 0;
 }
 
-.labs.is-open .labs-menu {
-  pointer-events: auto;
+.office-palette.is-minimized .office-palette__content,
+.office-palette.is-minimized .office-palette__resize {
+  display: none;
 }
 
-.labs-menu-item {
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 200ms var(--ease), transform 200ms var(--ease);
+.office-palette__section-label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-fg-muted);
 }
 
-.labs-menu.is-visible .labs-menu-item {
-  opacity: 1;
-  transform: translateY(0);
+.office-palette__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
 }
 
 .labs-menu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 10px 8px;
   font-family: inherit;
-  font-size: clamp(15px, 1.6vw, 19px);
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-transform: uppercase;
   color: var(--color-fg);
   background: none;
-  border: none;
-  padding: 0;
+  border: 1px solid var(--color-line);
   cursor: pointer;
-  transition: color 180ms var(--ease);
+  transition: color 180ms var(--ease), background-color 180ms var(--ease), border-color 180ms var(--ease);
 }
 
 .labs-menu-btn:hover,
 .labs-menu-btn:focus-visible {
-  color: var(--color-hover);
+  color: var(--color-bg);
+  background: var(--color-fg);
+  border-color: var(--color-fg);
 }
 
 .labs-menu-btn:focus-visible {
-  outline: 1px solid var(--color-fg-muted);
-  outline-offset: 6px;
+  outline: 1px solid var(--color-hover);
+  outline-offset: 2px;
 }
 
 .labs-menu-btn.is-active {
-  color: var(--color-hover);
+  color: var(--color-bg);
+  background: var(--color-hover);
+  border-color: var(--color-hover);
 }
 
 .labs-menu-icon {
-  margin-right: 8px;
+  margin-right: 6px;
+}
+
+.office-palette__resize {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 18px;
+  height: 18px;
+  cursor: nwse-resize;
+  touch-action: none;
+}
+
+.office-palette__resize::before {
+  content: "";
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 7px;
+  height: 7px;
+  border-right: 1px solid var(--color-fg-muted);
+  border-bottom: 1px solid var(--color-fg-muted);
+}
+
+/* Small edge tab that reappears after Close — click to bring the
+   palette back at its last position. */
+.office-palette-tab {
+  position: fixed;
+  right: 0;
+  bottom: 40px;
+  z-index: 60;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-fg);
+  background: var(--color-bg);
+  border: 1px solid var(--color-fg);
+  border-right: none;
+  padding: 10px 8px;
+  cursor: pointer;
+  writing-mode: vertical-rl;
+  transition: color 180ms var(--ease), background-color 180ms var(--ease);
+}
+
+.office-palette-tab[hidden] {
+  display: none;
+}
+
+.office-palette-tab:hover,
+.office-palette-tab:focus-visible {
+  color: var(--color-bg);
+  background: var(--color-fg);
+}
+
+.office-palette-tab:focus-visible {
+  outline: 1px solid var(--color-hover);
+  outline-offset: 2px;
+}
+
+/* Set on <body> only for the duration of a drag/resize so text on the
+   rest of the page doesn't get selected while the pointer moves. */
+.office-palette-no-select {
+  user-select: none;
 }
 
 /* Contact — a bordered panel on the right of the hero (not a page
@@ -1080,6 +1203,93 @@ html.js-typing .hero-title {
 }
 
 /* ==========================================================================
+   Mobile advisory — "desktop recommended" notice (js/mobile-advisory.js).
+   An advisory, not a gate: it sits above everything, including the
+   Office Palette (z-index 60) and the page-veil transition (9999), since
+   it can appear on the very first load before either is relevant. Same
+   bordered-panel, square-corner, color-inverting-button language as the
+   Office Palette itself — no rounded corners, no shadow.
+   ========================================================================== */
+
+.mobile-advisory-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.mobile-advisory-backdrop[hidden] {
+  display: none;
+}
+
+.mobile-advisory {
+  position: fixed;
+  z-index: 10001;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(360px, calc(100vw - 48px));
+  background: var(--color-bg);
+  border: 1px solid var(--color-fg);
+  padding: 28px 24px 24px;
+  text-align: left;
+  animation: fadeIn 0.3s var(--ease) both;
+}
+
+.mobile-advisory[hidden] {
+  display: none;
+}
+
+.mobile-advisory__title {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.mobile-advisory__desc {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-fg-muted);
+  margin-bottom: 24px;
+}
+
+.mobile-advisory__actions {
+  display: flex;
+  gap: 10px;
+}
+
+.mobile-advisory__btn {
+  flex: 1;
+  min-height: 44px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 12px 10px;
+  border: 1px solid var(--color-fg);
+  background: var(--color-bg);
+  color: var(--color-fg);
+  cursor: pointer;
+  transition: color 180ms var(--ease), background-color 180ms var(--ease);
+}
+
+.mobile-advisory__btn:hover,
+.mobile-advisory__btn:active {
+  color: var(--color-bg);
+  background: var(--color-fg);
+}
+
+.mobile-advisory__btn:focus-visible {
+  outline: 1px solid var(--color-hover);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
    Placeholder sections — Office / Archive / About
    Editorial shell: divider, label tag, large title, short description,
    laid out on a two-column grid. Content is structural; the sections
@@ -1225,11 +1435,11 @@ html.js-typing .hero-title {
     display: none;
   }
 
-  .labs {
+  .labs-notice {
     bottom: 40px;
   }
 
-  .labs-notice {
-    bottom: 40px;
+  .office-palette-tab {
+    bottom: 24px;
   }
 }

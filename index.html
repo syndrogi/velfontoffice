@@ -114,18 +114,6 @@
 
     <div class="hero-overlay"></div>
 
-    <div class="labs" id="labs">
-      <button
-        type="button"
-        class="labs-toggle"
-        id="labsToggle"
-        aria-haspopup="true"
-        aria-expanded="false"
-        aria-controls="labsMenu"
-      >labs</button>
-      <ul class="labs-menu" id="labsMenu" aria-hidden="true"></ul>
-    </div>
-
     <div class="contact-panel" id="contactPanel" aria-hidden="true">
       <button type="button" class="contact-close" id="contactClose" aria-label="Close contact form">&times;</button>
       <h2 class="contact-title">Contact</h2>
@@ -207,13 +195,57 @@
 
 <div class="page-veil" aria-hidden="true"></div>
 
+<!-- Mobile "desktop recommended" advisory — see js/mobile-advisory.js.
+     Both start hidden; the script decides at load time (once, never on
+     resize) whether this visit is a mobile context that should see it. -->
+<div class="mobile-advisory-backdrop" id="mobileAdvisoryBackdrop" hidden></div>
+<div
+  class="mobile-advisory"
+  id="mobileAdvisory"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="mobileAdvisoryTitle"
+  aria-describedby="mobileAdvisoryDesc"
+  hidden
+>
+  <h2 class="mobile-advisory__title" id="mobileAdvisoryTitle">Desktop Recommended</h2>
+  <p class="mobile-advisory__desc" id="mobileAdvisoryDesc">
+    Velfont Office is designed to work best on a desktop environment. Some interactions and visual details may be limited on mobile.
+  </p>
+  <div class="mobile-advisory__actions">
+    <button type="button" class="mobile-advisory__btn" id="mobileAdvisoryContinue">Continue</button>
+    <button type="button" class="mobile-advisory__btn" id="mobileAdvisoryDontShow">Don't Show Again</button>
+  </div>
+</div>
+
+<div class="office-palette" id="officePalette" role="dialog" aria-label="Office Palette">
+  <div class="office-palette__titlebar" id="officePaletteHandle">
+    <span class="office-palette__title">Office Palette</span>
+    <div class="office-palette__controls">
+      <button type="button" class="office-palette__btn" id="officePaletteMinimize" data-action="minimize" aria-label="Minimize">&minus;</button>
+      <button type="button" class="office-palette__btn" id="officePaletteClose" data-action="close" aria-label="Close">&times;</button>
+    </div>
+  </div>
+  <div class="office-palette__content" id="officePaletteContent">
+    <div class="office-palette__section">
+      <span class="office-palette__section-label">Labs</span>
+      <div class="office-palette__grid" id="labsMenu"></div>
+    </div>
+  </div>
+  <div class="office-palette__resize" id="officePaletteResize" aria-hidden="true"></div>
+</div>
+
+<button type="button" class="office-palette-tab" id="officePaletteTab" aria-label="Open Office Palette" hidden>Office Palette</button>
+
 <script src="js/transform.js" defer></script>
 <script src="js/main.js" defer></script>
+<script src="js/mobile-advisory.js" defer></script>
 <script src="js/logo-draw.js" defer></script>
 <script src="js/more-menu.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="js/contact.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js" defer></script>
+<script src="js/office-palette.js" defer></script>
 <script src="js/labs.js" defer></script>
 <script src="js/labs/reset.js" defer></script>
 <script src="js/labs/gravity.js" defer></script>

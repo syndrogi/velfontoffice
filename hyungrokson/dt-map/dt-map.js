@@ -100,11 +100,11 @@
     { id: "fashion", label: "FASHION", cx: 1520, cy: 90, gap: 260, members: ["yumin-ha", "dongjoon-lim", "vivienne-westwood"] },
     { id: "art", label: "ART, DESIGN & CREATIVE PRACTICE", cx: 380, cy: 560, gap: 260, members: ["banksy", "mschf", "teenage-engineering"] },
     { id: "projects", label: "INSPIRING PROJECTS", cx: 1700, cy: 560, gap: 260, members: ["love-is-in-the-bin", "field-system", "roys-airplane-series", "dt-map-website"] },
-    { id: "definition", label: "DEFINITION OF CREATIVE TECHNOLOGY", cx: 1000, cy: 740, gap: 0, members: ["definition-of-ct"] },
-    { id: "new-tech", label: "NEW TECHNOLOGIES & SKILLS", cx: 700, cy: 1050, gap: 270, members: ["programming-languages", "ai-image-video"] },
-    { id: "existing-skills", label: "EXISTING SKILLS TO IMPROVE", cx: 1300, cy: 1050, gap: 270, members: ["photoshop-illustrator", "drawing"] },
-    { id: "personal-interests", label: "PERSONAL INTERESTS OUTSIDE DT", cx: 650, cy: 1450, gap: 260, members: ["interest-fashion", "interest-music", "interest-exercise"] },
-    { id: "concepts", label: "CONCEPTS & PROBLEMS", cx: 1350, cy: 1450, gap: 270, members: ["creative-authorship-ai", "subculture-commercialization"] },
+    { id: "definition", label: "DEFINITION OF CREATIVE TECHNOLOGY", cx: 1000, cy: 830, gap: 0, members: ["definition-of-ct"] },
+    { id: "new-tech", label: "NEW TECHNOLOGIES & SKILLS", cx: 700, cy: 1120, gap: 270, members: ["programming-languages", "ai-image-video"] },
+    { id: "existing-skills", label: "EXISTING SKILLS TO IMPROVE", cx: 1300, cy: 1120, gap: 270, members: ["photoshop-illustrator", "drawing"] },
+    { id: "personal-interests", label: "PERSONAL INTERESTS OUTSIDE DT", cx: 650, cy: 1520, gap: 260, members: ["interest-fashion", "interest-music", "interest-exercise"] },
+    { id: "concepts", label: "CONCEPTS & PROBLEMS", cx: 1350, cy: 1520, gap: 270, members: ["creative-authorship-ai", "subculture-commercialization"] },
   ];
 
   var positions = {}; // id -> {x, y} — only core + TIER2_IDS ever get an entry
@@ -374,7 +374,11 @@
       var label = document.createElement("div");
       label.className = "dtm-cluster-label";
       label.style.left = cluster.cx + "px";
-      label.style.top = cluster.cy - 60 + "px";
+      // -60 was tuned for the old, shorter hatch-placeholder cards —
+      // real photo thumbnails (see .has-image) render taller, so the
+      // label needs more clearance above the row now or its own card
+      // tops run up into the label text.
+      label.style.top = cluster.cy - 90 + "px";
       label.textContent = cluster.label;
       elNodes.appendChild(label);
     });

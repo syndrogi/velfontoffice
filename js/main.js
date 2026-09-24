@@ -37,6 +37,92 @@
 })();
 
 /**
+ * VELFONT OFFICE — Draggable Header Elements
+ * Lets the logo, each primary nav link, the social icon, the "+" toggle,
+ * and each item inside its dropdown (members only / 5th ave / Hyungrok
+ * Son) be picked up and moved as a single unit — the same plain
+ * transform offset a hero letter uses (js/transform.js), just applied to
+ * the whole element instead of splitting it into per-character spans
+ * (unlike the hero title/js/labs/roulette.js, which is meant to spin
+ * letter by letter). Registered before Header Navigation and before
+ * more-menu.js/contact.js load, so a drag's click-suppression below runs
+ * ahead of — and can cancel — their own click handlers on the same
+ * element.
+ */
+(function () {
+  var DRAG_THRESHOLD = 4;
+
+  function makeElementDraggable(el) {
+    el.style.touchAction = "none";
+    // Anchors (logo/nav-link/social-icon) are natively draggable by the
+    // browser itself (e.g. dragging a link to a bookmarks bar) — left
+    // on, that native drag intercepts the gesture before pointermove
+    // ever sees it, so the custom drag below silently never starts.
+    el.draggable = false;
+    var dragging = false;
+    var moved = false;
+    var startX = 0;
+    var startY = 0;
+    var baseX = 0;
+    var baseY = 0;
+    var offsetX = 0;
+    var offsetY = 0;
+
+    el.addEventListener("pointerdown", function (e) {
+      // While Gravity is active, physics owns dragging for every body
+      // (see gravity.js) — this handler would otherwise fight it for
+      // control of the same transform every frame.
+      if (window.__gravityActive) return;
+      dragging = true;
+      moved = false;
+      baseX = offsetX;
+      baseY = offsetY;
+      startX = e.clientX;
+      startY = e.clientY;
+      el.setPointerCapture(e.pointerId);
+      el.classList.add("is-dragging");
+    });
+
+    el.addEventListener("pointermove", function (e) {
+      if (!dragging) return;
+      var dx = e.clientX - startX;
+      var dy = e.clientY - startY;
+      if (!moved && (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD)) moved = true;
+      offsetX = baseX + dx;
+      offsetY = baseY + dy;
+      window.labsTransform.update(el, { tx: offsetX, ty: offsetY });
+    });
+
+    function release() {
+      if (!dragging) return;
+      dragging = false;
+      el.classList.remove("is-dragging");
+    }
+
+    el.addEventListener("pointerup", release);
+    el.addEventListener("pointercancel", release);
+
+    // A drag that crossed the threshold shouldn't also fire the
+    // element's own click behavior (link navigation, menu toggle,
+    // in-page scroll) — stopImmediatePropagation blocks every other
+    // click listener on this same element too, not just this one's.
+    el.addEventListener("click", function (e) {
+      if (moved) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      }
+    });
+  }
+
+  var draggableHeaderEls = document.querySelectorAll(
+    ".logo, .main-nav .nav-link, .social-icon, .more-toggle, .more-menu-link"
+  );
+  draggableHeaderEls.forEach(function (el) {
+    makeElementDraggable(el);
+  });
+})();
+
+/**
  * VELFONT OFFICE — Header Navigation
  * Scroll-driven active-link state. The mobile nav is a plain, always-
  * visible bar below the header (see .mobile-nav in style.css) rather

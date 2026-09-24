@@ -257,7 +257,6 @@ a {
   border: none;
   padding: 0;
   color: var(--color-fg);
-  cursor: pointer;
   transition: color 180ms var(--ease);
 }
 
@@ -318,6 +317,7 @@ a {
 
 .more-menu-link {
   display: block;
+  position: relative;
   font-family: inherit;
   font-size: clamp(15px, 1.6vw, 19px);
   font-weight: 700;
@@ -358,6 +358,27 @@ a {
 .nav-link:focus-visible {
   outline: 1px solid var(--color-fg-muted);
   outline-offset: 6px;
+}
+
+/* Draggable header elements — js/main.js's makeElementDraggable() lets
+   these move as a single unit (never split into letters, unlike the
+   hero title's own .letter drag). Same grab/grabbing affordance as a
+   hero letter or the VFO Logo Vol.1 mark. */
+.logo,
+.nav-link,
+.social-icon,
+.more-toggle,
+.more-menu-link {
+  cursor: grab;
+}
+
+.logo.is-dragging,
+.nav-link.is-dragging,
+.social-icon.is-dragging,
+.more-toggle.is-dragging,
+.more-menu-link.is-dragging {
+  cursor: grabbing;
+  z-index: 10;
 }
 
 .nav-link.is-active {

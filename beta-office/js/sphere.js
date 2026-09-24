@@ -45,8 +45,8 @@
   var HOVER_PUSH = 26;
   var MAX_YAW = 55; // deg, left/right — follows the pointer directly
   var MAX_PITCH = 16; // deg, up/down — "아주 미세하게"
-  var IDLE_SPEED = 0.045; // deg/frame baseline spin
-  var IDLE_SPEED_HOVER = 0.012; // slows while a group is hovered
+  var IDLE_SPEED = 0.13; // deg/frame baseline spin — one full turn every ~46s at 60fps
+  var IDLE_SPEED_HOVER = 0.03; // slows (not stops) while a group is hovered
   var LERP = 0.07;
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -243,6 +243,12 @@
 
   // ==== Rotation loop (skipped entirely in the flat/reduced-motion case) ====
   var curX = 0, curY = 0, targetX = 0, targetY = 0, idleAngle = 0;
+  // Pointer offset layered ON TOP of idleAngle each frame (see frame()
+  // below) — kept separate so the idle spin never stops accumulating
+  // just because the pointer is sitting still over the stage. Previously
+  // onPointerMove baked idleAngle into targetY directly, which froze the
+  // globe the moment the mouse stopped moving instead of just tilting it.
+  var pointerYaw = 0, pointerPitch = 0;
   var pointerActive = false;
   var rafId = null;
   // Set by scroll-morph.js once the visitor starts scrolling past the
@@ -260,13 +266,18 @@
     nx = Math.max(-1, Math.min(1, nx));
     ny = Math.max(-1, Math.min(1, ny));
     pointerActive = true;
-    targetY = idleAngle + nx * MAX_YAW;
-    targetX = -ny * MAX_PITCH;
+    pointerYaw = nx * MAX_YAW;
+    pointerPitch = -ny * MAX_PITCH;
   }
 
   function frame() {
     idleAngle += hoveredLabel ? IDLE_SPEED_HOVER : IDLE_SPEED;
-    if (!pointerActive) targetY = idleAngle;
+    // Idle spin is always the baseline — the pointer only adds a yaw/
+    // pitch offset on top of it while active, and the sphere levels
+    // back out (pitch → 0) the moment the pointer leaves, so it always
+    // reads as a globe turning on its own axis, mouse or not.
+    targetY = idleAngle + (pointerActive ? pointerYaw : 0);
+    targetX = pointerActive ? pointerPitch : 0;
     curX += (targetX - curX) * LERP;
     curY += (targetY - curY) * LERP;
     if (!morphActive) {
@@ -332,7 +343,7 @@
     randomize: function () {
       if (isFlat) return;
       idleAngle += (Math.random() - 0.5) * 60;
-      IDLE_SPEED = 0.02 + Math.random() * 0.08;
+      IDLE_SPEED = 0.05 + Math.random() * 0.35;
     },
     reset: function () {
       idleAngle = 0;
@@ -340,7 +351,10 @@
       curY = 0;
       targetX = 0;
       targetY = 0;
-      IDLE_SPEED = 0.045;
+      pointerActive = false;
+      pointerYaw = 0;
+      pointerPitch = 0;
+      IDLE_SPEED = 0.13;
     },
   };
 })();

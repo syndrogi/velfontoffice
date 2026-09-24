@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BETA OFFICE — VELFONT OFFICE</title>
+<meta name="description" content="BETA OFFICE — VELFONT OFFICE's experimental laboratory. Interaction, motion, and browser-API prototypes in progress.">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="beta-office">
+
+<!-- Always-visible exit + tiny badge — see section 17/18 of the brief:
+     never traps the visitor, never hides what this page is. -->
+<div class="beta-topbar">
+  <a href="/" class="beta-exit">&larr; VELFONT OFFICE</a>
+  <span class="beta-badge">BETA OFFICE — EXPERIMENTAL ENVIRONMENT — THINGS MAY BREAK</span>
+</div>
+
+<!-- Real live values only, filled in by js/status-bar.js. -->
+<div class="beta-status" id="betaStatus" aria-hidden="true">
+  <span>VELFONT OFFICE</span>
+  <span>BETA OFFICE</span>
+  <span>BUILD 0.1</span>
+  <span id="betaStatusTime">--:--:--</span>
+  <span id="betaStatusViewport">0 × 0</span>
+  <span id="betaStatusFps">-- fps</span>
+</div>
+
+<button type="button" class="beta-keys-btn" id="betaKeysBtn" aria-haspopup="true" aria-expanded="false" aria-controls="betaKeysPanel">KEYS</button>
+<div class="beta-keys-panel" id="betaKeysPanel" hidden>
+  <p><kbd>G</kbd> grid</p>
+  <p><kbd>R</kbd> randomize</p>
+  <p><kbd>0</kbd> reset</p>
+  <p><kbd>Esc</kbd> close</p>
+  <p><kbd>&#8984;/Ctrl</kbd>+<kbd>K</kbd> command palette</p>
+</div>
+
+<main>
+  <!-- Kinetic typography sphere — js/sphere.js builds every word instance
+       into #betaSphere from the real nav data it reads for itself.
+       Falls back to a plain stacked list on touch/narrow viewports
+       (same element, different internal markup — see sphere.js). -->
+  <section class="beta-sphere-stage" id="betaSphereStage" aria-label="Beta Office navigation">
+    <div class="beta-sphere-perspective">
+      <div class="beta-sphere" id="betaSphere"></div>
+    </div>
+    <div class="beta-sphere-meta" id="betaSphereMeta" aria-hidden="true"></div>
+    <p class="beta-scroll-cue" aria-hidden="true">scroll</p>
+  </section>
+
+  <!-- Beta Office Control Area — js/app.js renders one tile per
+       registered experiment category (js/registry.js), each opening a
+       window via js/window-manager.js. -->
+  <section class="beta-control" id="betaControl">
+    <div class="beta-control-head">
+      <h1 class="beta-control-title">BETA OFFICE CONTROL AREA</h1>
+      <p class="beta-control-desc">Every experiment below is real — pick one, drag it around, break it, reset it.</p>
+      <div class="beta-control-actions">
+        <button type="button" class="beta-btn" id="betaRandomizeBtn">RANDOMIZE</button>
+        <button type="button" class="beta-btn" id="betaResetBtn">RESET</button>
+      </div>
+    </div>
+    <div class="beta-control-tiles" id="betaCategoryTiles"></div>
+  </section>
+</main>
+
+<!-- Every open experiment window lives here, stacked by js/window-manager.js. -->
+<div class="beta-windows-layer" id="betaWindowsLayer"></div>
+<div class="beta-taskbar" id="betaTaskbar" aria-label="Minimized windows"></div>
+
+<div class="beta-command-palette" id="betaCommandPalette" hidden role="dialog" aria-modal="true" aria-label="Command palette">
+  <input type="text" class="beta-command-input" id="betaCommandInput" placeholder="Type a command…" autocomplete="off" spellcheck="false">
+  <ul class="beta-command-list" id="betaCommandList"></ul>
+</div>
+
+<script src="js/registry.js" defer></script>
+<script src="js/window-manager.js" defer></script>
+<script src="js/controls.js" defer></script>
+<script src="js/experiments/typography.js" defer></script>
+<script src="js/experiments/motion.js" defer></script>
+<script src="js/experiments/cursor.js" defer></script>
+<script src="js/experiments/grid.js" defer></script>
+<script src="js/experiments/color.js" defer></script>
+<script src="js/experiments/dom.js" defer></script>
+<script src="js/experiments/browser.js" defer></script>
+<script src="js/experiments/system.js" defer></script>
+<script src="js/experiments/debug.js" defer></script>
+<script src="js/experiments/image.js" defer></script>
+<script src="js/experiments/sound.js" defer></script>
+<script src="js/experiments/canvas.js" defer></script>
+<script src="js/experiments/physics.js" defer></script>
+<script src="js/experiments/distortion.js" defer></script>
+<script src="js/experiments/experiments-index.js" defer></script>
+<script src="js/sphere.js" defer></script>
+<script src="js/scroll-morph.js" defer></script>
+<script src="js/command-palette.js" defer></script>
+<script src="js/keyboard.js" defer></script>
+<script src="js/status-bar.js" defer></script>
+<script src="js/app.js" defer></script>
+</body>
+</html>

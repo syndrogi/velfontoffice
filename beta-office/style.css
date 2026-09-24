@@ -1,0 +1,889 @@
+/* ==========================================================================
+   BETA OFFICE — an independent experimental sandbox under VELFONT OFFICE.
+   Deliberately flat/brutalist, matching the root site's language (no
+   radius, no shadow, thin borders, black/white) — everything "experimental"
+   here comes from interaction and motion, not decoration. Fully namespaced
+   under .beta-* / body.beta-office so nothing can collide with the root
+   site's style.css (this file is never loaded there, and vice versa).
+   ========================================================================== */
+
+:root {
+  --beta-bg: #ffffff;
+  --beta-fg: #000000;
+  --beta-fg-muted: rgba(0, 0, 0, 0.55);
+  --beta-fg-faint: rgba(0, 0, 0, 0.32);
+  --beta-line: #e5e5e5;
+  --beta-accent: #e0261f;
+
+  --beta-font-display: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --beta-font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+
+  --beta-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --beta-edge: 32px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background: var(--beta-bg);
+}
+
+body.beta-office {
+  background: var(--beta-bg);
+  color: var(--beta-fg);
+  font-family: var(--beta-font-display);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+.beta-office a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.beta-office button {
+  font: inherit;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.beta-office ul {
+  list-style: none;
+}
+
+.beta-office :focus-visible {
+  outline: 1px solid var(--beta-fg-muted);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beta-office * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ==========================================================================
+   Topbar — exit + badge, section 17/18
+   ========================================================================== */
+
+.beta-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px var(--beta-edge);
+  pointer-events: none;
+}
+
+.beta-exit {
+  pointer-events: auto;
+  font-family: var(--beta-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 10px;
+  border: 1px solid var(--beta-fg);
+  background: var(--beta-bg);
+  transition: color 150ms var(--beta-ease), background-color 150ms var(--beta-ease);
+}
+
+.beta-exit:hover,
+.beta-exit:focus-visible {
+  color: var(--beta-bg);
+  background: var(--beta-fg);
+}
+
+.beta-badge {
+  pointer-events: none;
+  font-family: var(--beta-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--beta-fg-faint);
+  text-align: right;
+}
+
+/* ==========================================================================
+   Status readout — section 16, real values only
+   ========================================================================== */
+
+.beta-status {
+  position: fixed;
+  left: var(--beta-edge);
+  bottom: 14px;
+  z-index: 700;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: var(--beta-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--beta-fg-faint);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Keys legend — section 14
+   ========================================================================== */
+
+.beta-keys-btn {
+  position: fixed;
+  right: var(--beta-edge);
+  bottom: 14px;
+  z-index: 700;
+  font-family: var(--beta-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 6px 10px;
+  border: 1px solid var(--beta-fg-muted);
+  transition: color 150ms var(--beta-ease), border-color 150ms var(--beta-ease);
+}
+
+.beta-keys-btn:hover {
+  color: var(--beta-accent);
+  border-color: var(--beta-accent);
+}
+
+.beta-keys-panel {
+  position: fixed;
+  right: var(--beta-edge);
+  bottom: 46px;
+  z-index: 750;
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  background: var(--beta-bg);
+  border: 1px solid var(--beta-fg);
+  font-family: var(--beta-font-mono);
+  font-size: 11px;
+}
+
+.beta-keys-panel kbd {
+  display: inline-block;
+  min-width: 1.4em;
+  padding: 1px 5px;
+  border: 1px solid var(--beta-fg-muted);
+  font-family: inherit;
+  font-size: 10px;
+  text-align: center;
+}
+
+/* ==========================================================================
+   Sphere stage — sections 4–8
+   ========================================================================== */
+
+.beta-sphere-stage {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.beta-sphere-perspective {
+  perspective: 1200px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.beta-sphere {
+  position: relative;
+  transform-style: preserve-3d;
+  width: 1px;
+  height: 1px;
+}
+
+.beta-sphere-word {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-style: preserve-3d;
+  white-space: nowrap;
+  font-family: var(--beta-font-display);
+  font-weight: 700;
+  font-size: clamp(13px, 1.6vw, 20px);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--beta-fg);
+  opacity: 0.85;
+  cursor: pointer;
+  transition: opacity 220ms var(--beta-ease), color 150ms var(--beta-ease);
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.beta-sphere-word.beta-is-secondary {
+  font-size: clamp(10px, 1.05vw, 13px);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--beta-fg-muted);
+}
+
+.beta-sphere.beta-has-hover .beta-sphere-word {
+  opacity: 0.14;
+}
+
+.beta-sphere.beta-has-hover .beta-sphere-word.beta-is-hovered {
+  opacity: 1;
+  color: var(--beta-accent);
+}
+
+.beta-sphere-meta {
+  position: absolute;
+  left: var(--beta-edge);
+  bottom: 96px;
+  z-index: 10;
+  font-family: var(--beta-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--beta-fg-muted);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 200ms var(--beta-ease), transform 200ms var(--beta-ease);
+  max-width: 60vw;
+}
+
+.beta-sphere-meta.beta-is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.beta-sphere-meta strong {
+  display: block;
+  color: var(--beta-fg);
+  font-size: 12px;
+}
+
+.beta-scroll-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  font-family: var(--beta-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--beta-fg-faint);
+  animation: beta-scroll-cue-bob 1.8s var(--beta-ease) infinite;
+}
+
+@keyframes beta-scroll-cue-bob {
+  0%, 100% { transform: translate(-50%, 0); opacity: 0.6; }
+  50% { transform: translate(-50%, 6px); opacity: 1; }
+}
+
+.beta-sphere-stage.beta-scrolled-past .beta-scroll-cue {
+  display: none;
+}
+
+/* Mobile / reduced-motion fallback — plain stacked list built by
+   sphere.js into the same #betaSphere element (see section 19). */
+.beta-sphere.beta-is-flat {
+  width: auto;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  transform: none !important;
+}
+
+.beta-sphere.beta-is-flat .beta-sphere-word {
+  position: static;
+  transform: none !important;
+  opacity: 1;
+}
+
+.beta-sphere.beta-is-flat.beta-has-hover .beta-sphere-word {
+  opacity: 0.35;
+}
+
+.beta-sphere.beta-is-flat.beta-has-hover .beta-sphere-word.beta-is-hovered {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   Control area — sections 9, 15
+   ========================================================================== */
+
+.beta-control {
+  position: relative;
+  z-index: 1;
+  background: var(--beta-bg);
+  border-top: 1px solid var(--beta-fg);
+  padding: 64px var(--beta-edge) 96px;
+}
+
+.beta-control-head {
+  max-width: 640px;
+  margin: 0 0 40px;
+}
+
+.beta-control-title {
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 12px;
+}
+
+.beta-control-desc {
+  font-size: 14px;
+  color: var(--beta-fg-muted);
+  margin-bottom: 20px;
+}
+
+.beta-control-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.beta-btn {
+  font-family: var(--beta-font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 9px 16px;
+  border: 1px solid var(--beta-fg);
+  transition: color 150ms var(--beta-ease), background-color 150ms var(--beta-ease);
+}
+
+.beta-btn:hover,
+.beta-btn:focus-visible {
+  color: var(--beta-bg);
+  background: var(--beta-fg);
+}
+
+.beta-control-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1px;
+  background: var(--beta-line);
+  border: 1px solid var(--beta-line);
+}
+
+.beta-tile {
+  background: var(--beta-bg);
+  padding: 18px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 96px;
+  transition: background-color 150ms var(--beta-ease);
+}
+
+.beta-tile:hover,
+.beta-tile:focus-visible {
+  background: var(--beta-bg-hover, #f5f5f5);
+}
+
+.beta-tile-name {
+  font-family: var(--beta-font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.beta-tile-count {
+  font-size: 11px;
+  color: var(--beta-fg-faint);
+}
+
+/* ==========================================================================
+   Windows — section 10
+   ========================================================================== */
+
+.beta-windows-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  pointer-events: none;
+}
+
+.beta-window {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  min-width: 220px;
+  min-height: 140px;
+  background: var(--beta-bg);
+  border: 1px solid var(--beta-fg);
+  pointer-events: auto;
+}
+
+.beta-window-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--beta-fg);
+  background: var(--beta-bg);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.beta-window.beta-is-dragging .beta-window-titlebar {
+  cursor: grabbing;
+}
+
+.beta-window-title {
+  font-family: var(--beta-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.beta-window-controls {
+  display: flex;
+  gap: 4px;
+  flex: none;
+}
+
+.beta-window-btn {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--beta-fg-muted);
+  font-size: 12px;
+  line-height: 1;
+  transition: color 150ms var(--beta-ease), border-color 150ms var(--beta-ease);
+}
+
+.beta-window-btn:hover,
+.beta-window-btn:focus-visible {
+  color: var(--beta-accent);
+  border-color: var(--beta-accent);
+}
+
+.beta-window-content {
+  flex: 1;
+  overflow: auto;
+  padding: 14px;
+  font-size: 13px;
+}
+
+.beta-window-resize {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 14px;
+  height: 14px;
+  cursor: nwse-resize;
+  background:
+    linear-gradient(135deg, transparent 45%, var(--beta-fg-muted) 45%, var(--beta-fg-muted) 55%, transparent 55%),
+    linear-gradient(135deg, transparent 65%, var(--beta-fg-muted) 65%, var(--beta-fg-muted) 75%, transparent 75%);
+}
+
+.beta-window.beta-is-minimized .beta-window-content,
+.beta-window.beta-is-minimized .beta-window-resize {
+  display: none;
+}
+
+.beta-window.beta-is-minimized {
+  height: auto !important;
+}
+
+.beta-window.beta-is-maximized {
+  left: var(--beta-edge) !important;
+  top: 64px !important;
+  width: calc(100% - (var(--beta-edge) * 2)) !important;
+  height: calc(100% - 96px) !important;
+}
+
+.beta-window.beta-is-hidden {
+  display: none;
+}
+
+/* ==========================================================================
+   Taskbar — minimized-window chips
+   ========================================================================== */
+
+.beta-taskbar {
+  position: fixed;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  z-index: 600;
+  display: flex;
+  gap: 6px;
+}
+
+.beta-taskbar-chip {
+  font-family: var(--beta-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 6px 10px;
+  border: 1px solid var(--beta-fg);
+  background: var(--beta-bg);
+}
+
+.beta-taskbar-chip:hover {
+  color: var(--beta-accent);
+  border-color: var(--beta-accent);
+}
+
+/* ==========================================================================
+   Command palette — section 13
+   ========================================================================== */
+
+.beta-command-palette {
+  position: fixed;
+  left: 50%;
+  top: 18vh;
+  transform: translateX(-50%);
+  z-index: 900;
+  width: min(90vw, 460px);
+  background: var(--beta-bg);
+  border: 1px solid var(--beta-fg);
+}
+
+.beta-command-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  border-bottom: 1px solid var(--beta-fg);
+  font-family: var(--beta-font-mono);
+  font-size: 13px;
+  color: var(--beta-fg);
+  background: var(--beta-bg);
+}
+
+.beta-command-input:focus-visible {
+  outline: none;
+}
+
+.beta-command-list {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.beta-command-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 16px;
+  font-family: var(--beta-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid var(--beta-line);
+}
+
+.beta-command-item:last-child {
+  border-bottom: none;
+}
+
+.beta-command-item.beta-is-active {
+  background: var(--beta-fg);
+  color: var(--beta-bg);
+}
+
+/* ==========================================================================
+   Shared experiment-window controls — reused by every js/experiments/*.js
+   module so individual files don't each reinvent slider/toggle markup.
+   ========================================================================== */
+
+.beta-field {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.beta-field:last-child {
+  margin-bottom: 0;
+}
+
+.beta-field-label {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--beta-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--beta-fg-muted);
+}
+
+.beta-field input[type="range"] {
+  width: 100%;
+  accent-color: var(--beta-fg);
+}
+
+.beta-field input[type="color"] {
+  width: 100%;
+  height: 26px;
+  border: 1px solid var(--beta-fg);
+  padding: 0;
+  background: none;
+}
+
+.beta-toggle-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.beta-toggle-row:last-child {
+  margin-bottom: 0;
+}
+
+.beta-toggle {
+  font-family: var(--beta-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 6px 9px;
+  border: 1px solid var(--beta-fg-muted);
+}
+
+.beta-toggle:hover {
+  border-color: var(--beta-fg);
+}
+
+.beta-toggle.beta-is-active {
+  background: var(--beta-fg);
+  color: var(--beta-bg);
+  border-color: var(--beta-fg);
+}
+
+.beta-readout {
+  font-family: var(--beta-font-mono);
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--beta-fg-muted);
+  white-space: pre-line;
+}
+
+.beta-readout strong {
+  color: var(--beta-fg);
+}
+
+.beta-sample-text {
+  font-family: var(--beta-font-display);
+  font-weight: 700;
+  line-height: 1.3;
+  padding: 10px 0;
+  word-break: break-word;
+}
+
+.beta-stage {
+  position: relative;
+  height: 140px;
+  border: 1px solid var(--beta-line);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.beta-stage-dot {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--beta-fg);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.beta-stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+
+.beta-mini-btn {
+  font-family: var(--beta-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 6px 9px;
+  border: 1px solid var(--beta-fg);
+}
+
+.beta-mini-btn:hover {
+  color: var(--beta-bg);
+  background: var(--beta-fg);
+}
+
+.beta-drop-zone {
+  border: 1px dashed var(--beta-fg-muted);
+  padding: 18px;
+  text-align: center;
+  font-family: var(--beta-font-mono);
+  font-size: 11px;
+  color: var(--beta-fg-muted);
+  margin-bottom: 14px;
+}
+
+.beta-drop-zone.beta-is-over {
+  border-color: var(--beta-accent);
+  color: var(--beta-accent);
+}
+
+.beta-drop-preview {
+  max-width: 100%;
+  display: block;
+  margin-bottom: 10px;
+}
+
+/* ==========================================================================
+   DOM-inspector overlay outlines (js/experiments/dom.js)
+   ========================================================================== */
+
+html.beta-dom-outline .beta-office * {
+  outline: 1px dashed rgba(224, 38, 31, 0.35) !important;
+  outline-offset: -1px;
+}
+
+.beta-dom-label {
+  position: fixed;
+  z-index: 5000;
+  background: var(--beta-fg);
+  color: var(--beta-bg);
+  font-family: var(--beta-font-mono);
+  font-size: 9px;
+  padding: 1px 4px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Grid overlay (js/experiments/grid.js) */
+.beta-grid-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  pointer-events: none;
+}
+
+.beta-grid-overlay[data-mode="column"] {
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(224, 38, 31, 0.12) 0,
+    rgba(224, 38, 31, 0.12) 1px,
+    transparent 1px,
+    transparent calc(100% / 12)
+  );
+}
+
+.beta-grid-overlay[data-mode="baseline"] {
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(224, 38, 31, 0.12) 0,
+    rgba(224, 38, 31, 0.12) 1px,
+    transparent 1px,
+    transparent 24px
+  );
+}
+
+.beta-grid-overlay[data-mode="pixel"] {
+  background-image:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.06) 0, rgba(0, 0, 0, 0.06) 1px, transparent 1px, transparent 8px),
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.06) 0, rgba(0, 0, 0, 0.06) 1px, transparent 1px, transparent 8px);
+}
+
+/* Custom cursor modes (js/experiments/cursor.js) */
+html.beta-cursor-crosshair .beta-office { cursor: crosshair; }
+html.beta-cursor-circle .beta-office { cursor: none; }
+
+.beta-cursor-dot {
+  position: fixed;
+  z-index: 6000;
+  pointer-events: none;
+  border: 1px solid var(--beta-fg);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  transform: translate(-50%, -50%);
+}
+
+.beta-cursor-coords {
+  position: fixed;
+  z-index: 6000;
+  pointer-events: none;
+  font-family: var(--beta-font-mono);
+  font-size: 10px;
+  background: var(--beta-fg);
+  color: var(--beta-bg);
+  padding: 2px 5px;
+  transform: translate(12px, 12px);
+}
+
+/* Page-level effects (color/distortion experiments) */
+html.beta-invert .beta-office {
+  filter: invert(1);
+}
+
+html.beta-mono .beta-office {
+  filter: grayscale(1);
+}
+
+body.beta-office.beta-shake {
+  animation: beta-shake 340ms var(--beta-ease);
+}
+
+@keyframes beta-shake {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(calc(var(--beta-shake-amount, 1) * -6px), calc(var(--beta-shake-amount, 1) * 2px)); }
+  40% { transform: translate(calc(var(--beta-shake-amount, 1) * 5px), calc(var(--beta-shake-amount, 1) * -3px)); }
+  60% { transform: translate(calc(var(--beta-shake-amount, 1) * -4px), calc(var(--beta-shake-amount, 1) * 3px)); }
+  80% { transform: translate(calc(var(--beta-shake-amount, 1) * 3px), calc(var(--beta-shake-amount, 1) * -2px)); }
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  :root {
+    --beta-edge: 20px;
+  }
+
+  .beta-badge {
+    display: none;
+  }
+
+  .beta-sphere-stage {
+    height: auto;
+    min-height: 100svh;
+    padding: 96px 0 64px;
+  }
+
+  .beta-window {
+    width: min(88vw, 320px) !important;
+  }
+
+  .beta-window.beta-is-maximized {
+    top: 56px !important;
+    height: calc(100% - 72px) !important;
+  }
+}

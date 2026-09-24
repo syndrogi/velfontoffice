@@ -764,6 +764,130 @@ body.beta-office {
   background: var(--beta-fg);
 }
 
+/* Dice — the rolled face, sized up from the default .beta-sample-text
+   weight so it reads at a glance. */
+.beta-dice-face {
+  font-size: 48px;
+  text-align: center;
+}
+
+/* Memory — 4x3 flip-and-match grid. */
+.beta-memory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.beta-memory-card {
+  aspect-ratio: 1;
+  border: 1px solid var(--beta-fg);
+  background: var(--beta-bg);
+  font-family: var(--beta-font-mono);
+  font-size: 14px;
+  color: var(--beta-fg);
+  cursor: pointer;
+}
+
+.beta-memory-card.beta-is-matched {
+  border-color: var(--beta-fg-muted);
+  color: var(--beta-fg-muted);
+  cursor: default;
+}
+
+/* Whack — 3x3 timed clicker; the active cell is the one to hit. */
+.beta-whack-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.beta-whack-cell {
+  aspect-ratio: 1;
+  border: 1px solid var(--beta-line);
+  background: var(--beta-bg);
+  cursor: pointer;
+}
+
+.beta-whack-cell.beta-is-active {
+  background: var(--beta-accent);
+  border-color: var(--beta-accent);
+}
+
+/* Piano — eight keys, playable by mouse or the A S D F H J K L row. */
+.beta-piano-row {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.beta-piano-key {
+  flex: 1;
+  padding: 18px 0;
+  border: 1px solid var(--beta-fg);
+  background: var(--beta-bg);
+  font-family: var(--beta-font-mono);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.beta-piano-key.beta-is-active {
+  background: var(--beta-fg);
+  color: var(--beta-bg);
+}
+
+/* Simon — 2x2 pad grid. Pads are shaded within the existing monochrome +
+   accent palette (white/light/black/red) rather than a rainbow of hues;
+   the active flash dims whichever pad it is, so it reads consistently
+   regardless of that pad's own base shade. */
+.beta-simon-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.beta-simon-pad {
+  aspect-ratio: 1;
+  border: 1px solid var(--beta-fg);
+  background: var(--beta-bg);
+  cursor: pointer;
+}
+
+.beta-simon-pad:nth-child(2) {
+  background: var(--beta-line);
+}
+
+.beta-simon-pad:nth-child(3) {
+  background: var(--beta-fg);
+}
+
+.beta-simon-pad:nth-child(4) {
+  background: var(--beta-accent);
+}
+
+.beta-simon-pad.beta-is-active {
+  opacity: 0.55;
+}
+
+/* TicTacToe — 3x3 local 2-player grid. */
+.beta-ttt-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.beta-ttt-cell {
+  aspect-ratio: 1;
+  border: 1px solid var(--beta-fg);
+  background: var(--beta-bg);
+  font-family: var(--beta-font-mono);
+  font-size: 22px;
+  cursor: pointer;
+}
+
 .beta-drop-zone {
   border: 1px dashed var(--beta-fg-muted);
   padding: 18px;

@@ -721,6 +721,35 @@ body.beta-office {
   cursor: crosshair;
 }
 
+/* Reflex — click-to-arm reaction timer. States are a background/
+   foreground flip within the existing monochrome + accent palette
+   (no new hue introduced): armed/idle stays default, the "go" signal
+   flips to a full black/white invert, a false start flips to accent-red. */
+.beta-reflex-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 16px;
+  cursor: pointer;
+  font-family: var(--beta-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--beta-fg-muted);
+  user-select: none;
+}
+
+.beta-reflex-stage.beta-is-go {
+  background: var(--beta-fg);
+  color: var(--beta-bg);
+}
+
+.beta-reflex-stage.beta-is-early {
+  background: var(--beta-accent);
+  color: var(--beta-bg);
+}
+
 .beta-mini-btn {
   font-family: var(--beta-font-mono);
   font-size: 10px;

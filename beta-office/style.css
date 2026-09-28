@@ -888,6 +888,161 @@ body.beta-office {
   cursor: pointer;
 }
 
+/* Minesweeper — 8x8 grid. */
+.beta-mine-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+  margin-bottom: 14px;
+}
+
+.beta-mine-cell {
+  aspect-ratio: 1;
+  border: 1px solid var(--beta-line);
+  background: var(--beta-fg-muted);
+  font-family: var(--beta-font-mono);
+  font-size: 9px;
+  color: var(--beta-fg);
+  cursor: pointer;
+}
+
+.beta-mine-cell.beta-is-revealed {
+  background: var(--beta-bg);
+  cursor: default;
+}
+
+.beta-mine-cell.beta-is-flagged {
+  color: var(--beta-accent);
+}
+
+/* 2048 — 4x4 slide-and-merge grid. */
+.beta-2048-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.beta-2048-cell {
+  aspect-ratio: 1;
+  border: 1px solid var(--beta-line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--beta-font-mono);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Connect Four — 7x6 drop grid. Red vs black, not the usual red/yellow,
+   to stay inside the existing monochrome + accent-red palette. */
+.beta-c4-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 14px;
+  background: var(--beta-line);
+  padding: 4px;
+}
+
+.beta-c4-cell {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid var(--beta-fg-muted);
+  background: var(--beta-bg);
+  cursor: pointer;
+}
+
+.beta-c4-cell.beta-is-red {
+  background: var(--beta-accent);
+  border-color: var(--beta-accent);
+}
+
+.beta-c4-cell.beta-is-black {
+  background: var(--beta-fg);
+  border-color: var(--beta-fg);
+}
+
+/* Hangman — the blanked word plus an on-screen A-Z keyboard. */
+.beta-hangman-word {
+  font-size: 20px;
+  letter-spacing: 0.15em;
+  text-align: center;
+}
+
+.beta-hangman-keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.beta-hangman-key {
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--beta-fg);
+  font-family: var(--beta-font-mono);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.beta-hangman-key:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.beta-hangman-key.beta-is-wrong {
+  border-color: var(--beta-accent);
+  opacity: 1;
+}
+
+.beta-hangman-key.beta-is-correct {
+  border-color: var(--beta-fg);
+  opacity: 1;
+}
+
+/* Lights Out — 5x5 toggle-neighbors puzzle. */
+.beta-lightsout-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.beta-lightsout-cell {
+  aspect-ratio: 1;
+  border: 1px solid var(--beta-fg-muted);
+  background: var(--beta-bg);
+  cursor: pointer;
+}
+
+.beta-lightsout-cell.beta-is-on {
+  background: var(--beta-fg);
+}
+
+/* Slots — three flickering reels. */
+.beta-slots-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.beta-slots-reel {
+  flex: 1;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--beta-fg);
+  font-size: 28px;
+}
+
+/* HiLo — the current card. */
+.beta-hilo-card {
+  font-size: 40px;
+  text-align: center;
+}
+
 .beta-drop-zone {
   border: 1px dashed var(--beta-fg-muted);
   padding: 18px;
@@ -901,6 +1056,345 @@ body.beta-office {
 .beta-drop-zone.beta-is-over {
   border-color: var(--beta-accent);
   color: var(--beta-accent);
+}
+
+/* Shared text input / textarea — used by any experiment that needs
+   typed input (Guess Number, Scramble, Emoji Guess, Type Race, ...). */
+.beta-text-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--beta-fg);
+  background: var(--beta-bg);
+  color: var(--beta-fg);
+  font-family: var(--beta-font-mono);
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.beta-textarea {
+  width: 100%;
+  min-height: 60px;
+  padding: 6px 8px;
+  border: 1px solid var(--beta-fg);
+  background: var(--beta-bg);
+  color: var(--beta-fg);
+  font-family: var(--beta-font-mono);
+  font-size: 12px;
+  margin-bottom: 10px;
+  resize: vertical;
+}
+
+/* Bingo — 5x5 card. */
+.beta-bingo-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 3px;
+  margin-bottom: 14px;
+}
+
+.beta-bingo-cell {
+  aspect-ratio: 1;
+  border: 1px solid var(--beta-fg-muted);
+  background: var(--beta-bg);
+  font-family: var(--beta-font-mono);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.beta-bingo-cell.beta-is-marked {
+  background: var(--beta-accent);
+  color: var(--beta-bg);
+  border-color: var(--beta-accent);
+  cursor: default;
+}
+
+/* Scramble — the scrambled word. */
+.beta-scramble-word {
+  font-size: 24px;
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+
+/* Trivia — question + option buttons. */
+.beta-trivia-q {
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.beta-trivia-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+/* Math — the current problem. */
+.beta-math-q {
+  font-size: 26px;
+  text-align: center;
+}
+
+/* Emoji Guess — the emoji puzzle itself. */
+.beta-emoji-puzzle {
+  font-size: 36px;
+  text-align: center;
+}
+
+/* CPS — click-speed test stage (own copy of Reflex's base look, since
+   the two experiments ship independently and neither depends on the
+   other's markup). */
+.beta-cps-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--beta-font-mono);
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Type Race — the sentence to copy. */
+.beta-typerace-prompt {
+  font-size: 15px;
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+/* Banner — the huge rendered text and its display-style modifiers. */
+.beta-banner-text {
+  font-size: 34px;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.beta-banner-outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--beta-fg);
+}
+
+.beta-banner-strike {
+  text-decoration: line-through;
+}
+
+/* Palette — 5 generated swatches. */
+.beta-palette-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.beta-palette-swatch {
+  flex: 1;
+  aspect-ratio: 1;
+  border: 1px solid var(--beta-fg);
+  cursor: pointer;
+}
+
+/* Bubble Wrap — a satisfying poppable grid. */
+.beta-bubblewrap-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.beta-bubblewrap-bubble {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid var(--beta-line);
+  background: var(--beta-bg);
+  cursor: pointer;
+}
+
+.beta-bubblewrap-bubble.beta-is-popped {
+  background: var(--beta-line);
+  border-color: var(--beta-fg-muted);
+  cursor: default;
+}
+
+/* Drums — 3x8 step sequencer. */
+.beta-drums-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 3px;
+  margin-bottom: 14px;
+}
+
+.beta-drums-cell {
+  aspect-ratio: 1;
+  border: 1px solid var(--beta-line);
+  background: var(--beta-bg);
+  cursor: pointer;
+}
+
+.beta-drums-cell.beta-is-active {
+  background: var(--beta-fg);
+}
+
+.beta-drums-cell.beta-is-current {
+  outline: 2px solid var(--beta-accent);
+  outline-offset: -2px;
+}
+
+/* Metronome — the pulsing beat dot. */
+.beta-metronome-dot {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--beta-fg);
+  margin: 0 auto 14px;
+}
+
+.beta-metronome-dot.beta-is-pulsing {
+  animation: betaMetronomePulse 180ms var(--beta-ease);
+}
+
+@keyframes betaMetronomePulse {
+  0% { transform: scale(1.3); opacity: 0.6; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Soundboard — 8 preset tone buttons. */
+.beta-soundboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.beta-soundboard-btn {
+  padding: 14px 0;
+  border: 1px solid var(--beta-fg);
+  font-family: var(--beta-font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.beta-soundboard-btn:hover {
+  background: var(--beta-fg);
+  color: var(--beta-bg);
+}
+
+/* Stopwatch — the recent-laps line. */
+.beta-stopwatch-laps {
+  font-family: var(--beta-font-mono);
+  font-size: 10px;
+  color: var(--beta-fg-muted);
+  margin-top: 8px;
+}
+
+/* Coin Flip — the coin face. */
+.beta-coin {
+  font-size: 44px;
+  text-align: center;
+}
+
+/* Text Mirror — the echoed output and its flip/mirror transforms. */
+.beta-textmirror-output {
+  font-size: 22px;
+  text-align: center;
+}
+
+.beta-textmirror-flip {
+  transform: rotate(180deg);
+}
+
+.beta-textmirror-mirror {
+  transform: scaleX(-1);
+}
+
+/* Pixel Paint — palette swatches + the 16x16 canvas-free grid. */
+.beta-pixelpaint-palette {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.beta-pixelpaint-swatch {
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--beta-fg-muted);
+  cursor: pointer;
+}
+
+.beta-pixelpaint-swatch.beta-is-active {
+  border-color: var(--beta-accent);
+  border-width: 2px;
+}
+
+.beta-pixelpaint-grid {
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  border: 1px solid var(--beta-line);
+  margin-bottom: 14px;
+  touch-action: none;
+}
+
+.beta-pixelpaint-cell {
+  aspect-ratio: 1;
+  box-shadow: inset 0 0 0 0.5px var(--beta-line);
+}
+
+/* Sticky Notes — a small draggable-note board. */
+.beta-sticky-board {
+  position: relative;
+  height: 160px;
+  border: 1px solid var(--beta-line);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.beta-sticky-note {
+  position: absolute;
+  width: 90px;
+  min-height: 70px;
+  padding: 8px;
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
+  cursor: grab;
+  touch-action: none;
+}
+
+.beta-sticky-note:active {
+  cursor: grabbing;
+}
+
+.beta-sticky-text {
+  font-family: var(--beta-font-mono);
+  font-size: 11px;
+  color: #111;
+  outline: none;
+  word-break: break-word;
+}
+
+.beta-sticky-delete {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  background: none;
+  border: none;
+  font-size: 12px;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+
+/* Stroop — the mismatched color word. */
+.beta-stroop-word {
+  font-size: 30px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Mood Ring — the color swatch. */
+.beta-moodring-swatch {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin: 0 auto 14px;
+  background: var(--beta-line);
+  transition: background-color 300ms var(--beta-ease);
 }
 
 .beta-drop-preview {

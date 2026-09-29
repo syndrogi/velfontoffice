@@ -534,4 +534,19 @@
       }, VEIL_MS);
     });
   });
+
+  // `.is-active` (and `.is-dark`) is a transient, JS-only class — never
+  // present in the static HTML, only added right before the navigation
+  // above. Back-forward cache can snapshot this page mid-transition
+  // (veil fully opaque, z-index 9999, covering everything) and restore
+  // that exact DOM state instantly on a bfcache hit, with no
+  // DOMContentLoaded/load re-run to naturally clear it — the page looks
+  // permanently blank until a manual reload. `pageshow`'s `persisted`
+  // flag is what tells a bfcache restore apart from a normal load, so
+  // only that case needs the veil explicitly cleared back to hidden.
+  window.addEventListener("pageshow", function (e) {
+    if (e.persisted) {
+      veil.classList.remove("is-active", "is-dark");
+    }
+  });
 })();

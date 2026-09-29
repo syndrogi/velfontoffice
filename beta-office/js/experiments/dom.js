@@ -25,7 +25,15 @@
         readout.innerHTML = "<strong>" + document.getElementsByTagName("*").length + "</strong> elements in document";
       }
       updateCount();
-      var countTimer = window.setInterval(updateCount, 800);
+      var countTimer = null;
+      function startCount() {
+        if (!countTimer) countTimer = window.setInterval(updateCount, 800);
+      }
+      function stopCount() {
+        window.clearInterval(countTimer);
+        countTimer = null;
+      }
+      startCount();
 
       function clearLabels() {
         labels.forEach(function (l) { l.remove(); });
@@ -70,12 +78,22 @@
         onToggle: function (next) { boundsOn = next; drawLabels(); },
       });
 
-      return function cleanup() {
-        window.clearInterval(countTimer);
-        window.removeEventListener("scroll", onViewportChange);
-        window.removeEventListener("resize", onViewportChange);
-        html.classList.remove("beta-dom-outline");
-        clearLabels();
+      return {
+        cleanup: function () {
+          stopCount();
+          window.removeEventListener("scroll", onViewportChange);
+          window.removeEventListener("resize", onViewportChange);
+          html.classList.remove("beta-dom-outline");
+          clearLabels();
+        },
+        // Only the node-count readout pauses on minimize — it's the
+        // one piece of this experiment that's actually invisible while
+        // the window is hidden. The outline/bounds-label effects stay
+        // running: they're drawn on the page itself, not inside this
+        // window, so minimizing the controls shouldn't visibly turn
+        // them off.
+        onHide: stopCount,
+        onShow: startCount,
       };
     },
   });

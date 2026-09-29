@@ -27,12 +27,18 @@
           "<strong>open windows</strong> " + open + "\n" +
           "<strong>loaded</strong> " + loadedAt;
       }
-      render();
-      var timer = window.setInterval(render, 600);
-
-      return function cleanup() {
+      var timer = null;
+      function start() {
+        render();
+        if (!timer) timer = window.setInterval(render, 600);
+      }
+      function stop() {
         window.clearInterval(timer);
-      };
+        timer = null;
+      }
+      start();
+
+      return { cleanup: stop, onHide: stop, onShow: start };
     },
   });
 })();

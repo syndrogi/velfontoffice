@@ -286,21 +286,41 @@
     rafId = requestAnimationFrame(frame);
   }
 
+  // Gates the rAF loop on two independent conditions: the tab being in
+  // the foreground (visibilitychange) and the stage actually being
+  // scrolled into view (IntersectionObserver) — scrolling on past into
+  // the control area still leaves `document.hidden` false, so without
+  // the second check the idle spin's math would keep running forever
+  // for a sphere nobody can see anymore.
+  var stageInView = true;
+  function startLoop() {
+    if (!rafId && !document.hidden && stageInView) rafId = requestAnimationFrame(frame);
+  }
+  function stopLoop() {
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = null;
+  }
+
   if (!isFlat) {
     stage.addEventListener("pointermove", onPointerMove, { passive: true });
     stage.addEventListener("pointerleave", function () {
       pointerActive = false;
     });
-    rafId = requestAnimationFrame(frame);
+    startLoop();
 
     document.addEventListener("visibilitychange", function () {
-      if (document.hidden) {
-        if (rafId) cancelAnimationFrame(rafId);
-        rafId = null;
-      } else if (!rafId) {
-        rafId = requestAnimationFrame(frame);
-      }
+      if (document.hidden) stopLoop();
+      else startLoop();
     });
+
+    if ("IntersectionObserver" in window) {
+      var stageObserver = new IntersectionObserver(function (entries) {
+        stageInView = entries[0].isIntersecting;
+        if (stageInView) startLoop();
+        else stopLoop();
+      });
+      stageObserver.observe(stage);
+    }
   }
 
   // Called by scroll-morph.js with 0 (fully sphere) → 1 (fully flat

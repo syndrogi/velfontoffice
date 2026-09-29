@@ -27,7 +27,7 @@ function galleryHtml(images, product, soldOut) {
           .map(
             (src, i) => `
           <button class="thumb${i === 0 ? " active" : ""}" data-src="${src}">
-            <img src="${src}" alt="${product.name} thumbnail ${i + 1}">
+            <img src="${src}" alt="${product.name} thumbnail ${i + 1}" loading="lazy">
           </button>`
           )
           .join("")}

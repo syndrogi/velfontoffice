@@ -24,7 +24,7 @@
     description: "Size, spacing, line-height, scramble",
     launch: function (container) {
       var sample = window.BetaControls.sampleText(container, SAMPLE);
-      var state = { size: 26, spacing: 0, lineHeight: 1.3, timer: null };
+      var state = { size: 26, spacing: 0, lineHeight: 1.3, timer: null, scrambleOn: false };
 
       function apply() {
         sample.style.fontSize = state.size + "px";
@@ -45,16 +45,25 @@
         label: "Line height", min: 0.8, max: 2.4, step: 0.1, value: state.lineHeight,
         onInput: function (v) { state.lineHeight = v; apply(); },
       });
+      function startScramble() {
+        if (state.timer) return;
+        state.timer = window.setInterval(function () {
+          sample.textContent = scrambleText(SAMPLE);
+        }, 70);
+      }
+      function stopScramble() {
+        window.clearInterval(state.timer);
+        state.timer = null;
+      }
+
       window.BetaControls.toggleButton(container, {
         label: "Scramble",
         onToggle: function (active) {
+          state.scrambleOn = active;
           if (active) {
-            state.timer = window.setInterval(function () {
-              sample.textContent = scrambleText(SAMPLE);
-            }, 70);
+            startScramble();
           } else {
-            window.clearInterval(state.timer);
-            state.timer = null;
+            stopScramble();
             sample.textContent = SAMPLE;
           }
         },
@@ -63,8 +72,15 @@
       container._betaInputs = { sizeInput: sizeInput, spacingInput: spacingInput, lineHeightInput: lineHeightInput };
       container._betaState = state;
 
-      return function cleanup() {
-        window.clearInterval(state.timer);
+      return {
+        cleanup: stopScramble,
+        // The scramble interval only ever animates text inside this
+        // window's own sample line — invisible once minimized, so it
+        // pauses there and picks back up (if it was on) on restore.
+        onHide: stopScramble,
+        onShow: function () {
+          if (state.scrambleOn) startScramble();
+        },
       };
     },
     randomize: function (container) {

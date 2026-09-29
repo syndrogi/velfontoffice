@@ -18,7 +18,6 @@
       var frames = 0, lastSample = performance.now(), fps = 0;
 
       function onMove(e) { mouseX = e.clientX; mouseY = e.clientY; }
-      document.addEventListener("pointermove", onMove);
 
       var rafId = null;
       function fpsFrame(now) {
@@ -30,7 +29,6 @@
         }
         rafId = requestAnimationFrame(fpsFrame);
       }
-      rafId = requestAnimationFrame(fpsFrame);
 
       function render() {
         readout.innerHTML =
@@ -42,14 +40,30 @@
           "<strong>online</strong> " + (navigator.onLine ? "yes" : "no") + "\n" +
           "<strong>ua</strong> " + navigator.userAgent;
       }
-      var renderTimer = window.setInterval(render, 250);
-      render();
+      var renderTimer = null;
 
-      return function cleanup() {
+      // Everything here only ever feeds this window's own readout —
+      // pointermove tracking, the FPS rAF loop, and the render interval
+      // all pause together while minimized instead of measuring for a
+      // display nobody can see.
+      function start() {
+        document.addEventListener("pointermove", onMove);
+        lastSample = performance.now();
+        frames = 0;
+        if (!rafId) rafId = requestAnimationFrame(fpsFrame);
+        if (!renderTimer) renderTimer = window.setInterval(render, 250);
+        render();
+      }
+      function stop() {
         document.removeEventListener("pointermove", onMove);
-        window.clearInterval(renderTimer);
         if (rafId) cancelAnimationFrame(rafId);
-      };
+        rafId = null;
+        window.clearInterval(renderTimer);
+        renderTimer = null;
+      }
+      start();
+
+      return { cleanup: stop, onHide: stop, onShow: start };
     },
   });
 })();

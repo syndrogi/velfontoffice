@@ -702,7 +702,11 @@
       if (Math.abs(dx) > 3 || Math.abs(dy) > 3) moved = true;
       view.x = startViewX + dx;
       view.y = startViewY + dy;
-      applyView();
+      // Same rAF-coalescing as the wheel handler below — a fast
+      // mouse/trackpad drag can report pointermove faster than the
+      // browser paints, so this collapses to one write per frame
+      // instead of one per event.
+      scheduleApply();
     });
 
     function endDrag() {
@@ -742,7 +746,18 @@
     elZoomOut.addEventListener("click", function () { zoomBy(1 / 1.2); });
     elResetBtn.addEventListener("click", resetView);
 
-    window.addEventListener("resize", resetView);
+    // Coalesces to one resetView() (its own rect reads + a style write)
+    // per animation frame — a window drag-resize can otherwise fire
+    // dozens of resize events per second.
+    var resetScheduled = false;
+    window.addEventListener("resize", function () {
+      if (resetScheduled) return;
+      resetScheduled = true;
+      requestAnimationFrame(function () {
+        resetScheduled = false;
+        resetView();
+      });
+    });
   }
 
   // ==========================================================================

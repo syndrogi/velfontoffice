@@ -11,9 +11,29 @@
  * plus the wordmark's per-letter spans) rather than a fixed list of
  * classes, so new links dropped into the header later are picked up
  * automatically.
+ *
+ * Matter.js itself is only fetched the first time this lab is actually
+ * clicked (dynamic import, mirrors js/logo-draw.js's anime.js import) —
+ * previously it loaded as a blocking <script> on every single page
+ * visit for a ~80KB library most visitors never end up needing.
  */
 (function () {
-  if (typeof registerLab !== "function" || !window.Matter) return;
+  if (typeof registerLab !== "function") return;
+
+  var MATTER_URL = "https://cdn.jsdelivr.net/npm/matter-js@0.19.0/+esm";
+  var matterPromise = null;
+  function loadMatter() {
+    if (!matterPromise) {
+      matterPromise = import(MATTER_URL)
+        .then(function (mod) {
+          return mod.default || mod;
+        })
+        .catch(function () {
+          return null; // blocked/offline CDN — action() below just no-ops
+        });
+    }
+    return matterPromise;
+  }
 
   var TARGET_SELECTOR = [
     "header a",
@@ -38,16 +58,10 @@
     "textTransform",
   ];
 
-  var Engine = Matter.Engine;
-  var World = Matter.World;
-  var Bodies = Matter.Bodies;
-  var Body = Matter.Body;
-  var Runner = Matter.Runner;
-
   // Lets a falling/settled body be grabbed and dragged by the pointer —
   // dragging moves the actual Matter.js body (pinned static while held)
   // so it keeps colliding correctly and resumes falling on release.
-  function attachBodyDrag(item) {
+  function attachBodyDrag(item, Body) {
     var dragging = false;
     var offsetX = 0;
     var offsetY = 0;
@@ -80,11 +94,34 @@
     item.el.addEventListener("pointerdown", onDown);
   }
 
-  function startGravity() {
+  async function startGravity() {
+    // Genuinely one-shot (see file header) — every header target has
+    // already been pulled out of `header` by the first run, so a second
+    // click's TARGET_SELECTOR query comes back empty anyway. Without this
+    // guard it would still spin up a whole new Matter engine/runner/
+    // render loop for zero visible effect, stacking forever with every
+    // extra click.
+    if (window.__gravityActive) return;
+
+    var Matter = await loadMatter();
+    if (!Matter || window.__gravityActive) return; // blocked CDN, or a second click resolved while the first was still loading
+
     window.__gravityActive = true;
+
+    var Engine = Matter.Engine;
+    var World = Matter.World;
+    var Bodies = Matter.Bodies;
+    var Body = Matter.Body;
+    var Runner = Matter.Runner;
 
     var engine = Engine.create();
     engine.gravity.y = 9.8;
+    // Bodies at rest stop costing Matter anything once asleep — this
+    // and the render loop's own isSleeping check below are what keep a
+    // settled pile of letters from quietly burning CPU for the rest of
+    // the session. Purely an internal cost saving: a sleeping body is,
+    // by definition, not moving, so nothing visible changes.
+    engine.enableSleeping = true;
     var world = engine.world;
 
     var w = window.innerWidth;
@@ -159,7 +196,7 @@
       World.add(world, body);
 
       var item = { el: el, body: body, cx: cx, cy: cy };
-      attachBodyDrag(item);
+      attachBodyDrag(item, Body);
       return item;
     });
 
@@ -168,6 +205,9 @@
 
     (function renderLoop() {
       items.forEach(function (item) {
+        // Asleep means Matter hasn't moved it — skip the transform
+        // write entirely rather than re-applying the same value 60x/sec.
+        if (item.body.isSleeping) return;
         var pos = item.body.position;
         var dx = pos.x - item.cx;
         var dy = pos.y - item.cy;

@@ -16,7 +16,7 @@ function renderCheckout() {
       return `
         <div class="checkout-item">
           <div class="checkout-item-image">
-            ${product.thumbnail ? `<img src="${resolveImageUrl(product.thumbnail)}" alt="${product.name}">` : ""}
+            ${product.thumbnail ? `<img src="${resolveImageUrl(product.thumbnail)}" alt="${product.name}" loading="lazy">` : ""}
           </div>
           <div class="checkout-item-info">
             <div class="checkout-item-name">${product.name}</div>

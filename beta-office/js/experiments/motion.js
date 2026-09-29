@@ -67,12 +67,24 @@
         dot.style.transform = "translate(" + state.x.toFixed(1) + "px, " + state.y.toFixed(1) + "px)";
         rafId = requestAnimationFrame(frame);
       }
-      rafId = requestAnimationFrame(frame);
+      function start() {
+        if (!rafId) rafId = requestAnimationFrame(frame);
+      }
+      function stop() {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      start();
 
       container._betaState = state;
 
-      return function cleanup() {
-        if (rafId) cancelAnimationFrame(rafId);
+      return {
+        cleanup: stop,
+        // Minimizing only hides this window via CSS — without pausing
+        // here too, the rAF loop above would keep animating a dot
+        // nobody can see for as long as the window stays minimized.
+        onHide: stop,
+        onShow: start,
       };
     },
     randomize: function (container) {

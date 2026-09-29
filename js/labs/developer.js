@@ -15,6 +15,9 @@
   var frameCount = 0;
   var fps = 0;
   var lastFpsTime = 0;
+  var lastRenderTime = 0;
+  var imageCount = 0;
+  var linkCount = 0;
 
   function onMouseMove(e) {
     mouseX = e.clientX;
@@ -42,14 +45,21 @@
       lastFpsTime = timestamp;
     }
 
-    overlay.innerHTML =
-      "viewport&nbsp; " + window.innerWidth + " × " + window.innerHeight + "<br>" +
-      "mouse&nbsp;&nbsp;&nbsp; " + mouseX + ", " + mouseY + "<br>" +
-      "scroll&nbsp;&nbsp;&nbsp; " + Math.round(window.scrollX) + ", " + Math.round(window.scrollY) + "<br>" +
-      "fps&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; " + fps + "<br>" +
-      "images&nbsp;&nbsp; " + document.images.length + "<br>" +
-      "links&nbsp;&nbsp;&nbsp;&nbsp; " + document.querySelectorAll("a").length + "<br>" +
-      "page&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; " + location.pathname;
+    // Text only actually needs to be redrawn a handful of times a
+    // second to read as "live" — writing innerHTML (plus the string
+    // concat behind it) on all 60 frames/sec was pure waste the eye
+    // could never tell apart from this.
+    if (timestamp - lastRenderTime >= 100) {
+      lastRenderTime = timestamp;
+      overlay.innerHTML =
+        "viewport&nbsp; " + window.innerWidth + " × " + window.innerHeight + "<br>" +
+        "mouse&nbsp;&nbsp;&nbsp; " + mouseX + ", " + mouseY + "<br>" +
+        "scroll&nbsp;&nbsp;&nbsp; " + Math.round(window.scrollX) + ", " + Math.round(window.scrollY) + "<br>" +
+        "fps&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; " + fps + "<br>" +
+        "images&nbsp;&nbsp; " + imageCount + "<br>" +
+        "links&nbsp;&nbsp;&nbsp;&nbsp; " + linkCount + "<br>" +
+        "page&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; " + location.pathname;
+    }
 
     rafId = requestAnimationFrame(update);
   }
@@ -59,6 +69,13 @@
     ensureOverlay().hidden = false;
     frameCount = 0;
     lastFpsTime = 0;
+    lastRenderTime = 0;
+    // Counted once on open rather than every render tick — these rarely
+    // change while the overlay's up, and this debug view's whole point
+    // (fps/mouse/scroll/viewport) doesn't depend on them being exact
+    // to the second.
+    imageCount = document.images.length;
+    linkCount = document.querySelectorAll("a").length;
     window.addEventListener("mousemove", onMouseMove);
     rafId = requestAnimationFrame(update);
     window.labsSetActive("developer", true);

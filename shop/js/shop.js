@@ -215,6 +215,12 @@ function setupFloatingNav() {
  * are measured from the actual rendered box rather than hardcoded, so
  * the drift can never expose empty space around the (asymmetrically
  * anchored) image.
+ *
+ * Bounds only change on resize (the box doesn't move on its own), so
+ * they're cached instead of re-measured — forced layout, previously —
+ * every single frame. The loop also pauses via IntersectionObserver
+ * once the banner scrolls out of view and via visibilitychange when the
+ * tab isn't active, instead of drifting an invisible image forever.
  */
 function setupPromoBannerIdle() {
   const wrap = document.querySelector(".promo-banner-image");
@@ -230,6 +236,9 @@ function setupPromoBannerIdle() {
   if (reduceMotion) return;
 
   let idleStart = null;
+  let rafId = null;
+  let bounds = null;
+  let inView = true;
 
   function computeBounds() {
     const cr = wrap.getBoundingClientRect();
@@ -245,19 +254,48 @@ function setupPromoBannerIdle() {
     };
   }
 
+  function refreshBounds() {
+    bounds = computeBounds();
+  }
+  refreshBounds();
+  window.addEventListener("resize", refreshBounds);
+
   function idleTick(timestamp) {
     if (idleStart === null) idleStart = timestamp;
     const elapsed = (timestamp - idleStart) / 1000;
-    const bounds = computeBounds();
     const ampX = Math.min(bounds.maxX, -bounds.minX) * IDLE_AMOUNT;
     const ampY = Math.min(bounds.maxY, -bounds.minY) * IDLE_AMOUNT;
     img.style.transform = `translate(${Math.sin((elapsed * 2 * Math.PI) / 9) * ampX}px, ${
       Math.sin((elapsed * 2 * Math.PI) / 7) * ampY
     }px)`;
-    requestAnimationFrame(idleTick);
+    rafId = requestAnimationFrame(idleTick);
   }
 
-  requestAnimationFrame(idleTick);
+  function start() {
+    if (rafId || document.hidden || !inView) return;
+    rafId = requestAnimationFrame(idleTick);
+  }
+  function stop() {
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = null;
+    idleStart = null; // picks the drift phase back up from center, not mid-cycle — fine since it was off-screen/hidden either way
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stop();
+    else start();
+  });
+
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+      inView = entries[0].isIntersecting;
+      if (inView) start();
+      else stop();
+    });
+    observer.observe(wrap);
+  } else {
+    start();
+  }
 }
 
 // Collapses/reveals the promo banner via .promo-banner-clip's max-height

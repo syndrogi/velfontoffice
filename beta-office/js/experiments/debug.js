@@ -22,12 +22,18 @@
         });
         readout.innerHTML = "<strong>" + lines.length + " registered</strong>\n" + lines.join("\n");
       }
-      render();
-      var timer = window.setInterval(render, 800);
-
-      return function cleanup() {
+      var timer = null;
+      function start() {
+        render();
+        if (!timer) timer = window.setInterval(render, 800);
+      }
+      function stop() {
         window.clearInterval(timer);
-      };
+        timer = null;
+      }
+      start();
+
+      return { cleanup: stop, onHide: stop, onShow: start };
     },
   });
 })();

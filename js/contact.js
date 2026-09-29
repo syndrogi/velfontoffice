@@ -8,16 +8,35 @@
  * The anon key below is meant to be public — it can only INSERT under
  * Row Level Security, it can't read anything back. See contact_table.sql
  * for the table + policy this depends on.
+ *
+ * The Supabase client library is only fetched the first time someone
+ * actually submits this form (dynamic import, same pattern as
+ * js/logo-draw.js's anime.js import) — previously it loaded as a
+ * blocking <script> on every page visit for a form most visitors never
+ * fill out.
  */
 (function () {
   var SUPABASE_URL = "https://miqfpvtmmvuvaezexazw.supabase.co";
   var SUPABASE_ANON_KEY =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pcWZwdnRtbXZ1dmFlemV4YXp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyMTYwNTEsImV4cCI6MjEwMDc5MjA1MX0.JeN31q4ahSoqjFVAZS3Is1nMOc_mkiLB4nv3yxP2aY0";
 
-  var supabaseClient =
-    window.supabase && window.supabase.createClient
-      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-      : null;
+  var supabaseClient = null;
+  var clientPromise = null;
+  function loadSupabaseClient() {
+    if (!clientPromise) {
+      clientPromise = import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm")
+        .then(function (mod) {
+          var createClient = mod.createClient || (mod.default && mod.default.createClient);
+          if (!createClient) return null;
+          supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          return supabaseClient;
+        })
+        .catch(function () {
+          return null; // blocked/offline CDN — the submit handler below just shows the existing error state
+        });
+    }
+    return clientPromise;
+  }
 
   var panel = document.getElementById("contactPanel");
   var closeBtn = document.getElementById("contactClose");
@@ -73,10 +92,15 @@
   if (form) {
     var submitBtn = form.querySelector(".contact-submit");
 
-    form.addEventListener("submit", function (e) {
+    form.addEventListener("submit", async function (e) {
       e.preventDefault();
 
-      if (!supabaseClient) {
+      if (submitBtn) submitBtn.disabled = true;
+      if (status) status.textContent = "Sending…";
+
+      var client = supabaseClient || (await loadSupabaseClient());
+      if (!client) {
+        if (submitBtn) submitBtn.disabled = false;
         if (status) status.textContent = "Something went wrong — try again later.";
         return;
       }
@@ -90,10 +114,7 @@
         comment: data.get("comment") || null,
       };
 
-      if (submitBtn) submitBtn.disabled = true;
-      if (status) status.textContent = "Sending…";
-
-      supabaseClient
+      client
         .from("contact_submissions")
         .insert([payload])
         .then(function (result) {

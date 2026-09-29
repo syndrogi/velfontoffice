@@ -52,7 +52,14 @@
         });
         rafId = requestAnimationFrame(step);
       }
-      rafId = requestAnimationFrame(step);
+      function start() {
+        if (!rafId) rafId = requestAnimationFrame(step);
+      }
+      function stop() {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      start();
 
       window.BetaControls.slider(container, {
         label: "Gravity", min: 0, max: 1.2, step: 0.05, value: state.gravity,
@@ -66,9 +73,7 @@
 
       container._betaState = state;
 
-      return function cleanup() {
-        if (rafId) cancelAnimationFrame(rafId);
-      };
+      return { cleanup: stop, onHide: stop, onShow: start };
     },
     randomize: function (container) {
       var s = container._betaState;

@@ -11,6 +11,15 @@
  * the experiment up in BetaExperiments (registry.js), builds the
  * window chrome, calls the experiment's launch(container), and wires
  * its returned cleanup into the close button.
+ *
+ * launch(container) may return a plain cleanup function, or
+ * `{ cleanup, onHide, onShow }` — onHide()/onShow() are optional and
+ * fire on minimize/restore (not just close). Minimizing only hides a
+ * window via CSS; without this hook, an experiment's own rAF/interval
+ * loop (a game, a generative-art canvas, a live readout) would keep
+ * running at full rate while invisible in the taskbar. Every existing
+ * experiment still works unchanged if it only returns a cleanup
+ * function — the hook is purely opt-in.
  */
 (function () {
   var layer = document.getElementById("betaWindowsLayer");
@@ -98,10 +107,21 @@
     if (minimized) {
       win.el.classList.add("beta-is-hidden");
       addTaskbarChip(id, win.title);
+      safeCall(win.onHide);
     } else {
       win.el.classList.remove("beta-is-hidden");
       removeTaskbarChip(id);
       applyGeometry(win);
+      safeCall(win.onShow);
+    }
+  }
+
+  function safeCall(fn) {
+    if (typeof fn !== "function") return;
+    try {
+      fn();
+    } catch (e) {
+      /* same rule as cleanup — an experiment's hook can't be allowed to break the shell */
     }
   }
 
@@ -268,6 +288,8 @@
       contentEl: chrome.content,
       title: spec.name,
       cleanup: null,
+      onHide: null,
+      onShow: null,
       left: pos.left,
       top: pos.top,
       width: width,
@@ -308,19 +330,29 @@
     }
     var cleanupFn = typeof result === "function" ? result : (result && typeof result.cleanup === "function" ? result.cleanup : function () {});
     win.cleanup = cleanupFn;
+    if (result && typeof result === "object") {
+      if (typeof result.onHide === "function") win.onHide = result.onHide;
+      if (typeof result.onShow === "function") win.onShow = result.onShow;
+    }
     window.BetaExperiments.noteOpened(id, chrome.content, cleanupFn);
 
     return win;
   }
 
+  var resizeScheduled = false;
   window.addEventListener("resize", function () {
-    Object.keys(windows).forEach(function (id) {
-      var win = windows[id];
-      win.width = clamp(win.width, MIN_WIDTH, window.innerWidth - 24);
-      win.height = clamp(win.height, MIN_HEIGHT, window.innerHeight - 24);
-      win.left = clamp(win.left, -(win.width - 80), window.innerWidth - 80);
-      win.top = clamp(win.top, 0, window.innerHeight - 40);
-      applyGeometry(win);
+    if (resizeScheduled) return;
+    resizeScheduled = true;
+    requestAnimationFrame(function () {
+      resizeScheduled = false;
+      Object.keys(windows).forEach(function (id) {
+        var win = windows[id];
+        win.width = clamp(win.width, MIN_WIDTH, window.innerWidth - 24);
+        win.height = clamp(win.height, MIN_HEIGHT, window.innerHeight - 24);
+        win.left = clamp(win.left, -(win.width - 80), window.innerWidth - 80);
+        win.top = clamp(win.top, 0, window.innerHeight - 40);
+        applyGeometry(win);
+      });
     });
   });
 

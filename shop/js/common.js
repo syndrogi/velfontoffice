@@ -76,7 +76,7 @@ function renderCartDrawer() {
           return `
             <div class="cart-item" data-id="${i.productId}" data-size="${i.size}">
               <div class="cart-item-image">
-                ${product.thumbnail ? `<img src="${resolveImageUrl(product.thumbnail)}" alt="${product.name}">` : ""}
+                ${product.thumbnail ? `<img src="${resolveImageUrl(product.thumbnail)}" alt="${product.name}" loading="lazy">` : ""}
               </div>
               <div class="cart-item-info">
                 <div class="cart-item-name">${product.name}</div>

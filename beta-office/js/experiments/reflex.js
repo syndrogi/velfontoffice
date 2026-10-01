@@ -12,6 +12,7 @@
     id: "reflex",
     name: "Reflex",
     category: "REFLEX",
+    number: 16,
     description: "Click-to-arm reaction timer, best/last ms",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, false);

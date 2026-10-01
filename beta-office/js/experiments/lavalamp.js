@@ -12,6 +12,7 @@
     id: "lavalamp",
     name: "Lava Lamp",
     category: "LAVALAMP",
+    number: 51,
     description: "Ambient drifting blurred blobs",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, true);

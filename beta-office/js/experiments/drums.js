@@ -44,6 +44,7 @@
     id: "drums",
     name: "Drums",
     category: "DRUMS",
+    number: 60,
     description: "8-step 3-track beat sequencer",
     launch: function (container) {
       var grid = document.createElement("div");

@@ -14,6 +14,7 @@
     id: "fireworks",
     name: "Fireworks",
     category: "FIREWORKS",
+    number: 45,
     description: "Auto-looping rocket launch and burst",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, true);

@@ -15,6 +15,7 @@
     id: "distortion",
     name: "Distortion",
     category: "DISTORTION",
+    number: 14,
     description: "Skew, perspective tilt, shake",
     launch: function (container) {
       var state = { skew: 0, tilt: 0, shakeAmount: 1, shakeTimer: null };

@@ -10,6 +10,7 @@
     id: "image",
     name: "Image",
     category: "IMAGE",
+    number: 10,
     description: "Drop a file, grayscale/invert/blur",
     launch: function (container) {
       var drop = document.createElement("div");

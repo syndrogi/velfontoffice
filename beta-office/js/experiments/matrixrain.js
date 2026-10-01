@@ -12,6 +12,7 @@
     id: "matrixrain",
     name: "Matrix Rain",
     category: "MATRIXRAIN",
+    number: 47,
     description: "Falling glyph columns, speed slider",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, true);

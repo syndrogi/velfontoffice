@@ -10,6 +10,7 @@
     id: "constellation",
     name: "Constellation",
     category: "CONSTELLATION",
+    number: 54,
     description: "Click to place stars, auto-linked to the nearest",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, true);

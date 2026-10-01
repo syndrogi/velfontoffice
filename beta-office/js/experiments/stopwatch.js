@@ -9,6 +9,7 @@
     id: "stopwatch",
     name: "Stopwatch",
     category: "STOPWATCH",
+    number: 64,
     description: "Start, stop, lap, reset",
     launch: function (container) {
       var readout = window.BetaControls.readout(container);

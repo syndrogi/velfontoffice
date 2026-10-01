@@ -12,6 +12,7 @@
     id: "cursor",
     name: "Cursor",
     category: "CURSOR",
+    number: 3,
     description: "Crosshair, circle, coords, trailing",
     launch: function (container) {
       var html = document.documentElement;

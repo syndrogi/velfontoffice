@@ -48,6 +48,7 @@
     id: "piano",
     name: "Piano",
     category: "PIANO",
+    number: 23,
     description: "Click or A S D F H J K L to play",
     launch: function (container) {
       var row = document.createElement("div");

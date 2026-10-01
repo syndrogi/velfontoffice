@@ -30,6 +30,7 @@
     id: "trivia",
     name: "Trivia",
     category: "TRIVIA",
+    number: 40,
     description: "Multiple-choice questions, running score",
     launch: function (container) {
       var qBox = window.BetaControls.sampleText(container, "");

@@ -14,6 +14,7 @@
     id: "textmirror",
     name: "Text Mirror",
     category: "TEXTMIRROR",
+    number: 66,
     description: "Type text, see it reversed/flipped/mirrored",
     launch: function (container) {
       var input = document.createElement("input");

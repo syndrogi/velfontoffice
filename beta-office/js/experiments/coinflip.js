@@ -12,6 +12,7 @@
     id: "coinflip",
     name: "Coin Flip",
     category: "COINFLIP",
+    number: 65,
     description: "Animated flip, heads/tails tally",
     launch: function (container) {
       var coin = window.BetaControls.sampleText(container, "H");

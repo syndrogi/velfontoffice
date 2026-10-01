@@ -14,6 +14,7 @@
     id: "pong",
     name: "Pong",
     category: "PONG",
+    number: 18,
     description: "Solo paddle-and-wall, mouse control, streak score",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, true);

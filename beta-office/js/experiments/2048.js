@@ -12,6 +12,7 @@
     id: "2048",
     name: "2048",
     category: "2048",
+    number: 27,
     description: "Arrow-key slide and merge, reach 2048",
     launch: function (container) {
       var grid = document.createElement("div");

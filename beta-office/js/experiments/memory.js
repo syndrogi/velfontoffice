@@ -12,6 +12,7 @@
     id: "memory",
     name: "Memory",
     category: "MEMORY",
+    number: 19,
     description: "Flip-and-match card grid, move counter",
     launch: function (container) {
       var grid = document.createElement("div");

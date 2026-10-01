@@ -14,6 +14,7 @@
     id: "dom",
     name: "DOM",
     category: "DOM",
+    number: 6,
     description: "Outline, bounds, live node count",
     launch: function (container) {
       var html = document.documentElement;

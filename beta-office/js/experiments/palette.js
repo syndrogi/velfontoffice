@@ -22,6 +22,7 @@
     id: "palette",
     name: "Palette",
     category: "PALETTE",
+    number: 57,
     description: "Generate a 5-color swatch, click to copy",
     launch: function (container) {
       var row = document.createElement("div");

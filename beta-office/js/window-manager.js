@@ -281,12 +281,15 @@
     var width = 300;
     var height = 260;
     var pos = nextCascadePosition(width, height);
-    var chrome = buildChrome(id, spec.name);
+    // experiments-index carries no `number` (see registry.js spec
+    // contract) and keeps its plain name.
+    var title = spec.number != null ? "#" + spec.number + " " + spec.name : spec.name;
+    var chrome = buildChrome(id, title);
 
     var win = {
       el: chrome.el,
       contentEl: chrome.content,
-      title: spec.name,
+      title: title,
       cleanup: null,
       onHide: null,
       onShow: null,

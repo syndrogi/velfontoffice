@@ -18,6 +18,7 @@
     id: "typerace",
     name: "Type Race",
     category: "TYPERACE",
+    number: 44,
     description: "Type the sentence, get your WPM",
     launch: function (container) {
       var prompt = window.BetaControls.sampleText(container, "");

@@ -38,6 +38,7 @@
     id: "sound",
     name: "Sound",
     category: "SOUND",
+    number: 11,
     description: "Oscillator beep, freq/volume",
     launch: function (container) {
       var state = { freq: 440, volume: 0.15, hoverOn: false };

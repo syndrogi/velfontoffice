@@ -13,6 +13,7 @@
     id: "pixelpaint",
     name: "Pixel Paint",
     category: "PIXELPAINT",
+    number: 67,
     description: "16x16 grid, click-drag to paint",
     launch: function (container) {
       var palette = document.createElement("div");

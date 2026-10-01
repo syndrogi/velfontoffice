@@ -27,7 +27,10 @@
 
       var name = document.createElement("span");
       name.className = "beta-tile-name";
-      name.textContent = category;
+      // Number comes from the category's first (only) experiment spec —
+      // see the `number` field each js/experiments/*.js module sets.
+      // experiments-index carries no number and simply omits the badge.
+      name.textContent = (specs[0].number != null ? "#" + specs[0].number + " " : "") + category;
 
       var count = document.createElement("span");
       count.className = "beta-tile-count";

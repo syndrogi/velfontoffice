@@ -40,6 +40,18 @@
   <p><kbd>&#8984;/Ctrl</kbd>+<kbd>K</kbd> command palette</p>
 </div>
 
+<!-- A searchable, concrete how-to-use reference for every registered
+     experiment — see js/help.js. Independent of the KEYS legend above
+     (that's shortcuts; this is per-experiment instructions). -->
+<button type="button" class="beta-help-btn" id="betaHelpBtn" aria-haspopup="true" aria-expanded="false" aria-controls="betaHelpPanel">HELP</button>
+<div class="beta-help-panel" id="betaHelpPanel" hidden role="dialog" aria-modal="true" aria-label="Experiment help">
+  <div class="beta-help-head">
+    <input type="text" class="beta-help-search" id="betaHelpSearch" placeholder="Search experiments…" autocomplete="off" spellcheck="false">
+    <button type="button" class="beta-help-close" id="betaHelpClose" aria-label="Close help">&times;</button>
+  </div>
+  <div class="beta-help-list" id="betaHelpList"></div>
+</div>
+
 <main>
   <!-- Kinetic typography sphere — js/sphere.js builds every word instance
        into #betaSphere from the real nav data it reads for itself.
@@ -156,10 +168,34 @@
 <script src="js/experiments/moodring.js" defer></script>
 <script src="js/experiments/rubberduck.js" defer></script>
 <script src="js/experiments/wordcloud.js" defer></script>
+<script src="js/experiments/stacker.js" defer></script>
+<script src="js/experiments/airhockey.js" defer></script>
+<script src="js/experiments/battleship.js" defer></script>
+<script src="js/experiments/fishtank.js" defer></script>
+<script src="js/experiments/snow.js" defer></script>
+<script src="js/experiments/colorpicker.js" defer></script>
+<script src="js/experiments/dotsandboxes.js" defer></script>
+<script src="js/experiments/wordle.js" defer></script>
+<script src="js/experiments/blackjack.js" defer></script>
+<script src="js/experiments/audioreflex.js" defer></script>
+<script src="js/experiments/pendulum.js" defer></script>
+<script src="js/experiments/bigclock.js" defer></script>
+<script src="js/experiments/breathe.js" defer></script>
+<script src="js/experiments/plinko.js" defer></script>
+<script src="js/experiments/target.js" defer></script>
+<script src="js/experiments/slidepuzzle.js" defer></script>
+<script src="js/experiments/hanoi.js" defer></script>
+<script src="js/experiments/worddrop.js" defer></script>
+<script src="js/experiments/tonguetwister.js" defer></script>
+<script src="js/experiments/riddle.js" defer></script>
+<script src="js/experiments/wouldyourather.js" defer></script>
+<script src="js/experiments/spinner.js" defer></script>
+<script src="js/experiments/etchasketch.js" defer></script>
 <script src="js/experiments/experiments-index.js" defer></script>
 <script src="js/sphere.js" defer></script>
 <script src="js/scroll-morph.js" defer></script>
 <script src="js/command-palette.js" defer></script>
+<script src="js/help.js" defer></script>
 <script src="js/keyboard.js" defer></script>
 <script src="js/status-bar.js" defer></script>
 <script src="js/app.js" defer></script>

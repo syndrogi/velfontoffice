@@ -23,6 +23,7 @@
     id: "color",
     name: "Color",
     category: "COLOR",
+    number: 5,
     description: "Background, foreground, invert, mono",
     launch: function (container) {
       var bgField = document.createElement("div");

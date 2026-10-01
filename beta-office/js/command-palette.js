@@ -27,8 +27,9 @@
 
   function allCommands() {
     var dynamic = (window.BetaExperiments ? window.BetaExperiments.getAll() : []).map(function (spec) {
+      var label = spec.number != null ? "Open #" + spec.number + " " + spec.name : "Open " + spec.name;
       return {
-        label: "Open " + spec.name,
+        label: label,
         run: function () {
           window.BetaWM && window.BetaWM.openExperiment(spec.id);
         },

@@ -15,6 +15,7 @@
     id: "textblast",
     name: "Text Blast",
     category: "TEXTBLAST",
+    number: 55,
     description: "Click the text to explode and reform it",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, true);

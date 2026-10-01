@@ -28,6 +28,7 @@
     id: "fortune",
     name: "Fortune",
     category: "FORTUNE",
+    number: 21,
     description: "Click for a one-line fortune",
     launch: function (container) {
       var box = window.BetaControls.sampleText(container, "Click Ask for a fortune.");

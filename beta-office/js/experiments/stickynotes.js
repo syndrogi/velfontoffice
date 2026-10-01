@@ -13,6 +13,7 @@
     id: "stickynotes",
     name: "Sticky Notes",
     category: "STICKYNOTES",
+    number: 68,
     description: "Add draggable sticky notes, edit inline",
     launch: function (container) {
       var board = document.createElement("div");

@@ -47,6 +47,7 @@
     id: "grid",
     name: "Grid",
     category: "GRID",
+    number: 4,
     description: "Column, baseline, pixel overlays",
     launch: function (container) {
       window.BetaControls.toggleButton(container, {

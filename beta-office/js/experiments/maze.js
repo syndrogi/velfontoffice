@@ -51,6 +51,7 @@
     id: "maze",
     name: "Maze",
     category: "MAZE",
+    number: 32,
     description: "Arrow keys to the exit, timed",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, true);

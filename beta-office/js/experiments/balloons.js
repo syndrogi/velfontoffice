@@ -13,6 +13,7 @@
     id: "balloons",
     name: "Balloons",
     category: "BALLOONS",
+    number: 59,
     description: "Pop rising balloons before they float off, 3 lives",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, true);

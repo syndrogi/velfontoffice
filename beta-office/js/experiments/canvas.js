@@ -9,6 +9,7 @@
     id: "canvas",
     name: "Canvas",
     category: "CANVAS",
+    number: 12,
     description: "Freehand draw, brush size, clear",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, true);

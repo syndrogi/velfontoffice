@@ -15,6 +15,7 @@
     id: "dice",
     name: "Dice",
     category: "DICE",
+    number: 22,
     description: "Click to roll, flicker settle, history",
     launch: function (container) {
       var face = window.BetaControls.sampleText(container, FACES[0]);

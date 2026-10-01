@@ -12,6 +12,7 @@
     id: "physics",
     name: "Physics",
     category: "PHYSICS",
+    number: 13,
     description: "Gravity + bounce ball-pit",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, true);

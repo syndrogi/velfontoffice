@@ -12,6 +12,7 @@
     id: "cps",
     name: "CPS",
     category: "CPS",
+    number: 43,
     description: "Click as fast as you can for 5 seconds",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, false);

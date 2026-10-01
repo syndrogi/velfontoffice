@@ -13,6 +13,7 @@
     id: "stroop",
     name: "Stroop",
     category: "STROOP",
+    number: 71,
     description: "Click the ink color, not the word",
     launch: function (container) {
       var word = window.BetaControls.sampleText(container, "");

@@ -18,6 +18,7 @@
     id: "moodring",
     name: "Mood Ring",
     category: "MOODRING",
+    number: 73,
     description: "Click for a random mood + color",
     launch: function (container) {
       var swatch = document.createElement("div");

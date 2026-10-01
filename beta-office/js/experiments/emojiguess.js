@@ -18,6 +18,7 @@
     id: "emojiguess",
     name: "Emoji Guess",
     category: "EMOJIGUESS",
+    number: 42,
     description: "Guess the phrase from the emoji",
     launch: function (container) {
       var box = window.BetaControls.sampleText(container, "");

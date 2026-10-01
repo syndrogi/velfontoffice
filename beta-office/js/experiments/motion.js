@@ -10,6 +10,7 @@
     id: "motion",
     name: "Motion",
     category: "MOTION",
+    number: 2,
     description: "Spring, attract, repel, float",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, false);

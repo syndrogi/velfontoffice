@@ -11,6 +11,7 @@
     id: "starfield",
     name: "Starfield",
     category: "STARFIELD",
+    number: 46,
     description: "Warp-speed starfield, speed slider",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, true);

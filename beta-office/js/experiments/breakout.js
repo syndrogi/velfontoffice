@@ -15,6 +15,7 @@
     id: "breakout",
     name: "Breakout",
     category: "BREAKOUT",
+    number: 29,
     description: "Mouse paddle, break every brick",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, true);

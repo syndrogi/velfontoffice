@@ -47,6 +47,7 @@
     id: "soundboard",
     name: "Soundboard",
     category: "SOUNDBOARD",
+    number: 62,
     description: "8 preset one-shot tones",
     launch: function (container) {
       var grid = document.createElement("div");

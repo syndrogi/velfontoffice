@@ -41,6 +41,7 @@
     id: "timer",
     name: "Timer",
     category: "TIMER",
+    number: 63,
     description: "Countdown timer, beeps at zero",
     launch: function (container) {
       var input = document.createElement("input");

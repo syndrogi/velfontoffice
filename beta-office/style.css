@@ -46,7 +46,13 @@ body.beta-office {
   text-decoration: none;
 }
 
-.beta-office button {
+/* :where() keeps this reset's specificity at zero (same as a bare
+   `button` selector) — as a plain `.beta-office button` descendant
+   selector it was (0,1,1), which silently beat every single-class
+   button style below it (.beta-toggle, .beta-mini-btn, .beta-window-btn,
+   every experiment's own game-cell classes, etc.) regardless of source
+   order, stripping their intended border/background. */
+.beta-office :where(button) {
   font: inherit;
   background: none;
   border: none;
@@ -157,6 +163,14 @@ body.beta-office {
   border-color: var(--beta-accent);
 }
 
+/* [hidden] must win over this rule's own `display: grid` — an author
+   rule always beats the UA [hidden]{display:none} default regardless of
+   specificity, so without this the panel stayed visible at all times
+   no matter what keyboard.js set keysPanel.hidden to. */
+.beta-keys-panel[hidden] {
+  display: none;
+}
+
 .beta-keys-panel {
   position: fixed;
   right: var(--beta-edge);
@@ -179,6 +193,139 @@ body.beta-office {
   font-family: inherit;
   font-size: 10px;
   text-align: center;
+}
+
+/* ==========================================================================
+   Help — searchable per-experiment reference (js/help.js)
+   ========================================================================== */
+
+.beta-help-btn {
+  position: fixed;
+  left: var(--beta-edge);
+  bottom: 14px;
+  z-index: 700;
+  font-family: var(--beta-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 6px 10px;
+  border: 1px solid var(--beta-fg-muted);
+  transition: color 150ms var(--beta-ease), border-color 150ms var(--beta-ease);
+}
+
+.beta-help-btn:hover {
+  color: var(--beta-accent);
+  border-color: var(--beta-accent);
+}
+
+/* [hidden] must win over this rule's own `display: flex` below — an
+   author rule always beats the UA [hidden]{display:none} default
+   regardless of specificity (see the same fix on .beta-keys-panel). */
+.beta-help-panel[hidden] {
+  display: none;
+}
+
+.beta-help-panel {
+  position: fixed;
+  left: 50%;
+  top: 8vh;
+  transform: translateX(-50%);
+  z-index: 900;
+  width: min(92vw, 640px);
+  max-height: 84vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--beta-bg);
+  border: 1px solid var(--beta-fg);
+}
+
+.beta-help-head {
+  display: flex;
+  align-items: center;
+  flex: none;
+  border-bottom: 1px solid var(--beta-fg);
+}
+
+.beta-help-search {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 16px;
+  border: none;
+  font-family: var(--beta-font-mono);
+  font-size: 13px;
+  color: var(--beta-fg);
+  background: var(--beta-bg);
+}
+
+.beta-help-search:focus-visible {
+  outline: none;
+}
+
+.beta-help-close {
+  flex: none;
+  padding: 14px 16px;
+  font-size: 16px;
+  line-height: 1;
+  border-left: 1px solid var(--beta-fg);
+}
+
+.beta-help-list {
+  overflow-y: auto;
+}
+
+.beta-help-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--beta-line);
+}
+
+.beta-help-item:last-child {
+  border-bottom: none;
+}
+
+.beta-help-item:hover {
+  background: var(--beta-line);
+}
+
+.beta-help-name {
+  font-family: var(--beta-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.beta-help-category {
+  font-family: var(--beta-font-mono);
+  font-size: 10px;
+  color: var(--beta-fg-muted);
+  margin-left: 6px;
+}
+
+.beta-help-desc {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--beta-fg-muted);
+}
+
+.beta-help-empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--beta-fg-muted);
+  font-size: 12px;
+}
+
+@media (max-width: 640px) {
+  .beta-help-panel {
+    width: 100vw;
+    max-height: 100vh;
+    top: 0;
+    height: 100vh;
+    border-left: none;
+    border-right: none;
+  }
 }
 
 /* ==========================================================================
@@ -1504,6 +1651,180 @@ body.beta-office.beta-shake {
   40% { transform: translate(calc(var(--beta-shake-amount, 1) * 5px), calc(var(--beta-shake-amount, 1) * -3px)); }
   60% { transform: translate(calc(var(--beta-shake-amount, 1) * -4px), calc(var(--beta-shake-amount, 1) * 3px)); }
   80% { transform: translate(calc(var(--beta-shake-amount, 1) * 3px), calc(var(--beta-shake-amount, 1) * -2px)); }
+}
+
+/* Battleship — 6x6 hidden-fleet grid. */
+.beta-battleship-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 3px;
+  margin-bottom: 14px;
+}
+
+.beta-battleship-cell {
+  aspect-ratio: 1;
+  border: 1px solid var(--beta-fg-muted);
+  background: var(--beta-bg);
+  cursor: pointer;
+}
+
+.beta-battleship-cell.beta-is-hit {
+  background: var(--beta-accent);
+  border-color: var(--beta-accent);
+  cursor: default;
+}
+
+.beta-battleship-cell.beta-is-miss {
+  background: var(--beta-line);
+  cursor: default;
+}
+
+/* Dots and Boxes — dots/edges/boxes modeled as one interleaved grid. */
+.beta-dab-grid {
+  display: grid;
+  gap: 2px;
+  margin-bottom: 14px;
+}
+
+.beta-dab-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--beta-fg);
+}
+
+.beta-dab-hedge {
+  width: 24px;
+  height: 6px;
+  background: var(--beta-line);
+  cursor: pointer;
+}
+
+.beta-dab-hedge.beta-is-drawn {
+  background: var(--beta-fg);
+  cursor: default;
+}
+
+.beta-dab-vedge {
+  width: 6px;
+  height: 24px;
+  background: var(--beta-line);
+  cursor: pointer;
+}
+
+.beta-dab-vedge.beta-is-drawn {
+  background: var(--beta-fg);
+  cursor: default;
+}
+
+.beta-dab-box {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--beta-font-mono);
+  font-size: 11px;
+  color: var(--beta-fg-muted);
+}
+
+.beta-dab-box.beta-is-claimed {
+  color: var(--beta-accent);
+  font-weight: 700;
+}
+
+/* Wordle — 6x5 guess board. Correct/present reuse the monochrome +
+   accent palette (black fill / red fill) instead of green/yellow. */
+.beta-wordle-board {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.beta-wordle-row {
+  display: flex;
+  gap: 4px;
+}
+
+.beta-wordle-tile {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--beta-fg-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--beta-font-mono);
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+.beta-wordle-tile.beta-is-correct {
+  background: var(--beta-fg);
+  color: var(--beta-bg);
+  border-color: var(--beta-fg);
+}
+
+.beta-wordle-tile.beta-is-present {
+  background: var(--beta-accent);
+  color: var(--beta-bg);
+  border-color: var(--beta-accent);
+}
+
+.beta-wordle-tile.beta-is-absent {
+  background: var(--beta-line);
+  border-color: var(--beta-line);
+}
+
+/* Blackjack — the two hands, overriding .beta-sample-text's display
+   weight since this is just plain card text, not a showcase line. */
+.beta-blackjack-hands {
+  font-family: var(--beta-font-mono);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.8;
+}
+
+/* Big Clock — the oversized time readout. */
+.beta-bigclock {
+  font-size: 40px;
+  text-align: center;
+  font-family: var(--beta-font-mono);
+}
+
+/* Breathe — the pulsing guide circle. */
+.beta-breathe-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--beta-fg);
+  margin: 0 auto 14px;
+  transform: scale(1);
+  transition: transform 4000ms ease-in-out;
+}
+
+/* Slide Puzzle — 4x4 15-puzzle. */
+.beta-slide-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+  margin-bottom: 14px;
+}
+
+.beta-slide-cell {
+  aspect-ratio: 1;
+  border: 1px solid var(--beta-fg);
+  background: var(--beta-bg);
+  font-family: var(--beta-font-mono);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.beta-slide-cell.beta-is-blank {
+  background: var(--beta-line);
+  border-color: var(--beta-line);
+  cursor: default;
 }
 
 /* ==========================================================================

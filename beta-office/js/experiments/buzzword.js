@@ -15,6 +15,7 @@
     id: "buzzword",
     name: "Buzzword",
     category: "BUZZWORD",
+    number: 69,
     description: "Click for a corporate-jargon phrase",
     launch: function (container) {
       var box = window.BetaControls.sampleText(container, "Click Generate for wisdom.");

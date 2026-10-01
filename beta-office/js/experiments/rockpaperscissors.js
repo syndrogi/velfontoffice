@@ -12,6 +12,7 @@
     id: "rockpaperscissors",
     name: "Rock Paper Scissors",
     category: "ROCKPAPERSCISSORS",
+    number: 37,
     description: "Endless rounds vs the computer, W/L/T tally",
     launch: function (container) {
       var readout = window.BetaControls.readout(container);

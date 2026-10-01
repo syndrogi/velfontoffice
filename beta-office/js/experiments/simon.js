@@ -14,6 +14,7 @@
     id: "simon",
     name: "Simon",
     category: "SIMON",
+    number: 24,
     description: "Watch, then repeat the flashing sequence",
     launch: function (container) {
       var grid = document.createElement("div");

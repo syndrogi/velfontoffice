@@ -11,6 +11,7 @@
     id: "system",
     name: "System",
     category: "SYSTEM",
+    number: 8,
     description: "Build, registry, open windows",
     launch: function (container) {
       var loadedAt = new Date().toLocaleTimeString();

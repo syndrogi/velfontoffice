@@ -24,6 +24,7 @@
     id: "scramble",
     name: "Scramble",
     category: "SCRAMBLE",
+    number: 39,
     description: "Unscramble the word, keep the streak",
     launch: function (container) {
       var word = window.BetaControls.sampleText(container, "");

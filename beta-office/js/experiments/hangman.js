@@ -13,6 +13,7 @@
     id: "hangman",
     name: "Hangman",
     category: "HANGMAN",
+    number: 30,
     description: "Guess the word, 6 wrong guesses allowed",
     launch: function (container) {
       var wordBox = window.BetaControls.sampleText(container, "");

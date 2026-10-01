@@ -16,6 +16,7 @@
     id: "flock",
     name: "Flock",
     category: "FLOCK",
+    number: 72,
     description: "Simple boids flocking simulation",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, true);

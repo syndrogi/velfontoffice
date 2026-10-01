@@ -36,6 +36,7 @@
     id: "metronome",
     name: "Metronome",
     category: "METRONOME",
+    number: 61,
     description: "BPM slider, visual + audio tick",
     launch: function (container) {
       var dot = document.createElement("div");

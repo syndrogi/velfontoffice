@@ -10,6 +10,7 @@
     id: "fractaltree",
     name: "Fractal Tree",
     category: "FRACTALTREE",
+    number: 49,
     description: "Recursive branching tree, angle + depth sliders",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, true);

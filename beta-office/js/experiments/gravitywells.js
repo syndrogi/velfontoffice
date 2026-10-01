@@ -13,6 +13,7 @@
     id: "gravitywells",
     name: "Gravity Wells",
     category: "GRAVITYWELLS",
+    number: 53,
     description: "Click to place attractors, particles orbit",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, true);

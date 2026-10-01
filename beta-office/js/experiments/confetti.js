@@ -14,6 +14,7 @@
     id: "confetti",
     name: "Confetti",
     category: "CONFETTI",
+    number: 17,
     description: "Click to burst, count + gravity sliders",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, true);

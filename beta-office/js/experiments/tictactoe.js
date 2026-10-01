@@ -23,6 +23,7 @@
     id: "tictactoe",
     name: "TicTacToe",
     category: "TICTACTOE",
+    number: 25,
     description: "Local 2-player 3x3 grid, no AI",
     launch: function (container) {
       var grid = document.createElement("div");

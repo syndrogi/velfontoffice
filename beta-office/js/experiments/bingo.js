@@ -33,6 +33,7 @@
     id: "bingo",
     name: "Bingo",
     category: "BINGO",
+    number: 36,
     description: "Random 5x5 card, click to mark, get a line",
     launch: function (container) {
       var grid = document.createElement("div");

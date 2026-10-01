@@ -14,6 +14,7 @@
     id: "lightsout",
     name: "Lights Out",
     category: "LIGHTSOUT",
+    number: 31,
     description: "Click toggles a cell + neighbors, turn them all off",
     launch: function (container) {
       var grid = document.createElement("div");

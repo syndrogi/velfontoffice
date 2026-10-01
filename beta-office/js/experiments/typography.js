@@ -21,6 +21,7 @@
     id: "typography",
     name: "Typography",
     category: "TYPOGRAPHY",
+    number: 1,
     description: "Size, spacing, line-height, scramble",
     launch: function (container) {
       var sample = window.BetaControls.sampleText(container, SAMPLE);

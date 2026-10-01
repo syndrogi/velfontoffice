@@ -12,6 +12,7 @@
     id: "banner",
     name: "Banner",
     category: "BANNER",
+    number: 56,
     description: "Type text, see it rendered huge",
     launch: function (container) {
       var input = document.createElement("input");

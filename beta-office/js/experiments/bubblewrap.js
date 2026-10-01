@@ -11,6 +11,7 @@
     id: "bubblewrap",
     name: "Bubble Wrap",
     category: "BUBBLEWRAP",
+    number: 58,
     description: "Click to pop every bubble",
     launch: function (container) {
       var grid = document.createElement("div");

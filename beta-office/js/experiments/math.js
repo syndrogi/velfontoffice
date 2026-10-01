@@ -11,6 +11,7 @@
     id: "math",
     name: "Math",
     category: "MATH",
+    number: 41,
     description: "30s of quick arithmetic, score",
     launch: function (container) {
       var qBox = window.BetaControls.sampleText(container, "Click Start");

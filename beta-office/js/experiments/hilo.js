@@ -15,6 +15,7 @@
     id: "hilo",
     name: "HiLo",
     category: "HILO",
+    number: 35,
     description: "Guess higher or lower, build a streak",
     launch: function (container) {
       var state = { current: randCard(), streak: 0, best: 0 };

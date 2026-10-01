@@ -11,6 +11,7 @@
     id: "debug",
     name: "Debug",
     category: "DEBUG",
+    number: 9,
     description: "Registry dump",
     launch: function (container) {
       var readout = window.BetaControls.readout(container);

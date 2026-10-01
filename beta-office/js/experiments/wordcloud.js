@@ -14,6 +14,7 @@
     id: "wordcloud",
     name: "Word Cloud",
     category: "WORDCLOUD",
+    number: 75,
     description: "Paste text, see a word-frequency cloud",
     launch: function (container) {
       var textarea = document.createElement("textarea");

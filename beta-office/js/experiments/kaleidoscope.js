@@ -12,6 +12,7 @@
     id: "kaleidoscope",
     name: "Kaleidoscope",
     category: "KALEIDOSCOPE",
+    number: 50,
     description: "Mouse-driven mirrored symmetric drawing",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, true);

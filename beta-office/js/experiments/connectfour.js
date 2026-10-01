@@ -29,6 +29,7 @@
     id: "connectfour",
     name: "Connect Four",
     category: "CONNECTFOUR",
+    number: 28,
     description: "Local 2-player, click a column to drop",
     launch: function (container) {
       var grid = document.createElement("div");

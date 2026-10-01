@@ -9,6 +9,7 @@
     id: "guessnumber",
     name: "Guess Number",
     category: "GUESSNUMBER",
+    number: 38,
     description: "1-100, higher/lower hints, fewest guesses",
     launch: function (container) {
       var input = document.createElement("input");

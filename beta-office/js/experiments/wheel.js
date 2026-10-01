@@ -14,6 +14,7 @@
     id: "wheel",
     name: "Wheel",
     category: "WHEEL",
+    number: 34,
     description: "Spin to pick from a list of options",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, true);

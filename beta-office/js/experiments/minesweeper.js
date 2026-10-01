@@ -14,6 +14,7 @@
     id: "minesweeper",
     name: "Minesweeper",
     category: "MINESWEEPER",
+    number: 26,
     description: "8x8 grid, flag with right-click, avoid the mines",
     launch: function (container) {
       var grid = document.createElement("div");

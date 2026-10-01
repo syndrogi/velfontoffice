@@ -13,6 +13,7 @@
     id: "whack",
     name: "Whack",
     category: "WHACK",
+    number: 20,
     description: "30s timed mole-grid clicker, score",
     launch: function (container) {
       var grid = document.createElement("div");

@@ -14,6 +14,7 @@
     id: "snake",
     name: "Snake",
     category: "SNAKE",
+    number: 15,
     description: "Grid snake, arrow keys, score",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, true);

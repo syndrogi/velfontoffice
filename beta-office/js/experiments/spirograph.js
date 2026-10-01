@@ -10,6 +10,7 @@
     id: "spirograph",
     name: "Spirograph",
     category: "SPIROGRAPH",
+    number: 52,
     description: "Parametric curve, R/r/d sliders",
     launch: function (container) {
       var stage = window.BetaControls.stage(container, true);

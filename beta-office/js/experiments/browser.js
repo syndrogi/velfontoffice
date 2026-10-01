@@ -11,6 +11,7 @@
     id: "browser",
     name: "Browser",
     category: "BROWSER",
+    number: 7,
     description: "Viewport, DPR, scroll, mouse, FPS, UA",
     launch: function (container) {
       var readout = window.BetaControls.readout(container);

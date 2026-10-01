@@ -12,6 +12,7 @@
     id: "startupname",
     name: "Startup Name",
     category: "STARTUPNAME",
+    number: 70,
     description: "Click for a fake startup name",
     launch: function (container) {
       var box = window.BetaControls.sampleText(container, "Click Generate.");

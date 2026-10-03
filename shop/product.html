@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VELFONT SHOP — Product</title>
 <link rel="canonical" href="https://velfontoffice.com/shop/product.html">
+<link rel="stylesheet" href="/css/tokens.css">
 <link rel="stylesheet" href="style.css">
 <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
@@ -23,7 +24,7 @@
 
 <header class="site-header">
   <div class="header-side header-left">
-    <button class="nav-toggle" id="navToggle" data-i18n-aria-label="nav.menuOpen" aria-label="메뉴 열기">
+    <button class="nav-toggle" id="navToggle" data-i18n-aria-label="nav.menuOpen" aria-label="Open menu">
       <svg viewBox="0 0 20 20" aria-hidden="true">
         <line class="nav-toggle-v" x1="10" y1="2" x2="10" y2="18"></line>
         <line x1="2" y1="10" x2="18" y2="10"></line>
@@ -41,44 +42,44 @@
             <li><a href="#">Accessories</a></li>
           </ul>
         </li>
-        <li><button type="button" class="header-text-btn" id="searchToggle" data-i18n-aria-label="nav.search" aria-label="검색">search</button></li>
+        <li><button type="button" class="header-text-btn" id="searchToggle" data-i18n-aria-label="nav.search" aria-label="Search">search</button></li>
       </ul>
     </nav>
   </div>
 
-  <a href="/" class="logo" data-i18n-aria-label="nav.logoHome" aria-label="VELFONT OFFICE 홈으로 이동">
+  <a href="/" class="logo" data-i18n-aria-label="nav.logoHome" aria-label="Go to VELFONT OFFICE home">
     <span class="logo-mark" role="img" aria-label="VELFONT OFFICE"></span>
   </a>
 
   <div class="header-side header-right">
     <div class="header-icons">
-      <div class="lang-switch has-dropdown" id="langSwitch">
-        <button type="button" class="lang-toggle" id="langToggle" aria-haspopup="true" aria-expanded="false" aria-controls="langMenu" data-i18n-aria-label="nav.langChange" aria-label="언어 변경">
+      <div class="currency-switch has-dropdown" id="currencySwitch">
+        <button type="button" class="currency-toggle" id="currencyToggle" aria-haspopup="true" aria-expanded="false" aria-controls="currencyMenu" data-i18n-aria-label="nav.currencyChange" aria-label="Change currency">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="12" cy="12" r="10"></circle>
             <line x1="2" y1="12" x2="22" y2="12"></line>
             <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
           </svg>
         </button>
-        <ul class="dropdown lang-menu" id="langMenu">
-          <li><a href="#" class="lang-option" data-currency="KRW">KRW ₩</a></li>
-          <li><a href="#" class="lang-option" data-currency="USD">USD $</a></li>
+        <ul class="dropdown currency-menu" id="currencyMenu">
+          <li><a href="#" class="currency-option" data-currency="KRW">KRW ₩</a></li>
+          <li><a href="#" class="currency-option" data-currency="USD">USD $</a></li>
         </ul>
       </div>
-      <button class="header-text-btn" id="accountBtn" data-i18n-aria-label="nav.login" aria-label="로그인">login</button>
+      <button class="header-text-btn" id="accountBtn" data-i18n-aria-label="nav.login" aria-label="Login">login</button>
       <div class="cart-nav-item" id="cartNavItem">
-        <button class="header-text-btn" id="cartBtn" data-i18n-aria-label="nav.cart" aria-label="장바구니">f(<span class="cart-count" id="cartCount">0</span>)</button>
-        <div class="dropdown cart-drawer" id="cartDrawer" data-i18n-aria-label="nav.cart" aria-label="장바구니">
+        <button class="header-text-btn" id="cartBtn" data-i18n-aria-label="nav.cart" aria-label="Cart">f(<span class="cart-count" id="cartCount">0</span>)</button>
+        <div class="dropdown cart-drawer" id="cartDrawer" data-i18n-aria-label="nav.cart" aria-label="Cart">
           <div class="cart-drawer-head">
-            <h3 data-i18n="cart.title">장바구니</h3>
+            <h3 data-i18n="cart.title">Cart</h3>
           </div>
           <div class="cart-drawer-items" id="cartDrawerItems"></div>
           <div class="cart-drawer-foot">
             <div class="cart-subtotal-row">
-              <span data-i18n="cart.subtotal">소계</span>
+              <span data-i18n="cart.subtotal">Subtotal</span>
               <span id="cartSubtotal">0원</span>
             </div>
-            <button class="checkout-btn" id="checkoutBtn" data-i18n="cart.checkout">결제하기</button>
+            <button class="checkout-btn" id="checkoutBtn" data-i18n="cart.checkout">Checkout</button>
           </div>
         </div>
       </div>
@@ -86,13 +87,13 @@
   </div>
 
   <div class="search-bar" id="searchBar">
-    <input type="text" id="searchInput" data-i18n-placeholder="nav.searchPlaceholder" placeholder="검색어를 입력하세요">
+    <input type="text" id="searchInput" data-i18n-placeholder="nav.searchPlaceholder" placeholder="Enter a search term">
   </div>
 </header>
 
 <div class="modal-overlay" id="loginOverlay"></div>
 <div class="login-modal" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
-  <button type="button" class="modal-close" id="loginModalClose" data-i18n-aria-label="modal.close" aria-label="닫기">
+  <button type="button" class="modal-close" id="loginModalClose" data-i18n-aria-label="modal.close" aria-label="Close">
     <svg viewBox="0 0 24 24"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
   </button>
   <h2 id="loginModalTitle">Login</h2>
@@ -126,7 +127,7 @@
 </nav>
 
 <main class="product-detail" id="productDetail">
-  <!-- 상품 상세 내용은 js/product-detail.js 에서 렌더링됩니다 -->
+  <!-- Product detail content is rendered in js/product-detail.js -->
 </main>
 
 <footer class="site-footer">
@@ -142,26 +143,26 @@
   <div class="footer-col">
     <h4>Help</h4>
     <ul>
-      <li><a href="shipping.html" data-i18n="footer.helpShipping">배송 안내</a></li>
-      <li><a href="exchange.html" data-i18n="footer.helpExchange">교환/반품</a></li>
-      <li><a href="size-guide.html" data-i18n="footer.helpSizeGuide">사이즈 가이드</a></li>
-      <li><a href="contact.html" data-i18n="footer.helpContact">문의하기</a></li>
+      <li><a href="shipping.html" data-i18n="footer.helpShipping">Shipping Info</a></li>
+      <li><a href="exchange.html" data-i18n="footer.helpExchange">Exchange & Returns</a></li>
+      <li><a href="size-guide.html" data-i18n="footer.helpSizeGuide">Size Guide</a></li>
+      <li><a href="contact.html" data-i18n="footer.helpContact">Contact Us</a></li>
     </ul>
   </div>
   <div class="footer-col">
     <h4>Company</h4>
     <ul>
-      <li><a href="about.html" data-i18n="footer.companyAbout">브랜드 소개</a></li>
-      <li><a href="store.html" data-i18n="footer.companyStore">스토어 안내</a></li>
-      <li><a href="careers.html" data-i18n="footer.companyCareers">채용</a></li>
+      <li><a href="about.html" data-i18n="footer.companyAbout">About the Brand</a></li>
+      <li><a href="store.html" data-i18n="footer.companyStore">Store Info</a></li>
+      <li><a href="careers.html" data-i18n="footer.companyCareers">Careers</a></li>
     </ul>
   </div>
   <div class="footer-col newsletter">
     <h4>Newsletter</h4>
-    <p data-i18n="footer.newsletterText">신상품 소식을 가장 먼저 받아보세요.</p>
+    <p data-i18n="footer.newsletterText">Be the first to hear about new arrivals.</p>
     <form id="newsletterForm">
-      <input type="email" data-i18n-placeholder="footer.newsletterPlaceholder" placeholder="이메일 주소" required>
-      <button type="submit" data-i18n="footer.newsletterSubmit">구독</button>
+      <input type="email" data-i18n-placeholder="footer.newsletterPlaceholder" placeholder="Email address" required>
+      <button type="submit" data-i18n="footer.newsletterSubmit">Subscribe</button>
     </form>
     <div class="social-links">
       <a href="https://www.instagram.com/velfontoffice/" target="_blank" rel="noopener">Instagram</a>

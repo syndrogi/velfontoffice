@@ -30,20 +30,8 @@ function renderCheckout() {
   totalEl.textContent = formatPrice(getCartSubtotal());
 }
 
-function setupCheckoutSubmit() {
-  const btn = document.getElementById("checkoutSubmitBtn");
-  btn.addEventListener("click", () => {
-    if (getCartCount() === 0) {
-      alert(t("checkout.emptyAlert"));
-      return;
-    }
-    alert(t("checkout.pendingAlert"));
-  });
-}
-
 document.addEventListener("DOMContentLoaded", async () => {
   await productsReady;
   renderCheckout();
-  setupCheckoutSubmit();
   onCurrencyChange(renderCheckout);
 });

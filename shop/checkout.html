@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VELFONT SHOP — Checkout</title>
 <link rel="canonical" href="https://velfontoffice.com/shop/checkout.html">
+<link rel="stylesheet" href="/css/tokens.css">
 <link rel="stylesheet" href="style.css">
 <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
@@ -23,7 +24,7 @@
 
 <header class="site-header">
   <div class="header-side header-left">
-    <button class="nav-toggle" id="navToggle" data-i18n-aria-label="nav.menuOpen" aria-label="메뉴 열기">
+    <button class="nav-toggle" id="navToggle" data-i18n-aria-label="nav.menuOpen" aria-label="Open menu">
       <svg viewBox="0 0 20 20" aria-hidden="true">
         <line class="nav-toggle-v" x1="10" y1="2" x2="10" y2="18"></line>
         <line x1="2" y1="10" x2="18" y2="10"></line>
@@ -36,7 +37,7 @@
     </nav>
   </div>
 
-  <a href="/" class="logo" data-i18n-aria-label="nav.logoHome" aria-label="VELFONT OFFICE 홈으로 이동">
+  <a href="/" class="logo" data-i18n-aria-label="nav.logoHome" aria-label="Go to VELFONT OFFICE home">
     <span class="logo-mark" role="img" aria-label="VELFONT OFFICE"></span>
   </a>
 
@@ -49,32 +50,32 @@
 
 <main class="checkout-page">
   <section class="checkout-summary">
-    <h1 data-i18n="checkout.title">주문 요약</h1>
+    <h1 data-i18n="checkout.title">Order Summary</h1>
     <div class="checkout-items" id="checkoutItems"></div>
     <div class="checkout-total-row">
-      <span data-i18n="checkout.totalLabel">총 결제 금액</span>
+      <span data-i18n="checkout.totalLabel">Total Payment</span>
       <span id="checkoutTotal">0원</span>
     </div>
   </section>
 
   <section class="checkout-payment">
-    <h2 data-i18n="checkout.paymentInfo">결제 정보</h2>
-    <p class="checkout-note" data-i18n="checkout.note">결제 연동은 준비 중입니다. 아래 버튼은 이후 실제 PG(결제) 연동이 붙을 자리입니다.</p>
+    <h2 data-i18n="checkout.paymentInfo">Payment Information</h2>
+    <p class="checkout-note" data-i18n="checkout.note">Payment integration is in progress. This button will connect to a real payment gateway later.</p>
 
     <div class="checkout-field">
-      <label for="recipientName" data-i18n="checkout.recipientLabel">받는 사람</label>
-      <input type="text" id="recipientName" data-i18n-placeholder="checkout.recipientPlaceholder" placeholder="이름">
+      <label for="recipientName" data-i18n="checkout.recipientLabel">Recipient</label>
+      <input type="text" id="recipientName" data-i18n-placeholder="checkout.recipientPlaceholder" placeholder="Name">
     </div>
     <div class="checkout-field">
-      <label for="recipientAddress" data-i18n="checkout.addressLabel">배송지</label>
-      <input type="text" id="recipientAddress" data-i18n-placeholder="checkout.addressPlaceholder" placeholder="주소">
+      <label for="recipientAddress" data-i18n="checkout.addressLabel">Shipping Address</label>
+      <input type="text" id="recipientAddress" data-i18n-placeholder="checkout.addressPlaceholder" placeholder="Address">
     </div>
     <div class="checkout-field">
-      <label for="recipientPhone" data-i18n="checkout.phoneLabel">연락처</label>
-      <input type="text" id="recipientPhone" data-i18n-placeholder="checkout.phonePlaceholder" placeholder="휴대폰 번호">
+      <label for="recipientPhone" data-i18n="checkout.phoneLabel">Phone Number</label>
+      <input type="text" id="recipientPhone" data-i18n-placeholder="checkout.phonePlaceholder" placeholder="Mobile Number">
     </div>
 
-    <button class="checkout-submit-btn" id="checkoutSubmitBtn" data-i18n="checkout.submit">결제하기</button>
+    <button class="checkout-submit-btn" id="checkoutSubmitBtn" data-i18n="checkout.submit" disabled aria-disabled="true">Checkout — Coming Soon</button>
   </section>
 </main>
 

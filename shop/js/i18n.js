@@ -12,7 +12,7 @@ const STRINGS = {
   "nav.login": "Login",
   "nav.cart": "Cart",
   "nav.searchPlaceholder": "Enter a search term",
-  "nav.langChange": "Change currency",
+  "nav.currencyChange": "Change currency",
 
   "cart.title": "Cart",
   "cart.subtotal": "Subtotal",
@@ -78,11 +78,9 @@ const STRINGS = {
   "checkout.addressPlaceholder": "Address",
   "checkout.phoneLabel": "Phone Number",
   "checkout.phonePlaceholder": "Mobile Number",
-  "checkout.submit": "Checkout",
+  "checkout.submit": "Checkout — Coming Soon",
   "checkout.emptyCart": "Your cart is empty.",
   "checkout.continueShopping": "Continue Shopping",
-  "checkout.emptyAlert": "Your cart is empty.",
-  "checkout.pendingAlert": "Payment integration is in progress. This button will process real payments once connected.",
   "checkout.itemMeta": "Size {size} · Qty {qty}",
 };
 
@@ -127,7 +125,7 @@ function onCurrencyChange(callback) {
 }
 
 function updateCurrencyOptions() {
-  document.querySelectorAll(".lang-option").forEach((opt) => {
+  document.querySelectorAll(".currency-option").forEach((opt) => {
     opt.classList.toggle("is-active", opt.dataset.currency === getCurrency());
   });
 }
@@ -138,12 +136,10 @@ function setCurrency(currency) {
   currencyChangeListeners.forEach((callback) => callback(currency));
 }
 
-// Globe icon opens a small dropdown of currency options, reusing the same
-// .lang-switch/.lang-menu/.lang-option markup and styling this used for
-// the language switch it replaced.
-function setupLangSwitch() {
-  const switchEl = document.getElementById("langSwitch");
-  const toggle = document.getElementById("langToggle");
+// Globe icon opens a small dropdown of currency options.
+function setupCurrencySwitch() {
+  const switchEl = document.getElementById("currencySwitch");
+  const toggle = document.getElementById("currencyToggle");
   if (!switchEl || !toggle) return;
 
   updateCurrencyOptions();
@@ -159,7 +155,7 @@ function setupLangSwitch() {
     toggle.setAttribute("aria-expanded", String(isOpen));
   });
 
-  switchEl.querySelectorAll(".lang-option").forEach((opt) => {
+  switchEl.querySelectorAll(".currency-option").forEach((opt) => {
     opt.addEventListener("click", (e) => {
       e.preventDefault();
       setCurrency(opt.dataset.currency);
@@ -179,5 +175,5 @@ function setupLangSwitch() {
 document.addEventListener("DOMContentLoaded", () => {
   document.documentElement.lang = "en";
   applyStaticTranslations();
-  setupLangSwitch();
+  setupCurrencySwitch();
 });

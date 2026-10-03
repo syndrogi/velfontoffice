@@ -2,14 +2,20 @@
    VELFONT OFFICE — Base
    ========================================================================== */
 
+/* Semantic layer — what each shared primitive (css/tokens.css, loaded
+   before this file) MEANS on this site. Values are unchanged from
+   before tokens.css existed; only indirected through var() so the
+   primitives have one source instead of being retyped per section
+   (see shop/style.css's own semantic layer for the same primitives
+   used slightly differently there). */
 :root {
-  --color-bg: #ffffff;
-  --color-bg-alt: #f5f5f5;
-  --color-fg: #000000;
+  --color-bg: var(--color-white, #ffffff);
+  --color-bg-alt: var(--color-grey-f5, #f5f5f5);
+  --color-fg: var(--color-black, #000000);
   --color-fg-muted: rgba(0, 0, 0, 0.55);
   --color-fg-faint: rgba(0, 0, 0, 0.38);
-  --color-line: #e5e5e5;
-  --color-hover: #e0261f;
+  --color-line: var(--color-grey-e5, #e5e5e5);
+  --color-hover: var(--color-accent-red, #e0261f);
 
   --font-sans: "Helvetica Neue", Helvetica, Arial, "Apple SD Gothic Neo", sans-serif;
   /* archivio-uno.com's body font is a self-hosted custom face (Baikal VAR)
@@ -17,10 +23,15 @@
      — Helvetica Bold — applied at full weight to match its heavier feel. */
   --font-body: "Helvetica Bold", Helvetica, "Helvetica Neue", Arial, sans-serif;
 
+  /* Same 127px css/tokens.css declares as the shared primitive (shop
+     uses the identical value) — kept as a plain literal rather than
+     var(--header-height, ...) since that would self-reference this
+     same custom property name and resolve to invalid. Duplicated, not
+     derived; if it ever needs to change, update both. */
   --header-height: 127px;
   --edge: 56px;
 
-  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease: var(--ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
   /* Matches anime.js's "inOutQuad" — used by the header logo's SVG line
      draw (js/logo-draw.js) and reused by the hero title's letter draw
      (see .hero-title .letter below) so both read as the same animation. */
@@ -982,6 +993,55 @@ a {
 
 .labs-logo-display .logo-draw-line {
   stroke-width: 1.2;
+}
+
+/* Labs / VFO Stem Logo — same mask-image + drag pattern as
+   .labs-logo-mark above (js/labs/stem-logo.js), just a second mark
+   (images/velfontoffice stem logo.png) and mirrored to the hero's
+   bottom-right corner so the two can be shown at once without
+   overlapping. No stroke-draw intro here — there's no traced SVG
+   construction grid for this mark the way logo-draw.svg exists for
+   the main one. */
+.labs-stem-logo-display {
+  position: fixed;
+  right: var(--edge);
+  bottom: 40px;
+  z-index: 40;
+  width: min(46vw, 640px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 400ms var(--ease);
+}
+
+.labs-stem-logo-display.is-visible {
+  opacity: 1;
+}
+
+.labs-stem-logo-mark {
+  display: block;
+  width: 100%;
+  aspect-ratio: 883 / 353;
+  background-color: var(--color-fg);
+  -webkit-mask-image: url("images/velfontoffice stem logo.png");
+  mask-image: url("images/velfontoffice stem logo.png");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  cursor: grab;
+  pointer-events: auto;
+  transition: background-color 180ms var(--ease);
+}
+
+.labs-stem-logo-mark:hover,
+.labs-stem-logo-mark:focus-visible {
+  background-color: var(--color-hover);
+}
+
+.labs-stem-logo-mark.is-dragging {
+  cursor: grabbing;
 }
 
 /* Minimal feedback text for placeholder labs ("Coming Soon") — no box,

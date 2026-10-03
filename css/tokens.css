@@ -1,0 +1,51 @@
+/* ==========================================================================
+   VELFONT OFFICE — Shared primitive tokens
+   One place for the raw color/motion/layout values every section draws
+   from, so e.g. "the brand red" or "the standard hairline grey" has a
+   single source instead of being retyped as a slightly different hex
+   per file. These are PRIMITIVES, not semantics — a section's own
+   stylesheet still defines what each primitive MEANS there (its own
+   --color-bg/--color-fg/etc., or a --shop-* layer), it just points that
+   definition at one of these instead of a bare hex literal.
+
+   Deliberately NOT prescriptive about spacing/typography here — those
+   stay local to each section's own design language (see each section's
+   own :root). This file only covers values that are already provably
+   shared (identical hex across root site + shop at minimum).
+
+   Load this before a section's own stylesheet:
+     <link rel="stylesheet" href="/css/tokens.css">
+     <link rel="stylesheet" href="style.css">
+   ========================================================================== */
+
+:root {
+  /* Core neutrals */
+  --color-black: #000000;
+  --color-white: #ffffff;
+
+  /* Grey ramp — named by their existing hex, not a lightness index,
+     since the values already in use across sections don't form a clean
+     evenly-spaced scale. Each section's semantic layer picks which of
+     these it actually uses. */
+  --color-grey-111: #111111;
+  --color-grey-333: #333333;
+  --color-grey-666: #666666;
+  --color-grey-999: #999999;
+  --color-grey-ddd: #dddddd;
+  --color-grey-e5: #e5e5e5;
+  --color-grey-eee: #eeeeee;
+  --color-grey-f2: #f2f2f2;
+  --color-grey-f5: #f5f5f5;
+  --color-grey-f7: #f7f7f7;
+
+  /* Brand accent — identical value already shared by the root site and
+     shop before this file existed (style.css --color-hover, shop's own
+     --color-hover). */
+  --color-accent-red: #e0261f;
+
+  /* Shared layout constants — identical across root site and shop. */
+  --header-height: 127px;
+
+  /* Shared motion curve — root site's --ease. */
+  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+}

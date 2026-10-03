@@ -343,6 +343,9 @@
       '<span class="tile-sub">' +
       (module.sub || "") +
       "</span>";
+    if (module.status === "wip") {
+      html += '<span class="tile-status" aria-label="Work in progress">WIP</span>';
+    }
     if (module.icon && ICONS[module.icon]) {
       html += '<span class="tile-icon">' + ICONS[module.icon] + "</span>";
     }

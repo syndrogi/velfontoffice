@@ -46,7 +46,7 @@
   window.BetaExperiments.registerExperiment({
     id: "soundboard",
     name: "Soundboard",
-    category: "SOUNDBOARD",
+    category: "SOUND",
     number: 62,
     description: "8 preset one-shot tones",
     launch: function (container) {

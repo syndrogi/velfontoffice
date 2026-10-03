@@ -10,7 +10,7 @@
   window.BetaExperiments.registerExperiment({
     id: "math",
     name: "Math",
-    category: "MATH",
+    category: "WORDPLAY",
     number: 41,
     description: "30s of quick arithmetic, score",
     launch: function (container) {

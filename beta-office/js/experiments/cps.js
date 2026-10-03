@@ -11,7 +11,7 @@
   window.BetaExperiments.registerExperiment({
     id: "cps",
     name: "CPS",
-    category: "CPS",
+    category: "SKILL",
     number: 43,
     description: "Click as fast as you can for 5 seconds",
     launch: function (container) {

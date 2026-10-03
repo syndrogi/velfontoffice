@@ -11,7 +11,7 @@
   window.BetaExperiments.registerExperiment({
     id: "matrixrain",
     name: "Matrix Rain",
-    category: "MATRIXRAIN",
+    category: "VISUAL",
     number: 47,
     description: "Falling glyph columns, speed slider",
     launch: function (container) {

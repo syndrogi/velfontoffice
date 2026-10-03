@@ -12,7 +12,7 @@
   window.BetaExperiments.registerExperiment({
     id: "hangman",
     name: "Hangman",
-    category: "HANGMAN",
+    category: "GAMES",
     number: 30,
     description: "Guess the word, 6 wrong guesses allowed",
     launch: function (container) {

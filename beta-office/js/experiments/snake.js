@@ -13,7 +13,7 @@
   window.BetaExperiments.registerExperiment({
     id: "snake",
     name: "Snake",
-    category: "SNAKE",
+    category: "GAMES",
     number: 15,
     description: "Grid snake, arrow keys, score",
     launch: function (container) {

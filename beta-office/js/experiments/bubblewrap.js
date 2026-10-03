@@ -10,7 +10,7 @@
   window.BetaExperiments.registerExperiment({
     id: "bubblewrap",
     name: "Bubble Wrap",
-    category: "BUBBLEWRAP",
+    category: "VISUAL",
     number: 58,
     description: "Click to pop every bubble",
     launch: function (container) {

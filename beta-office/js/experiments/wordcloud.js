@@ -13,7 +13,7 @@
   window.BetaExperiments.registerExperiment({
     id: "wordcloud",
     name: "Word Cloud",
-    category: "WORDCLOUD",
+    category: "WORDPLAY",
     number: 75,
     description: "Paste text, see a word-frequency cloud",
     launch: function (container) {

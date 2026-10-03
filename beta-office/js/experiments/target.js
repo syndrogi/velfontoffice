@@ -12,7 +12,7 @@
   window.BetaExperiments.registerExperiment({
     id: "target",
     name: "Target",
-    category: "TARGET",
+    category: "SKILL",
     number: 90,
     description: "Click the target before it shrinks away, score streak",
     launch: function (container) {

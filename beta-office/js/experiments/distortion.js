@@ -14,7 +14,7 @@
   window.BetaExperiments.registerExperiment({
     id: "distortion",
     name: "Distortion",
-    category: "DISTORTION",
+    category: "PAGEFX",
     number: 14,
     description: "Skew, perspective tilt, shake",
     launch: function (container) {

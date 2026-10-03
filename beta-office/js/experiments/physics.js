@@ -11,7 +11,7 @@
   window.BetaExperiments.registerExperiment({
     id: "physics",
     name: "Physics",
-    category: "PHYSICS",
+    category: "PAGEFX",
     number: 13,
     description: "Gravity + bounce ball-pit",
     launch: function (container) {

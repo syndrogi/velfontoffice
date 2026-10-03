@@ -22,7 +22,7 @@
   window.BetaExperiments.registerExperiment({
     id: "tictactoe",
     name: "TicTacToe",
-    category: "TICTACTOE",
+    category: "GAMES",
     number: 25,
     description: "Local 2-player 3x3 grid, no AI",
     launch: function (container) {

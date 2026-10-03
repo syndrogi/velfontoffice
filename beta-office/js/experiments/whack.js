@@ -12,7 +12,7 @@
   window.BetaExperiments.registerExperiment({
     id: "whack",
     name: "Whack",
-    category: "WHACK",
+    category: "GAMES",
     number: 20,
     description: "30s timed mole-grid clicker, score",
     launch: function (container) {

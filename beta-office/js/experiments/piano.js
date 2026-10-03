@@ -47,7 +47,7 @@
   window.BetaExperiments.registerExperiment({
     id: "piano",
     name: "Piano",
-    category: "PIANO",
+    category: "SOUND",
     number: 23,
     description: "Click or A S D F H J K L to play",
     launch: function (container) {

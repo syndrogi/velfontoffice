@@ -16,7 +16,7 @@
   window.BetaExperiments.registerExperiment({
     id: "breathe",
     name: "Breathe",
-    category: "BREATHE",
+    category: "UTILITY",
     number: 88,
     description: "A slow, guided breathing circle",
     launch: function (container) {

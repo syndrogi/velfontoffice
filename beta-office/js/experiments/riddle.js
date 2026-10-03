@@ -17,7 +17,7 @@
   window.BetaExperiments.registerExperiment({
     id: "riddle",
     name: "Riddle",
-    category: "RIDDLE",
+    category: "WORDPLAY",
     number: 95,
     description: "Click for a riddle, click again to reveal the answer",
     launch: function (container) {

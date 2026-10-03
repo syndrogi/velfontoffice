@@ -1,0 +1,140 @@
+/* ==========================================================================
+   Sphere stage — sections 4–8
+   ========================================================================== */
+
+.beta-sphere-stage {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.beta-sphere-perspective {
+  perspective: 1200px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.beta-sphere {
+  position: relative;
+  transform-style: preserve-3d;
+  width: 1px;
+  height: 1px;
+}
+
+.beta-sphere-word {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-style: preserve-3d;
+  white-space: nowrap;
+  font-family: var(--beta-font-display);
+  font-weight: 700;
+  font-size: clamp(13px, 1.6vw, 20px);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--beta-fg);
+  opacity: 0.85;
+  cursor: pointer;
+  transition: opacity 220ms var(--beta-ease), color 150ms var(--beta-ease);
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.beta-sphere-word.beta-is-secondary {
+  font-size: clamp(10px, 1.05vw, 13px);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--beta-fg-muted);
+}
+
+.beta-sphere.beta-has-hover .beta-sphere-word {
+  opacity: 0.14;
+}
+
+.beta-sphere.beta-has-hover .beta-sphere-word.beta-is-hovered {
+  opacity: 1;
+  color: var(--beta-accent);
+}
+
+.beta-sphere-meta {
+  position: absolute;
+  left: var(--beta-edge);
+  bottom: 96px;
+  z-index: 10;
+  font-family: var(--beta-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--beta-fg-muted);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 200ms var(--beta-ease), transform 200ms var(--beta-ease);
+  max-width: 60vw;
+}
+
+.beta-sphere-meta.beta-is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.beta-sphere-meta strong {
+  display: block;
+  color: var(--beta-fg);
+  font-size: 12px;
+}
+
+.beta-scroll-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  font-family: var(--beta-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--beta-fg-faint);
+  animation: beta-scroll-cue-bob 1.8s var(--beta-ease) infinite;
+}
+
+@keyframes beta-scroll-cue-bob {
+  0%, 100% { transform: translate(-50%, 0); opacity: 0.6; }
+  50% { transform: translate(-50%, 6px); opacity: 1; }
+}
+
+.beta-sphere-stage.beta-scrolled-past .beta-scroll-cue {
+  display: none;
+}
+
+/* Mobile / reduced-motion fallback — plain stacked list built by
+   sphere.js into the same #betaSphere element (see section 19). */
+.beta-sphere.beta-is-flat {
+  width: auto;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  transform: none !important;
+}
+
+.beta-sphere.beta-is-flat .beta-sphere-word {
+  position: static;
+  transform: none !important;
+  opacity: 1;
+}
+
+.beta-sphere.beta-is-flat.beta-has-hover .beta-sphere-word {
+  opacity: 0.35;
+}
+
+.beta-sphere.beta-is-flat.beta-has-hover .beta-sphere-word.beta-is-hovered {
+  opacity: 1;
+}
+

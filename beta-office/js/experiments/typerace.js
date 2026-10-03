@@ -17,7 +17,7 @@
   window.BetaExperiments.registerExperiment({
     id: "typerace",
     name: "Type Race",
-    category: "TYPERACE",
+    category: "WORDPLAY",
     number: 44,
     description: "Type the sentence, get your WPM",
     launch: function (container) {

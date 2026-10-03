@@ -8,7 +8,7 @@
   window.BetaExperiments.registerExperiment({
     id: "canvas",
     name: "Canvas",
-    category: "CANVAS",
+    category: "VISUAL",
     number: 12,
     description: "Freehand draw, brush size, clear",
     launch: function (container) {

@@ -13,7 +13,7 @@
   window.BetaExperiments.registerExperiment({
     id: "fireworks",
     name: "Fireworks",
-    category: "FIREWORKS",
+    category: "VISUAL",
     number: 45,
     description: "Auto-looping rocket launch and burst",
     launch: function (container) {

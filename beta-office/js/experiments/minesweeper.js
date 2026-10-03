@@ -13,7 +13,7 @@
   window.BetaExperiments.registerExperiment({
     id: "minesweeper",
     name: "Minesweeper",
-    category: "MINESWEEPER",
+    category: "GAMES",
     number: 26,
     description: "8x8 grid, flag with right-click, avoid the mines",
     launch: function (container) {

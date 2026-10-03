@@ -36,7 +36,7 @@
   window.BetaExperiments.registerExperiment({
     id: "audioreflex",
     name: "Audio Reflex",
-    category: "AUDIOREFLEX",
+    category: "SOUND",
     number: 85,
     description: "Click Arm, then press Space the instant you hear the beep",
     launch: function (container) {

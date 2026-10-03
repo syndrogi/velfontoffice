@@ -46,7 +46,7 @@
   window.BetaExperiments.registerExperiment({
     id: "grid",
     name: "Grid",
-    category: "GRID",
+    category: "PAGEFX",
     number: 4,
     description: "Column, baseline, pixel overlays",
     launch: function (container) {

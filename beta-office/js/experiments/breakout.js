@@ -14,7 +14,7 @@
   window.BetaExperiments.registerExperiment({
     id: "breakout",
     name: "Breakout",
-    category: "BREAKOUT",
+    category: "GAMES",
     number: 29,
     description: "Mouse paddle, break every brick",
     launch: function (container) {

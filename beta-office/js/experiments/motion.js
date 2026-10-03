@@ -9,7 +9,7 @@
   window.BetaExperiments.registerExperiment({
     id: "motion",
     name: "Motion",
-    category: "MOTION",
+    category: "PAGEFX",
     number: 2,
     description: "Spring, attract, repel, float",
     launch: function (container) {

@@ -22,7 +22,7 @@
   window.BetaExperiments.registerExperiment({
     id: "color",
     name: "Color",
-    category: "COLOR",
+    category: "PAGEFX",
     number: 5,
     description: "Background, foreground, invert, mono",
     launch: function (container) {

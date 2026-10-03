@@ -10,7 +10,7 @@
   window.BetaExperiments.registerExperiment({
     id: "starfield",
     name: "Starfield",
-    category: "STARFIELD",
+    category: "VISUAL",
     number: 46,
     description: "Warp-speed starfield, speed slider",
     launch: function (container) {

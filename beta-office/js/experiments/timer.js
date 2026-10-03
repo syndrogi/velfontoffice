@@ -40,7 +40,7 @@
   window.BetaExperiments.registerExperiment({
     id: "timer",
     name: "Timer",
-    category: "TIMER",
+    category: "UTILITY",
     number: 63,
     description: "Countdown timer, beeps at zero",
     launch: function (container) {

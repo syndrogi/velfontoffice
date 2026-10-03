@@ -40,7 +40,7 @@
   window.BetaExperiments.registerExperiment({
     id: "blackjack",
     name: "Blackjack",
-    category: "BLACKJACK",
+    category: "GAMES",
     number: 84,
     description: "Hit or stand against the dealer, beat 21",
     launch: function (container) {

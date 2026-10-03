@@ -20,7 +20,7 @@
   window.BetaExperiments.registerExperiment({
     id: "typography",
     name: "Typography",
-    category: "TYPOGRAPHY",
+    category: "PAGEFX",
     number: 1,
     description: "Size, spacing, line-height, scramble",
     launch: function (container) {

@@ -11,7 +11,7 @@
   window.BetaExperiments.registerExperiment({
     id: "2048",
     name: "2048",
-    category: "2048",
+    category: "GAMES",
     number: 27,
     description: "Arrow-key slide and merge, reach 2048",
     launch: function (container) {

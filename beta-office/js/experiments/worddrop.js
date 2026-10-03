@@ -14,7 +14,7 @@
   window.BetaExperiments.registerExperiment({
     id: "worddrop",
     name: "Word Drop",
-    category: "WORDDROP",
+    category: "WORDPLAY",
     number: 93,
     description: "Type falling words before they land",
     launch: function (container) {

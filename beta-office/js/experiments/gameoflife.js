@@ -12,7 +12,7 @@
   window.BetaExperiments.registerExperiment({
     id: "gameoflife",
     name: "Game of Life",
-    category: "GAMEOFLIFE",
+    category: "VISUAL",
     number: 48,
     description: "Conway's life — click to seed, play/pause",
     launch: function (container) {

@@ -12,7 +12,7 @@
   window.BetaExperiments.registerExperiment({
     id: "hanoi",
     name: "Tower of Hanoi",
-    category: "HANOI",
+    category: "GAMES",
     number: 92,
     description: "Click a peg to pick up, click another to place",
     launch: function (container) {

@@ -11,7 +11,7 @@
   window.BetaExperiments.registerExperiment({
     id: "coinflip",
     name: "Coin Flip",
-    category: "COINFLIP",
+    category: "GAMES",
     number: 65,
     description: "Animated flip, heads/tails tally",
     launch: function (container) {

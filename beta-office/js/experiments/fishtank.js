@@ -21,7 +21,7 @@
   window.BetaExperiments.registerExperiment({
     id: "fishtank",
     name: "Fish Tank",
-    category: "FISHTANK",
+    category: "VISUAL",
     number: 79,
     description: "Ambient swimming fish, click to add more",
     launch: function (container) {

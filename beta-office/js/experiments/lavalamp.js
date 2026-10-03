@@ -11,7 +11,7 @@
   window.BetaExperiments.registerExperiment({
     id: "lavalamp",
     name: "Lava Lamp",
-    category: "LAVALAMP",
+    category: "VISUAL",
     number: 51,
     description: "Ambient drifting blurred blobs",
     launch: function (container) {

@@ -11,7 +11,7 @@
   window.BetaExperiments.registerExperiment({
     id: "cursor",
     name: "Cursor",
-    category: "CURSOR",
+    category: "PAGEFX",
     number: 3,
     description: "Crosshair, circle, coords, trailing",
     launch: function (container) {

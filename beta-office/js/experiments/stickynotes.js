@@ -12,7 +12,7 @@
   window.BetaExperiments.registerExperiment({
     id: "stickynotes",
     name: "Sticky Notes",
-    category: "STICKYNOTES",
+    category: "UTILITY",
     number: 68,
     description: "Add draggable sticky notes, edit inline",
     launch: function (container) {

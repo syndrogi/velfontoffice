@@ -13,7 +13,7 @@
   window.BetaExperiments.registerExperiment({
     id: "confetti",
     name: "Confetti",
-    category: "CONFETTI",
+    category: "VISUAL",
     number: 17,
     description: "Click to burst, count + gravity sliders",
     launch: function (container) {

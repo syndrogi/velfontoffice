@@ -14,7 +14,7 @@
   window.BetaExperiments.registerExperiment({
     id: "dotsandboxes",
     name: "Dots and Boxes",
-    category: "DOTSANDBOXES",
+    category: "GAMES",
     number: 82,
     description: "Local 2-player — claim edges, complete boxes to score",
     launch: function (container) {

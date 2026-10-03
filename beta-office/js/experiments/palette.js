@@ -21,7 +21,7 @@
   window.BetaExperiments.registerExperiment({
     id: "palette",
     name: "Palette",
-    category: "PALETTE",
+    category: "VISUAL",
     number: 57,
     description: "Generate a 5-color swatch, click to copy",
     launch: function (container) {

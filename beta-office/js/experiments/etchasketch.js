@@ -9,7 +9,7 @@
   window.BetaExperiments.registerExperiment({
     id: "etchasketch",
     name: "Etch A Sketch",
-    category: "ETCHASKETCH",
+    category: "VISUAL",
     number: 98,
     description: "Two knobs move the pen — X and Y sliders draw a line",
     launch: function (container) {

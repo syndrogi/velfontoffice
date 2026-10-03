@@ -9,7 +9,7 @@
   window.BetaExperiments.registerExperiment({
     id: "constellation",
     name: "Constellation",
-    category: "CONSTELLATION",
+    category: "VISUAL",
     number: 54,
     description: "Click to place stars, auto-linked to the nearest",
     launch: function (container) {

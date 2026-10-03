@@ -13,7 +13,7 @@
   window.BetaExperiments.registerExperiment({
     id: "dom",
     name: "DOM",
-    category: "DOM",
+    category: "DEVTOOLS",
     number: 6,
     description: "Outline, bounds, live node count",
     launch: function (container) {

@@ -13,7 +13,7 @@
   window.BetaExperiments.registerExperiment({
     id: "plinko",
     name: "Plinko",
-    category: "PLINKO",
+    category: "GAMES",
     number: 89,
     description: "Drop a ball through the pegs into a scoring slot",
     launch: function (container) {

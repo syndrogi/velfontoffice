@@ -13,7 +13,7 @@
   window.BetaExperiments.registerExperiment({
     id: "textmirror",
     name: "Text Mirror",
-    category: "TEXTMIRROR",
+    category: "VISUAL",
     number: 66,
     description: "Type text, see it reversed/flipped/mirrored",
     launch: function (container) {

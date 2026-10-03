@@ -17,7 +17,7 @@
   window.BetaExperiments.registerExperiment({
     id: "emojiguess",
     name: "Emoji Guess",
-    category: "EMOJIGUESS",
+    category: "WORDPLAY",
     number: 42,
     description: "Guess the phrase from the emoji",
     launch: function (container) {

@@ -14,7 +14,7 @@
   window.BetaExperiments.registerExperiment({
     id: "hilo",
     name: "HiLo",
-    category: "HILO",
+    category: "GAMES",
     number: 35,
     description: "Guess higher or lower, build a streak",
     launch: function (container) {

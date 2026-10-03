@@ -14,7 +14,7 @@
   window.BetaExperiments.registerExperiment({
     id: "dice",
     name: "Dice",
-    category: "DICE",
+    category: "GAMES",
     number: 22,
     description: "Click to roll, flicker settle, history",
     launch: function (container) {

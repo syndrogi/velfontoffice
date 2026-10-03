@@ -35,7 +35,7 @@
   window.BetaExperiments.registerExperiment({
     id: "metronome",
     name: "Metronome",
-    category: "METRONOME",
+    category: "SOUND",
     number: 61,
     description: "BPM slider, visual + audio tick",
     launch: function (container) {

@@ -11,7 +11,7 @@
   window.BetaExperiments.registerExperiment({
     id: "memory",
     name: "Memory",
-    category: "MEMORY",
+    category: "GAMES",
     number: 19,
     description: "Flip-and-match card grid, move counter",
     launch: function (container) {

@@ -11,7 +11,7 @@
   window.BetaExperiments.registerExperiment({
     id: "rockpaperscissors",
     name: "Rock Paper Scissors",
-    category: "ROCKPAPERSCISSORS",
+    category: "GAMES",
     number: 37,
     description: "Endless rounds vs the computer, W/L/T tally",
     launch: function (container) {

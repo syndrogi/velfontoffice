@@ -23,7 +23,7 @@
   window.BetaExperiments.registerExperiment({
     id: "scramble",
     name: "Scramble",
-    category: "SCRAMBLE",
+    category: "WORDPLAY",
     number: 39,
     description: "Unscramble the word, keep the streak",
     launch: function (container) {

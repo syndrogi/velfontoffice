@@ -1,0 +1,201 @@
+/* ==========================================================================
+   BETA OFFICE — an independent experimental sandbox under VELFONT OFFICE.
+   Deliberately flat/brutalist, matching the root site's language (no
+   radius, no shadow, thin borders, black/white) — everything "experimental"
+   here comes from interaction and motion, not decoration. Fully namespaced
+   under .beta-* / body.beta-office so nothing can collide with the root
+   site's style.css (this file is never loaded there, and vice versa).
+   ========================================================================== */
+
+:root {
+  --beta-bg: #ffffff;
+  --beta-fg: #000000;
+  --beta-fg-muted: rgba(0, 0, 0, 0.55);
+  --beta-fg-faint: rgba(0, 0, 0, 0.32);
+  --beta-line: #e5e5e5;
+  --beta-accent: #e0261f;
+
+  --beta-font-display: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --beta-font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+
+  --beta-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --beta-edge: 32px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background: var(--beta-bg);
+}
+
+body.beta-office {
+  background: var(--beta-bg);
+  color: var(--beta-fg);
+  font-family: var(--beta-font-display);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+.beta-office a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* :where() keeps this reset's specificity at zero (same as a bare
+   `button` selector) — as a plain `.beta-office button` descendant
+   selector it was (0,1,1), which silently beat every single-class
+   button style below it (.beta-toggle, .beta-mini-btn, .beta-window-btn,
+   every experiment's own game-cell classes, etc.) regardless of source
+   order, stripping their intended border/background. */
+.beta-office :where(button) {
+  font: inherit;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.beta-office ul {
+  list-style: none;
+}
+
+.beta-office :focus-visible {
+  outline: 1px solid var(--beta-fg-muted);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beta-office * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ==========================================================================
+   Topbar — exit + badge, section 17/18
+   ========================================================================== */
+
+.beta-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px var(--beta-edge);
+  pointer-events: none;
+}
+
+.beta-exit {
+  pointer-events: auto;
+  font-family: var(--beta-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 10px;
+  border: 1px solid var(--beta-fg);
+  background: var(--beta-bg);
+  transition: color 150ms var(--beta-ease), background-color 150ms var(--beta-ease);
+}
+
+.beta-exit:hover,
+.beta-exit:focus-visible {
+  color: var(--beta-bg);
+  background: var(--beta-fg);
+}
+
+.beta-badge {
+  pointer-events: none;
+  font-family: var(--beta-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  /* --beta-fg-faint (0.32 alpha) reads ~2.2:1 against --beta-bg — well
+     under WCAG AA's 4.5:1 for normal text, and this badge is the one
+     thing on the page that actually needs to be read ("things may
+     break"), not decorative. --beta-fg-muted (0.55 alpha) clears ~4.7:1. */
+  color: var(--beta-fg-muted);
+  text-align: right;
+}
+
+/* ==========================================================================
+   Status readout — section 16, real values only
+   ========================================================================== */
+
+.beta-status {
+  position: fixed;
+  left: var(--beta-edge);
+  bottom: 14px;
+  z-index: 700;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: var(--beta-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--beta-fg-faint);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Keys legend — section 14
+   ========================================================================== */
+
+.beta-keys-btn {
+  position: fixed;
+  right: var(--beta-edge);
+  bottom: 14px;
+  z-index: 700;
+  font-family: var(--beta-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 6px 10px;
+  border: 1px solid var(--beta-fg-muted);
+  transition: color 150ms var(--beta-ease), border-color 150ms var(--beta-ease);
+}
+
+.beta-keys-btn:hover {
+  color: var(--beta-accent);
+  border-color: var(--beta-accent);
+}
+
+/* [hidden] must win over this rule's own `display: grid` — an author
+   rule always beats the UA [hidden]{display:none} default regardless of
+   specificity, so without this the panel stayed visible at all times
+   no matter what keyboard.js set keysPanel.hidden to. */
+.beta-keys-panel[hidden] {
+  display: none;
+}
+
+.beta-keys-panel {
+  position: fixed;
+  right: var(--beta-edge);
+  bottom: 46px;
+  z-index: 750;
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  background: var(--beta-bg);
+  border: 1px solid var(--beta-fg);
+  font-family: var(--beta-font-mono);
+  font-size: 11px;
+}
+
+.beta-keys-panel kbd {
+  display: inline-block;
+  min-width: 1.4em;
+  padding: 1px 5px;
+  border: 1px solid var(--beta-fg-muted);
+  font-family: inherit;
+  font-size: 10px;
+  text-align: center;
+}
+

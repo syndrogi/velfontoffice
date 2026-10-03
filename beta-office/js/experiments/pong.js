@@ -13,7 +13,7 @@
   window.BetaExperiments.registerExperiment({
     id: "pong",
     name: "Pong",
-    category: "PONG",
+    category: "GAMES",
     number: 18,
     description: "Solo paddle-and-wall, mouse control, streak score",
     launch: function (container) {

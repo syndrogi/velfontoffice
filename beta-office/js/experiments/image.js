@@ -9,7 +9,7 @@
   window.BetaExperiments.registerExperiment({
     id: "image",
     name: "Image",
-    category: "IMAGE",
+    category: "DEVTOOLS",
     number: 10,
     description: "Drop a file, grayscale/invert/blur",
     launch: function (container) {

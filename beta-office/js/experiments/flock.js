@@ -15,7 +15,7 @@
   window.BetaExperiments.registerExperiment({
     id: "flock",
     name: "Flock",
-    category: "FLOCK",
+    category: "VISUAL",
     number: 72,
     description: "Simple boids flocking simulation",
     launch: function (container) {

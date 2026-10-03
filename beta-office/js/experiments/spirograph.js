@@ -9,7 +9,7 @@
   window.BetaExperiments.registerExperiment({
     id: "spirograph",
     name: "Spirograph",
-    category: "SPIROGRAPH",
+    category: "VISUAL",
     number: 52,
     description: "Parametric curve, R/r/d sliders",
     launch: function (container) {

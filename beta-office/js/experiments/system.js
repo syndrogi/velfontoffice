@@ -10,7 +10,7 @@
   window.BetaExperiments.registerExperiment({
     id: "system",
     name: "System",
-    category: "SYSTEM",
+    category: "DEVTOOLS",
     number: 8,
     description: "Build, registry, open windows",
     launch: function (container) {

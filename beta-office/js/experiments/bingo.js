@@ -32,7 +32,7 @@
   window.BetaExperiments.registerExperiment({
     id: "bingo",
     name: "Bingo",
-    category: "BINGO",
+    category: "GAMES",
     number: 36,
     description: "Random 5x5 card, click to mark, get a line",
     launch: function (container) {

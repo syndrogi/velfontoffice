@@ -12,7 +12,7 @@
   window.BetaExperiments.registerExperiment({
     id: "gravitywells",
     name: "Gravity Wells",
-    category: "GRAVITYWELLS",
+    category: "VISUAL",
     number: 53,
     description: "Click to place attractors, particles orbit",
     launch: function (container) {

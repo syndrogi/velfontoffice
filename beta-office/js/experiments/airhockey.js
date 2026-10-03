@@ -15,7 +15,7 @@
   window.BetaExperiments.registerExperiment({
     id: "airhockey",
     name: "Air Hockey",
-    category: "AIRHOCKEY",
+    category: "GAMES",
     number: 77,
     description: "Mouse paddle vs a simple AI, first to 5",
     launch: function (container) {

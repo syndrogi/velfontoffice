@@ -13,7 +13,7 @@
   window.BetaExperiments.registerExperiment({
     id: "simon",
     name: "Simon",
-    category: "SIMON",
+    category: "GAMES",
     number: 24,
     description: "Watch, then repeat the flashing sequence",
     launch: function (container) {

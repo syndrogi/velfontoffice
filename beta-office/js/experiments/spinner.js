@@ -12,7 +12,7 @@
   window.BetaExperiments.registerExperiment({
     id: "spinner",
     name: "Spinner",
-    category: "SPINNER",
+    category: "VISUAL",
     number: 97,
     description: "Drag in a circle to flick the spinner, watch it slow down",
     launch: function (container) {

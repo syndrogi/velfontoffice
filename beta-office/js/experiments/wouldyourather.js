@@ -18,7 +18,7 @@
   window.BetaExperiments.registerExperiment({
     id: "wouldyourather",
     name: "Would You Rather",
-    category: "WOULDYOURATHER",
+    category: "WORDPLAY",
     number: 96,
     description: "Click a side to vote, tallied just for fun",
     launch: function (container) {

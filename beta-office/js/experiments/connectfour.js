@@ -28,7 +28,7 @@
   window.BetaExperiments.registerExperiment({
     id: "connectfour",
     name: "Connect Four",
-    category: "CONNECTFOUR",
+    category: "GAMES",
     number: 28,
     description: "Local 2-player, click a column to drop",
     launch: function (container) {

@@ -39,7 +39,7 @@
   window.BetaExperiments.registerExperiment({
     id: "wordle",
     name: "Wordle",
-    category: "WORDLE",
+    category: "GAMES",
     number: 83,
     description: "Guess the 5-letter word in 6 tries",
     launch: function (container) {

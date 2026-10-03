@@ -6,7 +6,15 @@
 <title>BETA OFFICE — VELFONT OFFICE</title>
 <meta name="description" content="BETA OFFICE — VELFONT OFFICE's experimental laboratory. Interaction, motion, and browser-API prototypes in progress.">
 <meta name="robots" content="noindex">
-<link rel="stylesheet" href="style.css">
+<!-- Split from a single 1,900+ line style.css into one file per
+     responsibility, in the same order the rules always had (cascade-
+     order-preserving — nothing reordered, just divided). -->
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/help.css">
+<link rel="stylesheet" href="css/sphere.css">
+<link rel="stylesheet" href="css/shell.css">
+<link rel="stylesheet" href="css/experiments.css">
+<link rel="stylesheet" href="css/responsive.css">
 <link rel="icon" href="/favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -62,22 +70,28 @@
       <div class="beta-sphere" id="betaSphere"></div>
     </div>
     <div class="beta-sphere-meta" id="betaSphereMeta" aria-hidden="true"></div>
-    <p class="beta-scroll-cue" aria-hidden="true">scroll</p>
+    <!-- The sphere above links to the rest of the site (same nav as the
+         homepage's) — this is the one on-page hint that the actual
+         experiments live below, not inside the sphere itself. -->
+    <p class="beta-scroll-cue" aria-hidden="true">scroll — 99 experiments below</p>
   </section>
 
-  <!-- Beta Office Control Area — js/app.js renders one tile per
-       registered experiment category (js/registry.js), each opening a
-       window via js/window-manager.js. -->
+  <!-- Beta Office Control Area — js/app.js groups every registered
+       experiment (js/registry.js) by its real category, filterable by
+       the search box below, each opening a window via
+       js/window-manager.js (which loads that experiment's script on
+       demand the first time it's opened). -->
   <section class="beta-control" id="betaControl">
     <div class="beta-control-head">
       <h1 class="beta-control-title">BETA OFFICE CONTROL AREA</h1>
       <p class="beta-control-desc">Every experiment below is real — pick one, drag it around, break it, reset it.</p>
+      <input type="text" class="beta-control-search" id="betaControlSearch" placeholder="Search experiments…" autocomplete="off" spellcheck="false">
       <div class="beta-control-actions">
         <button type="button" class="beta-btn" id="betaRandomizeBtn">RANDOMIZE</button>
         <button type="button" class="beta-btn" id="betaResetBtn">RESET</button>
       </div>
     </div>
-    <div class="beta-control-tiles" id="betaCategoryTiles"></div>
+    <div class="beta-control-groups" id="betaCategoryGroups"></div>
   </section>
 </main>
 
@@ -91,107 +105,17 @@
 </div>
 
 <script src="js/registry.js" defer></script>
+<script src="js/manifest.js" defer></script>
 <script src="js/window-manager.js" defer></script>
 <script src="js/controls.js" defer></script>
-<script src="js/experiments/typography.js" defer></script>
-<script src="js/experiments/motion.js" defer></script>
-<script src="js/experiments/cursor.js" defer></script>
+<!-- grid/color stay eager (not lazy-loaded with the other 97 below) —
+     both expose a global (window.BetaGrid/BetaColor) that the command
+     palette and the global `G` keyboard shortcut call directly, outside
+     of ever opening these two experiments' own windows. Every other
+     experiment module is fetched on demand instead, the first time it's
+     actually opened — see js/registry.js's loadExperiment(). -->
 <script src="js/experiments/grid.js" defer></script>
 <script src="js/experiments/color.js" defer></script>
-<script src="js/experiments/dom.js" defer></script>
-<script src="js/experiments/browser.js" defer></script>
-<script src="js/experiments/system.js" defer></script>
-<script src="js/experiments/debug.js" defer></script>
-<script src="js/experiments/image.js" defer></script>
-<script src="js/experiments/sound.js" defer></script>
-<script src="js/experiments/canvas.js" defer></script>
-<script src="js/experiments/physics.js" defer></script>
-<script src="js/experiments/distortion.js" defer></script>
-<script src="js/experiments/snake.js" defer></script>
-<script src="js/experiments/reflex.js" defer></script>
-<script src="js/experiments/confetti.js" defer></script>
-<script src="js/experiments/pong.js" defer></script>
-<script src="js/experiments/memory.js" defer></script>
-<script src="js/experiments/whack.js" defer></script>
-<script src="js/experiments/fortune.js" defer></script>
-<script src="js/experiments/dice.js" defer></script>
-<script src="js/experiments/piano.js" defer></script>
-<script src="js/experiments/simon.js" defer></script>
-<script src="js/experiments/tictactoe.js" defer></script>
-<script src="js/experiments/minesweeper.js" defer></script>
-<script src="js/experiments/2048.js" defer></script>
-<script src="js/experiments/connectfour.js" defer></script>
-<script src="js/experiments/breakout.js" defer></script>
-<script src="js/experiments/hangman.js" defer></script>
-<script src="js/experiments/lightsout.js" defer></script>
-<script src="js/experiments/maze.js" defer></script>
-<script src="js/experiments/slots.js" defer></script>
-<script src="js/experiments/wheel.js" defer></script>
-<script src="js/experiments/hilo.js" defer></script>
-<script src="js/experiments/bingo.js" defer></script>
-<script src="js/experiments/rockpaperscissors.js" defer></script>
-<script src="js/experiments/guessnumber.js" defer></script>
-<script src="js/experiments/scramble.js" defer></script>
-<script src="js/experiments/trivia.js" defer></script>
-<script src="js/experiments/math.js" defer></script>
-<script src="js/experiments/emojiguess.js" defer></script>
-<script src="js/experiments/cps.js" defer></script>
-<script src="js/experiments/typerace.js" defer></script>
-<script src="js/experiments/fireworks.js" defer></script>
-<script src="js/experiments/starfield.js" defer></script>
-<script src="js/experiments/matrixrain.js" defer></script>
-<script src="js/experiments/gameoflife.js" defer></script>
-<script src="js/experiments/fractaltree.js" defer></script>
-<script src="js/experiments/kaleidoscope.js" defer></script>
-<script src="js/experiments/lavalamp.js" defer></script>
-<script src="js/experiments/spirograph.js" defer></script>
-<script src="js/experiments/gravitywells.js" defer></script>
-<script src="js/experiments/constellation.js" defer></script>
-<script src="js/experiments/textblast.js" defer></script>
-<script src="js/experiments/banner.js" defer></script>
-<script src="js/experiments/palette.js" defer></script>
-<script src="js/experiments/bubblewrap.js" defer></script>
-<script src="js/experiments/balloons.js" defer></script>
-<script src="js/experiments/drums.js" defer></script>
-<script src="js/experiments/metronome.js" defer></script>
-<script src="js/experiments/soundboard.js" defer></script>
-<script src="js/experiments/timer.js" defer></script>
-<script src="js/experiments/stopwatch.js" defer></script>
-<script src="js/experiments/coinflip.js" defer></script>
-<script src="js/experiments/textmirror.js" defer></script>
-<script src="js/experiments/pixelpaint.js" defer></script>
-<script src="js/experiments/stickynotes.js" defer></script>
-<script src="js/experiments/buzzword.js" defer></script>
-<script src="js/experiments/startupname.js" defer></script>
-<script src="js/experiments/stroop.js" defer></script>
-<script src="js/experiments/flock.js" defer></script>
-<script src="js/experiments/moodring.js" defer></script>
-<script src="js/experiments/rubberduck.js" defer></script>
-<script src="js/experiments/wordcloud.js" defer></script>
-<script src="js/experiments/stacker.js" defer></script>
-<script src="js/experiments/airhockey.js" defer></script>
-<script src="js/experiments/battleship.js" defer></script>
-<script src="js/experiments/fishtank.js" defer></script>
-<script src="js/experiments/snow.js" defer></script>
-<script src="js/experiments/colorpicker.js" defer></script>
-<script src="js/experiments/dotsandboxes.js" defer></script>
-<script src="js/experiments/wordle.js" defer></script>
-<script src="js/experiments/blackjack.js" defer></script>
-<script src="js/experiments/audioreflex.js" defer></script>
-<script src="js/experiments/pendulum.js" defer></script>
-<script src="js/experiments/bigclock.js" defer></script>
-<script src="js/experiments/breathe.js" defer></script>
-<script src="js/experiments/plinko.js" defer></script>
-<script src="js/experiments/target.js" defer></script>
-<script src="js/experiments/slidepuzzle.js" defer></script>
-<script src="js/experiments/hanoi.js" defer></script>
-<script src="js/experiments/worddrop.js" defer></script>
-<script src="js/experiments/tonguetwister.js" defer></script>
-<script src="js/experiments/riddle.js" defer></script>
-<script src="js/experiments/wouldyourather.js" defer></script>
-<script src="js/experiments/spinner.js" defer></script>
-<script src="js/experiments/etchasketch.js" defer></script>
-<script src="js/experiments/experiments-index.js" defer></script>
 <script src="js/sphere.js" defer></script>
 <script src="js/scroll-morph.js" defer></script>
 <script src="js/command-palette.js" defer></script>

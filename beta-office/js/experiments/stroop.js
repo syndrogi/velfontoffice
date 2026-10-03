@@ -12,7 +12,7 @@
   window.BetaExperiments.registerExperiment({
     id: "stroop",
     name: "Stroop",
-    category: "STROOP",
+    category: "WORDPLAY",
     number: 71,
     description: "Click the ink color, not the word",
     launch: function (container) {

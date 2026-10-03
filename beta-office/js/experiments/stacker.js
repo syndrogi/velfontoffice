@@ -13,7 +13,7 @@
   window.BetaExperiments.registerExperiment({
     id: "stacker",
     name: "Stacker",
-    category: "STACKER",
+    category: "GAMES",
     number: 76,
     description: "Click to drop blocks, don't overflow a column",
     launch: function (container) {

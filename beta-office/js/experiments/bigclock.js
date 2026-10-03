@@ -8,7 +8,7 @@
   window.BetaExperiments.registerExperiment({
     id: "bigclock",
     name: "Big Clock",
-    category: "BIGCLOCK",
+    category: "UTILITY",
     number: 87,
     description: "A live, oversized digital clock",
     launch: function (container) {

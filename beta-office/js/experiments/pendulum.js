@@ -10,7 +10,7 @@
   window.BetaExperiments.registerExperiment({
     id: "pendulum",
     name: "Pendulum",
-    category: "PENDULUM",
+    category: "VISUAL",
     number: 86,
     description: "Drag the bob to set an angle, release to swing",
     launch: function (container) {

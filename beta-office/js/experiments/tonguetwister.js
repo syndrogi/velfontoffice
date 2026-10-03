@@ -19,7 +19,7 @@
   window.BetaExperiments.registerExperiment({
     id: "tonguetwister",
     name: "Tongue Twister",
-    category: "TONGUETWISTER",
+    category: "WORDPLAY",
     number: 94,
     description: "Click for a tongue twister, say it 3 times fast",
     launch: function (container) {

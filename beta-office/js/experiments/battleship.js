@@ -45,7 +45,7 @@
   window.BetaExperiments.registerExperiment({
     id: "battleship",
     name: "Battleship",
-    category: "BATTLESHIP",
+    category: "GAMES",
     number: 78,
     description: "Click cells to find and sink the hidden fleet",
     launch: function (container) {

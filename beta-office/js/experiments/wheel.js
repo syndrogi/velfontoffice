@@ -13,7 +13,7 @@
   window.BetaExperiments.registerExperiment({
     id: "wheel",
     name: "Wheel",
-    category: "WHEEL",
+    category: "GAMES",
     number: 34,
     description: "Spin to pick from a list of options",
     launch: function (container) {

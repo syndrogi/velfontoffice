@@ -275,15 +275,19 @@
       else bringToFront(id);
       return windows[id];
     }
-    var spec = window.BetaExperiments.get(id);
-    if (!spec) return null;
+    // Metadata (name/category/number) is always available via the
+    // manifest (js/manifest.js) — the real spec (.launch/.randomize/
+    // .reset) is fetched on demand below, the first time this id is
+    // actually opened.
+    var meta = window.BetaExperiments.getMeta(id);
+    if (!meta) return null;
 
     var width = 300;
     var height = 260;
     var pos = nextCascadePosition(width, height);
     // experiments-index carries no `number` (see registry.js spec
     // contract) and keeps its plain name.
-    var title = spec.number != null ? "#" + spec.number + " " + spec.name : spec.name;
+    var title = meta.number != null ? "#" + meta.number + " " + meta.name : meta.name;
     var chrome = buildChrome(id, title);
 
     var win = {
@@ -325,19 +329,35 @@
       closeWindow(id);
     });
 
-    var result;
-    try {
-      result = spec.launch(chrome.content);
-    } catch (e) {
-      result = null;
-    }
-    var cleanupFn = typeof result === "function" ? result : (result && typeof result.cleanup === "function" ? result.cleanup : function () {});
-    win.cleanup = cleanupFn;
-    if (result && typeof result === "object") {
-      if (typeof result.onHide === "function") win.onHide = result.onHide;
-      if (typeof result.onShow === "function") win.onShow = result.onShow;
-    }
-    window.BetaExperiments.noteOpened(id, chrome.content, cleanupFn);
+    // Chrome/title build synchronously so the window appears instantly;
+    // the actual module loads (and launches) async, below.
+    var loadingEl = document.createElement("div");
+    loadingEl.className = "beta-window-loading";
+    loadingEl.textContent = "Loading…";
+    chrome.content.appendChild(loadingEl);
+
+    window.BetaExperiments.loadExperiment(id).then(function (spec) {
+      if (!windows[id]) return; // closed again before the script finished loading
+      loadingEl.remove();
+      if (!spec) {
+        chrome.content.textContent = "Couldn't load this experiment.";
+        return;
+      }
+
+      var result;
+      try {
+        result = spec.launch(chrome.content);
+      } catch (e) {
+        result = null;
+      }
+      var cleanupFn = typeof result === "function" ? result : (result && typeof result.cleanup === "function" ? result.cleanup : function () {});
+      win.cleanup = cleanupFn;
+      if (result && typeof result === "object") {
+        if (typeof result.onHide === "function") win.onHide = result.onHide;
+        if (typeof result.onShow === "function") win.onShow = result.onShow;
+      }
+      window.BetaExperiments.noteOpened(id, chrome.content, cleanupFn);
+    });
 
     return win;
   }

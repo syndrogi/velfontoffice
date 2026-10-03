@@ -43,7 +43,7 @@
   window.BetaExperiments.registerExperiment({
     id: "drums",
     name: "Drums",
-    category: "DRUMS",
+    category: "SOUND",
     number: 60,
     description: "8-step 3-track beat sequencer",
     launch: function (container) {

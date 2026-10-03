@@ -19,7 +19,7 @@
   window.BetaExperiments.registerExperiment({
     id: "rubberduck",
     name: "Rubber Duck",
-    category: "RUBBERDUCK",
+    category: "UTILITY",
     number: 74,
     description: "Explain your problem, the duck listens",
     launch: function (container) {

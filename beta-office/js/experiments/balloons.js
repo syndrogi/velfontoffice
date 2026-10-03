@@ -12,7 +12,7 @@
   window.BetaExperiments.registerExperiment({
     id: "balloons",
     name: "Balloons",
-    category: "BALLOONS",
+    category: "VISUAL",
     number: 59,
     description: "Pop rising balloons before they float off, 3 lives",
     launch: function (container) {

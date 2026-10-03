@@ -11,7 +11,7 @@
   window.BetaExperiments.registerExperiment({
     id: "startupname",
     name: "Startup Name",
-    category: "STARTUPNAME",
+    category: "WORDPLAY",
     number: 70,
     description: "Click for a fake startup name",
     launch: function (container) {

@@ -55,7 +55,7 @@
   window.BetaExperiments.registerExperiment({
     id: "slidepuzzle",
     name: "Slide Puzzle",
-    category: "SLIDEPUZZLE",
+    category: "GAMES",
     number: 91,
     description: "Classic 15-puzzle — slide tiles into numeric order",
     launch: function (container) {

@@ -14,7 +14,7 @@
   window.BetaExperiments.registerExperiment({
     id: "textblast",
     name: "Text Blast",
-    category: "TEXTBLAST",
+    category: "VISUAL",
     number: 55,
     description: "Click the text to explode and reform it",
     launch: function (container) {

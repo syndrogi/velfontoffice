@@ -29,7 +29,7 @@
   window.BetaExperiments.registerExperiment({
     id: "trivia",
     name: "Trivia",
-    category: "TRIVIA",
+    category: "WORDPLAY",
     number: 40,
     description: "Multiple-choice questions, running score",
     launch: function (container) {

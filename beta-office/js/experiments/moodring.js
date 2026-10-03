@@ -17,7 +17,7 @@
   window.BetaExperiments.registerExperiment({
     id: "moodring",
     name: "Mood Ring",
-    category: "MOODRING",
+    category: "VISUAL",
     number: 73,
     description: "Click for a random mood + color",
     launch: function (container) {

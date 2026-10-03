@@ -14,7 +14,7 @@
   window.BetaExperiments.registerExperiment({
     id: "buzzword",
     name: "Buzzword",
-    category: "BUZZWORD",
+    category: "WORDPLAY",
     number: 69,
     description: "Click for a corporate-jargon phrase",
     launch: function (container) {

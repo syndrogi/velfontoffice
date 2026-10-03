@@ -11,7 +11,7 @@
   window.BetaExperiments.registerExperiment({
     id: "snow",
     name: "Snow",
-    category: "SNOW",
+    category: "VISUAL",
     number: 80,
     description: "Ambient falling snow",
     launch: function (container) {

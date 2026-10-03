@@ -13,7 +13,7 @@
   window.BetaExperiments.registerExperiment({
     id: "lightsout",
     name: "Lights Out",
-    category: "LIGHTSOUT",
+    category: "GAMES",
     number: 31,
     description: "Click toggles a cell + neighbors, turn them all off",
     launch: function (container) {

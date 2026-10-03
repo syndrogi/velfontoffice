@@ -10,7 +10,7 @@
   window.BetaExperiments.registerExperiment({
     id: "browser",
     name: "Browser",
-    category: "BROWSER",
+    category: "DEVTOOLS",
     number: 7,
     description: "Viewport, DPR, scroll, mouse, FPS, UA",
     launch: function (container) {

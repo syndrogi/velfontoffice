@@ -11,7 +11,7 @@
   window.BetaExperiments.registerExperiment({
     id: "slots",
     name: "Slots",
-    category: "SLOTS",
+    category: "GAMES",
     number: 33,
     description: "Spin 3 reels, match all 3 to win",
     launch: function (container) {

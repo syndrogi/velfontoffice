@@ -27,7 +27,7 @@
   window.BetaExperiments.registerExperiment({
     id: "fortune",
     name: "Fortune",
-    category: "FORTUNE",
+    category: "WORDPLAY",
     number: 21,
     description: "Click for a one-line fortune",
     launch: function (container) {

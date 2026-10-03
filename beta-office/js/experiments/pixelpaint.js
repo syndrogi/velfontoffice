@@ -12,7 +12,7 @@
   window.BetaExperiments.registerExperiment({
     id: "pixelpaint",
     name: "Pixel Paint",
-    category: "PIXELPAINT",
+    category: "VISUAL",
     number: 67,
     description: "16x16 grid, click-drag to paint",
     launch: function (container) {

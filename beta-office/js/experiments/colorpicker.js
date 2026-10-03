@@ -9,7 +9,7 @@
   window.BetaExperiments.registerExperiment({
     id: "colorpicker",
     name: "Color Picker",
-    category: "COLORPICKER",
+    category: "VISUAL",
     number: 81,
     description: "Click the gradient to sample its exact color",
     launch: function (container) {

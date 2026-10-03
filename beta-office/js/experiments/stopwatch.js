@@ -8,7 +8,7 @@
   window.BetaExperiments.registerExperiment({
     id: "stopwatch",
     name: "Stopwatch",
-    category: "STOPWATCH",
+    category: "UTILITY",
     number: 64,
     description: "Start, stop, lap, reset",
     launch: function (container) {

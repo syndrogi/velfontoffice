@@ -11,7 +11,7 @@
   window.BetaExperiments.registerExperiment({
     id: "kaleidoscope",
     name: "Kaleidoscope",
-    category: "KALEIDOSCOPE",
+    category: "VISUAL",
     number: 50,
     description: "Mouse-driven mirrored symmetric drawing",
     launch: function (container) {

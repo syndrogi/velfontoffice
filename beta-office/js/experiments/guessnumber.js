@@ -8,7 +8,7 @@
   window.BetaExperiments.registerExperiment({
     id: "guessnumber",
     name: "Guess Number",
-    category: "GUESSNUMBER",
+    category: "GAMES",
     number: 38,
     description: "1-100, higher/lower hints, fewest guesses",
     launch: function (container) {

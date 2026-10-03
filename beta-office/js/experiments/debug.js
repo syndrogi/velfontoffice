@@ -10,7 +10,7 @@
   window.BetaExperiments.registerExperiment({
     id: "debug",
     name: "Debug",
-    category: "DEBUG",
+    category: "DEVTOOLS",
     number: 9,
     description: "Registry dump",
     launch: function (container) {

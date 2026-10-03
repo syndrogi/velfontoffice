@@ -9,7 +9,7 @@
   window.BetaExperiments.registerExperiment({
     id: "fractaltree",
     name: "Fractal Tree",
-    category: "FRACTALTREE",
+    category: "VISUAL",
     number: 49,
     description: "Recursive branching tree, angle + depth sliders",
     launch: function (container) {

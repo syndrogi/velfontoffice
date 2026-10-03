@@ -11,7 +11,7 @@
   window.BetaExperiments.registerExperiment({
     id: "banner",
     name: "Banner",
-    category: "BANNER",
+    category: "VISUAL",
     number: 56,
     description: "Type text, see it rendered huge",
     launch: function (container) {

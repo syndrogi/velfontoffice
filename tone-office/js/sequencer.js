@@ -40,6 +40,7 @@
   var timerId = null;
   var notesInQueue = [];
   var stepListeners = [];
+  var gridEl = null; // the currently-rendered step grid, if the window is open
 
   var LOOKAHEAD_MS = 25;
   var SCHEDULE_AHEAD_SEC = 0.1;
@@ -198,6 +199,40 @@
     return pattern[trackId][index];
   }
 
+  function setStep(trackId, index, value) {
+    if (!pattern[trackId]) return;
+    pattern[trackId][index] = !!value;
+  }
+
+  // AI Jam's "Generate beat" — not a real model, just a few weighted-
+  // probability rules per track (kick favors the downbeats, hats are
+  // dense, snare/clap favor backbeats) so the result reads as a beat
+  // rather than pure noise. See js/ai-jam.js.
+  function randomizePattern() {
+    TRACKS.forEach(function (t) {
+      for (var i = 0; i < STEPS; i++) {
+        var onDownbeat = i % 4 === 0;
+        var onBackbeat = i % 8 === 4;
+        var chance = 0.12;
+        if (t.id === "kick") chance = onDownbeat ? 0.85 : 0.08;
+        if (t.id === "snare") chance = onBackbeat ? 0.9 : 0.05;
+        if (t.id === "hat") chance = i % 2 === 0 ? 0.75 : 0.35;
+        if (t.id === "clap") chance = onBackbeat ? 0.3 : 0.03;
+        pattern[t.id][i] = Math.random() < chance;
+      }
+    });
+    refreshGridUI();
+  }
+
+  function refreshGridUI() {
+    if (!gridEl) return;
+    var steps = gridEl.querySelectorAll(".tone-seq-step");
+    steps.forEach(function (el) {
+      var on = pattern[el.dataset.track][Number(el.dataset.step)];
+      el.classList.toggle("tone-is-active", on);
+    });
+  }
+
   function setBpm(value) {
     bpm = Math.max(40, Math.min(220, value));
   }
@@ -210,10 +245,79 @@
     stepListeners.push(fn);
   }
 
+  // Playhead highlight — registered once, no-ops whenever the window
+  // isn't open (gridEl null), rather than being re-added every time
+  // buildWindow() runs (which would stack duplicate listeners across
+  // repeated open/close cycles).
+  onStep(function (stepIndex) {
+    if (!gridEl) return;
+    var steps = gridEl.querySelectorAll(".tone-seq-step");
+    steps.forEach(function (el) {
+      el.classList.toggle("tone-is-playhead", Number(el.dataset.step) === stepIndex);
+    });
+  });
+
   // So the synth's optional arpeggiator can lock to the exact same
   // 16th-note grid as the drums, instead of running its own timer.
   function stepSeconds() {
     return stepDuration();
+  }
+
+  function buildWindow(container) {
+    gridEl = document.createElement("div");
+    gridEl.className = "tone-seq-tracks";
+
+    TRACKS.forEach(function (track) {
+      var row = document.createElement("div");
+      row.className = "tone-seq-track";
+
+      var label = document.createElement("span");
+      label.className = "tone-seq-track-label";
+      label.textContent = track.name;
+      row.appendChild(label);
+
+      var steps = document.createElement("div");
+      steps.className = "tone-seq-steps";
+      for (var i = 0; i < STEPS; i++) {
+        var step = document.createElement("button");
+        step.type = "button";
+        step.className = "tone-seq-step";
+        if (i % 4 === 0) step.classList.add("tone-is-beat");
+        if (pattern[track.id][i]) step.classList.add("tone-is-active");
+        step.setAttribute("aria-label", track.name + " step " + (i + 1));
+        step.dataset.track = track.id;
+        step.dataset.step = String(i);
+        step.addEventListener("click", function () {
+          window.ToneEngine.init();
+          var on = toggleStep(this.dataset.track, Number(this.dataset.step));
+          this.classList.toggle("tone-is-active", on);
+        });
+        steps.appendChild(step);
+      }
+      row.appendChild(steps);
+      gridEl.appendChild(row);
+    });
+
+    var actions = document.createElement("div");
+    actions.className = "tone-seq-actions";
+    var clearBtn = document.createElement("button");
+    clearBtn.type = "button";
+    clearBtn.className = "tone-mini-btn";
+    clearBtn.textContent = "CLEAR";
+    clearBtn.addEventListener("click", function () {
+      TRACKS.forEach(function (t) {
+        for (var i = 0; i < STEPS; i++) pattern[t.id][i] = false;
+      });
+      refreshGridUI();
+    });
+    actions.appendChild(clearBtn);
+
+    container.appendChild(gridEl);
+    container.appendChild(actions);
+
+    return function cleanup() {
+      gridEl = null;
+    };
   }
 
   window.ToneSequencer = {
@@ -225,9 +329,12 @@
     stop: stop,
     toggle: toggle,
     toggleStep: toggleStep,
+    setStep: setStep,
+    randomizePattern: randomizePattern,
     setBpm: setBpm,
     getBpm: getBpm,
     onStep: onStep,
     stepSeconds: stepSeconds,
+    buildWindow: buildWindow,
   };
 })();

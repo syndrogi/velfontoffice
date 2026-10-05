@@ -1,24 +1,21 @@
 /* ==========================================================================
-   TONE OFFICE — a playable step sequencer + synth.
-   Dark, flat, hairline-bordered — Teenage Engineering's exposed-grid
-   hardware language crossed with Ableton's dark session view. One
-   accent color, square corners, mono type throughout (same IBM Plex
-   Mono the rest of the site already loads). Semantic layer over
-   /css/tokens.css's shared primitives, like shop/style.css and
-   beta-office/css/base.css — this section just happens to be dark-
-   theme-first, so most of its own tokens are new literals rather than
-   primitives this site doesn't share elsewhere yet.
+   TONE OFFICE — a playable studio in small draggable windows.
+   White, flat, hairline-bordered — beta-office's own window language
+   (see ../beta-office/css/shell.css for the sibling version of this
+   chrome), same IBM Plex Mono, same --color-accent-red hover accent
+   the rest of the site already uses. Semantic layer over
+   /css/tokens.css's shared primitives.
    ========================================================================== */
 
 :root {
-  --tone-bg: #0a0a0a;
-  --tone-bg-raised: #141414;
-  --tone-fg: var(--color-white, #f5f5f5);
-  --tone-fg-muted: rgba(245, 245, 245, 0.6);
-  --tone-fg-faint: rgba(245, 245, 245, 0.32);
-  --tone-line: rgba(245, 245, 245, 0.14);
-  --tone-accent: #ff5a1f;
-  --tone-accent-dim: rgba(255, 90, 31, 0.28);
+  --tone-bg: var(--color-white, #ffffff);
+  --tone-bg-raised: var(--color-grey-f7, #f7f7f7);
+  --tone-fg: var(--color-black, #000000);
+  --tone-fg-muted: rgba(0, 0, 0, 0.6);
+  --tone-fg-faint: rgba(0, 0, 0, 0.35);
+  --tone-line: rgba(0, 0, 0, 0.14);
+  --tone-accent: var(--color-accent-red, #e0261f);
+  --tone-accent-dim: rgba(224, 38, 31, 0.16);
   --tone-font: "IBM Plex Mono", ui-monospace, monospace;
   --tone-ease: var(--ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
   --tone-edge: 32px;
@@ -42,13 +39,34 @@ body.tone-office {
 }
 
 button,
-select {
+select,
+input {
   font: inherit;
   color: inherit;
 }
 
+/* Quick, automatic entrance — no blocking "tap to enter" screen (see
+   app.js's header comment for why one isn't needed). Skipped entirely
+   under prefers-reduced-motion since .js-enter is never added then
+   (same convention the root site's index.html/shop use). */
+@keyframes tone-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+html.js-enter .tone-main,
+html.js-enter .tone-topbar {
+  animation: tone-enter 420ms var(--tone-ease) both;
+}
+
 /* ==========================================================================
-   Topbar — same role as beta-office's: always-visible exit + context badge.
+   Topbar
    ========================================================================== */
 
 .tone-topbar {
@@ -71,16 +89,16 @@ select {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 6px 10px;
-  border: 1px solid var(--tone-line);
+  border: 1px solid var(--tone-fg);
   color: var(--tone-fg);
-  background: var(--tone-bg-raised);
-  transition: color 150ms var(--tone-ease), background-color 150ms var(--tone-ease), border-color 150ms var(--tone-ease);
+  background: var(--tone-bg);
+  transition: color 150ms var(--tone-ease), background-color 150ms var(--tone-ease);
 }
 
 .tone-exit:hover,
 .tone-exit:focus-visible {
-  border-color: var(--tone-accent);
-  color: var(--tone-accent);
+  color: var(--tone-bg);
+  background: var(--tone-fg);
 }
 
 .tone-badge {
@@ -93,88 +111,202 @@ select {
 }
 
 /* ==========================================================================
-   Gate — audio can't start before a user gesture, so nothing plays
-   until this is dismissed. See js/app.js's enter().
+   Help — button + searchable panel, same pattern as beta-office's.
    ========================================================================== */
 
-.tone-gate {
+.tone-help-btn {
   position: fixed;
-  inset: 0;
-  z-index: 100;
+  top: 16px;
+  right: var(--tone-edge);
+  z-index: 60;
+  margin-top: 36px;
+  border: 1px solid var(--tone-fg);
+  background: var(--tone-bg);
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: color 150ms var(--tone-ease), background-color 150ms var(--tone-ease);
+}
+
+.tone-help-btn:hover,
+.tone-help-btn:focus-visible {
+  color: var(--tone-bg);
+  background: var(--tone-fg);
+}
+
+.tone-help-panel {
+  position: fixed;
+  top: 70px;
+  right: var(--tone-edge);
+  z-index: 200;
+  width: min(380px, calc(100vw - 2 * var(--tone-edge)));
+  max-height: 70vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
   background: var(--tone-bg);
-  transition: opacity 300ms var(--tone-ease);
+  border: 1px solid var(--tone-fg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
-.tone-gate.tone-is-gone {
-  opacity: 0;
-  pointer-events: none;
+.tone-help-panel[hidden] {
+  display: none;
 }
 
-.tone-gate-btn {
+.tone-help-head {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 18px 28px;
-  border: 1px solid var(--tone-accent);
-  background: transparent;
-  color: var(--tone-fg);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  gap: 8px;
+  padding: 10px;
+  border-bottom: 1px solid var(--tone-line);
+}
+
+.tone-help-search {
+  flex: 1;
+  border: 1px solid var(--tone-line);
+  background: var(--tone-bg);
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.tone-help-close {
+  border: 1px solid var(--tone-line);
+  background: var(--tone-bg);
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
+  line-height: 1;
   cursor: pointer;
-  transition: background-color 150ms var(--tone-ease), color 150ms var(--tone-ease);
 }
 
-.tone-gate-btn:hover,
-.tone-gate-btn:focus-visible {
-  background: var(--tone-accent);
-  color: var(--tone-bg);
+.tone-help-list {
+  overflow-y: auto;
+  padding: 8px;
 }
 
-.tone-gate-mark {
+.tone-help-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-bottom: 1px solid var(--tone-line);
+  background: none;
+  padding: 10px 6px;
+  cursor: pointer;
+}
+
+.tone-help-item:last-child {
+  border-bottom: none;
+}
+
+.tone-help-item:hover,
+.tone-help-item:focus-visible {
+  background: var(--tone-bg-raised);
+}
+
+.tone-help-name {
   font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
 }
 
-.tone-gate-hint {
+.tone-help-desc {
   font-size: 11px;
+  color: var(--tone-fg-muted);
+  line-height: 1.5;
+}
+
+.tone-help-empty {
+  padding: 16px 6px;
+  font-size: 12px;
   color: var(--tone-fg-faint);
-  letter-spacing: 0.04em;
 }
 
 /* ==========================================================================
-   Rack — the main playable surface.
+   Main — transport + dock.
    ========================================================================== */
 
-.tone-rack {
+.tone-main {
   max-width: 920px;
   margin: 0 auto;
   padding: 96px var(--tone-edge) 80px;
   display: flex;
   flex-direction: column;
   gap: 24px;
+  position: relative;
+  z-index: 1;
 }
 
-.tone-module {
+.tone-transport,
+.tone-dock {
   border: 1px solid var(--tone-line);
   background: var(--tone-bg-raised);
   padding: 20px;
 }
 
-.tone-module-title {
-  margin: 0 0 16px;
+.tone-transport {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  /* Sticky and above the windows layer (z-index: 500) — transport
+     controls the one clock every module locks to, so a floating
+     window cascaded on top of it must never be able to block it. */
+  position: sticky;
+  top: 64px;
+  z-index: 600;
+}
+
+.tone-dock-title {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.tone-dock-desc {
+  margin: 0 0 18px;
+  font-size: 12px;
+  color: var(--tone-fg-muted);
+}
+
+.tone-dock-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 1px;
+  background: var(--tone-line);
+  border: 1px solid var(--tone-line);
+}
+
+.tone-dock-btn {
+  background: var(--tone-bg);
+  border: none;
+  text-align: left;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 76px;
+  cursor: pointer;
+  transition: background-color 150ms var(--tone-ease);
+}
+
+.tone-dock-btn:hover,
+.tone-dock-btn:focus-visible {
+  background: var(--tone-bg-raised);
+}
+
+.tone-dock-btn-name {
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--tone-fg-muted);
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--tone-line);
+  letter-spacing: 0.08em;
+}
+
+.tone-dock-btn-desc {
+  font-size: 11px;
+  color: var(--tone-fg-faint);
 }
 
 /* ---------- Shared field/control styling ---------- */
@@ -184,6 +316,13 @@ select {
   flex-direction: column;
   gap: 6px;
   min-width: 96px;
+}
+
+.tone-field-inline {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 
 .tone-field label {
@@ -242,21 +381,56 @@ select {
   text-transform: uppercase;
 }
 
-/* ---------- Transport ---------- */
-
-.tone-transport {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  flex-wrap: wrap;
+.tone-mini-btn {
+  display: inline-block;
+  border: 1px solid var(--tone-fg);
+  background: var(--tone-bg);
+  padding: 7px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  text-align: center;
+  transition: color 150ms var(--tone-ease), background-color 150ms var(--tone-ease);
 }
+
+.tone-mini-btn:hover,
+.tone-mini-btn:focus-visible {
+  color: var(--tone-bg);
+  background: var(--tone-fg);
+}
+
+.tone-toggle-btn {
+  border: 1px solid var(--tone-line);
+  background: var(--tone-bg);
+  padding: 9px 16px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: background-color 150ms var(--tone-ease), border-color 150ms var(--tone-ease), color 150ms var(--tone-ease);
+}
+
+.tone-toggle-btn.tone-is-active {
+  background: var(--tone-accent);
+  border-color: var(--tone-accent);
+  color: var(--tone-bg);
+}
+
+.tone-hint {
+  font-size: 11px;
+  color: var(--tone-fg-faint);
+  line-height: 1.6;
+}
+
+/* ---------- Transport specifics ---------- */
 
 .tone-play-btn {
   display: flex;
   align-items: center;
   gap: 8px;
   border: 1px solid var(--tone-fg);
-  background: transparent;
+  background: var(--tone-bg);
   padding: 10px 18px;
   cursor: pointer;
   font-size: 11px;
@@ -288,7 +462,7 @@ select {
 
 .tone-tap-btn {
   border: 1px solid var(--tone-line);
-  background: transparent;
+  background: var(--tone-bg);
   padding: 8px 14px;
   font-size: 10px;
   font-weight: 700;
@@ -308,7 +482,182 @@ select {
   min-width: 140px;
 }
 
-/* ---------- Sequencer ---------- */
+/* ==========================================================================
+   Windows — beta-office's small-floating-window chrome, same idea.
+   ========================================================================== */
+
+.tone-windows-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  pointer-events: none;
+}
+
+.tone-window {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  background: var(--tone-bg);
+  border: 1px solid var(--tone-fg);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
+  pointer-events: auto;
+}
+
+.tone-window.tone-is-dragging {
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2);
+}
+
+.tone-window.tone-is-hidden {
+  display: none;
+}
+
+.tone-window.tone-is-maximized {
+  left: 12px !important;
+  top: 90px !important;
+  width: calc(100vw - 24px) !important;
+  height: calc(100vh - 100px) !important;
+}
+
+.tone-window-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--tone-line);
+  background: var(--tone-bg-raised);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.tone-window.tone-is-dragging .tone-window-titlebar {
+  cursor: grabbing;
+}
+
+.tone-window-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tone-window-controls {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.tone-window-btn {
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--tone-line);
+  background: var(--tone-bg);
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+}
+
+.tone-window-btn:hover,
+.tone-window-btn:focus-visible {
+  border-color: var(--tone-accent);
+}
+
+.tone-window-min::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 5px;
+  height: 1.5px;
+  background: currentColor;
+}
+
+.tone-window-max::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1.5px solid currentColor;
+}
+
+.tone-window-close::before,
+.tone-window-close::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  top: 50%;
+  height: 1.5px;
+  background: currentColor;
+}
+
+.tone-window-close::before {
+  transform: rotate(45deg);
+}
+
+.tone-window-close::after {
+  transform: rotate(-45deg);
+}
+
+.tone-window-content {
+  flex: 1;
+  overflow: auto;
+  padding: 14px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tone-window-resize {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 14px;
+  height: 14px;
+  cursor: nwse-resize;
+  background:
+    linear-gradient(135deg, transparent 45%, var(--tone-fg-muted) 45%, var(--tone-fg-muted) 55%, transparent 55%),
+    linear-gradient(135deg, transparent 65%, var(--tone-fg-muted) 65%, var(--tone-fg-muted) 75%, transparent 75%);
+}
+
+/* ==========================================================================
+   Taskbar — minimized window chips.
+   ========================================================================== */
+
+.tone-taskbar {
+  position: fixed;
+  left: var(--tone-edge);
+  bottom: 16px;
+  z-index: 500;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tone-taskbar-chip {
+  border: 1px solid var(--tone-fg);
+  background: var(--tone-bg);
+  padding: 6px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.tone-taskbar-chip:hover,
+.tone-taskbar-chip:focus-visible {
+  border-color: var(--tone-accent);
+  color: var(--tone-accent);
+}
+
+/* ==========================================================================
+   Sequencer / Sampler step grid — shared classes between both modules.
+   ========================================================================== */
 
 .tone-seq-tracks {
   display: flex;
@@ -323,11 +672,11 @@ select {
 }
 
 .tone-seq-track-label {
-  width: 56px;
+  width: 50px;
   flex-shrink: 0;
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   color: var(--tone-fg-muted);
 }
 
@@ -348,7 +697,7 @@ select {
 }
 
 .tone-seq-step.tone-is-beat {
-  border-color: rgba(245, 245, 245, 0.22);
+  border-color: rgba(0, 0, 0, 0.3);
 }
 
 .tone-seq-step.tone-is-active {
@@ -365,38 +714,26 @@ select {
   box-shadow: inset 0 0 0 2px var(--tone-fg);
 }
 
-/* ---------- Synth ---------- */
+.tone-seq-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ==========================================================================
+   Synth — controls + playable keyboard.
+   ========================================================================== */
 
 .tone-synth-controls {
   display: flex;
   align-items: flex-end;
-  gap: 24px;
+  gap: 20px;
   flex-wrap: wrap;
-  margin-bottom: 20px;
-}
-
-.tone-toggle-btn {
-  border: 1px solid var(--tone-line);
-  background: transparent;
-  padding: 9px 16px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-  align-self: flex-end;
-  transition: background-color 150ms var(--tone-ease), border-color 150ms var(--tone-ease), color 150ms var(--tone-ease);
-}
-
-.tone-toggle-btn.tone-is-active {
-  background: var(--tone-accent);
-  border-color: var(--tone-accent);
-  color: var(--tone-bg);
 }
 
 .tone-keyboard {
   position: relative;
   display: flex;
-  height: 150px;
+  height: 140px;
   user-select: none;
   touch-action: none;
 }
@@ -408,20 +745,21 @@ select {
   align-items: flex-end;
   justify-content: center;
   padding-bottom: 10px;
-  transition: background-color 80ms linear;
+  transition: background-color 80ms linear, color 80ms linear;
 }
 
 .tone-key-white {
   position: relative;
   flex: 1;
   height: 100%;
-  background: var(--tone-fg);
-  color: var(--tone-bg);
-  border-right: 1px solid var(--tone-bg);
+  background: var(--tone-bg);
+  color: var(--tone-fg-faint);
+  border: 1px solid var(--tone-fg);
+  border-right: none;
 }
 
 .tone-key-white:last-child {
-  border-right: none;
+  border-right: 1px solid var(--tone-fg);
 }
 
 .tone-key-black {
@@ -429,10 +767,10 @@ select {
   top: 0;
   z-index: 2;
   width: var(--tone-black-key-width);
-  height: 60%;
-  background: var(--tone-bg);
-  color: var(--tone-fg);
-  border: 1px solid var(--tone-line);
+  height: 58%;
+  background: var(--tone-fg);
+  color: var(--tone-bg);
+  border: 1px solid var(--tone-fg);
 }
 
 .tone-key-label {
@@ -444,6 +782,7 @@ select {
 
 .tone-key.tone-is-pressed {
   background: var(--tone-accent);
+  border-color: var(--tone-accent);
   color: var(--tone-bg);
 }
 
@@ -453,6 +792,175 @@ select {
   display: flex;
   gap: 24px;
   flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   Sampler
+   ========================================================================== */
+
+.tone-sampler-load,
+.tone-dj-crossfader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tone-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.tone-file-label {
+  cursor: pointer;
+}
+
+.tone-sampler-status {
+  font-size: 11px;
+  color: var(--tone-fg-muted);
+}
+
+.tone-sampler-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tone-sampler-pads {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 4px;
+}
+
+.tone-sampler-pad {
+  aspect-ratio: 1;
+  border: 1px solid var(--tone-fg);
+  background: var(--tone-bg);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 100ms var(--tone-ease), color 100ms var(--tone-ease);
+}
+
+.tone-sampler-pad:hover,
+.tone-sampler-pad:focus-visible,
+.tone-sampler-pad:active {
+  background: var(--tone-accent);
+  color: var(--tone-bg);
+  border-color: var(--tone-accent);
+}
+
+/* ==========================================================================
+   DJ decks
+   ========================================================================== */
+
+.tone-dj-decks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.tone-dj-deck {
+  border: 1px solid var(--tone-line);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tone-dj-deck-title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.tone-dj-play {
+  align-self: flex-start;
+}
+
+.tone-dj-crossfader {
+  border-top: 1px solid var(--tone-line);
+  padding-top: 14px;
+}
+
+.tone-dj-crossfader .tone-field {
+  flex: 1;
+}
+
+/* ==========================================================================
+   AI Jam
+   ========================================================================== */
+
+.tone-ai-face {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.tone-ai-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tone-ai-status {
+  font-size: 11px;
+  color: var(--tone-fg-muted);
+  min-height: 1.4em;
+}
+
+/* ==========================================================================
+   Recorder
+   ========================================================================== */
+
+.tone-recorder-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.tone-record-btn.tone-is-active {
+  background: var(--tone-accent);
+  border-color: var(--tone-accent);
+  color: var(--tone-bg);
+}
+
+.tone-record-timer {
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.tone-takes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tone-take-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--tone-line);
+  padding-top: 10px;
+}
+
+.tone-take-name {
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 100px;
+}
+
+.tone-take-audio {
+  height: 32px;
+  flex: 1;
+  min-width: 160px;
 }
 
 /* ==========================================================================
@@ -469,13 +977,25 @@ select {
     display: none;
   }
 
-  .tone-rack {
+  .tone-help-btn {
+    margin-top: 0;
+    top: auto;
+    bottom: 16px;
+  }
+
+  .tone-help-panel {
+    top: auto;
+    bottom: 60px;
+    right: 18px;
+  }
+
+  .tone-main {
     padding-top: 80px;
     gap: 16px;
   }
 
   .tone-seq-track-label {
-    width: 44px;
+    width: 40px;
     font-size: 9px;
   }
 
@@ -484,16 +1004,14 @@ select {
   }
 
   .tone-keyboard {
-    height: 120px;
-  }
-}
-
-@media (max-width: 480px) {
-  .tone-seq-steps {
-    grid-template-columns: repeat(16, minmax(0, 1fr));
+    height: 110px;
   }
 
-  .tone-seq-track-label {
-    width: 36px;
+  .tone-dj-decks {
+    grid-template-columns: 1fr;
+  }
+
+  .tone-window {
+    max-width: calc(100vw - 24px);
   }
 }

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TONE OFFICE — VELFONT OFFICE</title>
-<meta name="description" content="TONE OFFICE — a playable step sequencer and synth, built entirely in the browser with the Web Audio API.">
+<meta name="description" content="TONE OFFICE — a playable studio built with the Web Audio API: sequencer, synth, sampler, DJ decks, and a recorder, all in small draggable windows.">
 <meta name="robots" content="noindex">
 <link rel="canonical" href="https://velfontoffice.com/tone-office/">
 <link rel="stylesheet" href="/css/tokens.css">
@@ -13,6 +13,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.documentElement.classList.add("js-enter");
+  }
+</script>
 </head>
 <body class="tone-office">
 
@@ -21,22 +26,22 @@
   <span class="tone-badge">TONE OFFICE — A PLAYABLE STUDIO, BUILT WITH WEB AUDIO</span>
 </div>
 
-<!-- Everything below is silent until this fires once — browsers refuse
-     to start an AudioContext before a user gesture, so the whole rack
-     waits behind a single "ENTER" tap instead of silently doing nothing
-     the first time someone hits play. -->
-<div class="tone-gate" id="toneGate">
-  <button type="button" class="tone-gate-btn" id="toneGateBtn">
-    <span class="tone-gate-mark">&#9654;</span>
-    ENTER TONE OFFICE
-  </button>
-  <p class="tone-gate-hint">Sound starts on tap — turn your volume up.</p>
+<!-- A searchable reference for every module, read live from
+     js/modules.js — see js/help.js. -->
+<button type="button" class="tone-help-btn" id="toneHelpBtn" aria-haspopup="true" aria-expanded="false" aria-controls="toneHelpPanel">HELP</button>
+<div class="tone-help-panel" id="toneHelpPanel" hidden role="dialog" aria-modal="true" aria-label="Module help">
+  <div class="tone-help-head">
+    <input type="text" class="tone-help-search" id="toneHelpSearch" placeholder="Search modules…" autocomplete="off" spellcheck="false">
+    <button type="button" class="tone-help-close" id="toneHelpClose" aria-label="Close help">&times;</button>
+  </div>
+  <div class="tone-help-list" id="toneHelpList"></div>
 </div>
 
-<main class="tone-rack" id="toneRack" aria-hidden="true" inert>
-
-  <!-- Transport — section 1: shared clock every module below locks to. -->
-  <section class="tone-module tone-transport" aria-label="Transport">
+<main class="tone-main">
+  <!-- Shared transport — every module locks to this clock/volume
+       rather than keeping its own. Not a window itself (closing it
+       would break everything downstream of it). -->
+  <section class="tone-transport" aria-label="Transport">
     <button type="button" class="tone-play-btn" id="tonePlayBtn" aria-pressed="false">
       <span class="tone-play-icon" aria-hidden="true"></span>
       <span class="tone-play-label">PLAY</span>
@@ -56,69 +61,30 @@
     </div>
   </section>
 
-  <!-- Sequencer — section 2: 4 synthesized drum voices, 16 steps each. -->
-  <section class="tone-module tone-sequencer" aria-label="Step sequencer">
-    <h2 class="tone-module-title">SEQUENCER</h2>
-    <div class="tone-seq-tracks" id="toneSeqTracks"></div>
+  <!-- Dock — one button per js/modules.js entry, each opening its own
+       small window (js/window-manager.js), beta-office style. -->
+  <section class="tone-dock" aria-label="Modules">
+    <h1 class="tone-dock-title">TONE OFFICE</h1>
+    <p class="tone-dock-desc">A playable studio — open a module below, drag it where you want it.</p>
+    <div class="tone-dock-buttons" id="toneDockButtons"></div>
   </section>
-
-  <!-- Synth — section 3: the actually-playable part. Click/drag the keys
-       or use the computer keyboard (row shown on the keys themselves). -->
-  <section class="tone-module tone-synth" aria-label="Synth">
-    <h2 class="tone-module-title">SYNTH</h2>
-
-    <div class="tone-synth-controls">
-      <div class="tone-field">
-        <label for="toneWave">WAVE</label>
-        <select id="toneWave" class="tone-select">
-          <option value="sawtooth">SAW</option>
-          <option value="square">SQUARE</option>
-          <option value="triangle">TRIANGLE</option>
-          <option value="sine">SINE</option>
-        </select>
-      </div>
-      <div class="tone-field">
-        <label for="toneCutoff">CUTOFF</label>
-        <input type="range" id="toneCutoff" min="200" max="8000" step="1" value="2400">
-      </div>
-      <div class="tone-field">
-        <label for="toneAttack">ATTACK</label>
-        <input type="range" id="toneAttack" min="0" max="500" step="1" value="8">
-      </div>
-      <div class="tone-field">
-        <label for="toneRelease">RELEASE</label>
-        <input type="range" id="toneRelease" min="20" max="1500" step="1" value="220">
-      </div>
-      <button type="button" class="tone-toggle-btn" id="toneArpBtn" aria-pressed="false">ARP</button>
-    </div>
-
-    <div class="tone-keyboard" id="toneKeyboard"></div>
-  </section>
-
-  <!-- FX — section 4: one real-time effect on the synth's own output. -->
-  <section class="tone-module tone-fx" aria-label="Delay effect">
-    <h2 class="tone-module-title">DELAY</h2>
-    <div class="tone-fx-controls">
-      <div class="tone-field">
-        <label for="toneDelayTime">TIME</label>
-        <input type="range" id="toneDelayTime" min="0" max="800" step="1" value="260">
-      </div>
-      <div class="tone-field">
-        <label for="toneDelayFeedback">FEEDBACK</label>
-        <input type="range" id="toneDelayFeedback" min="0" max="85" step="1" value="35">
-      </div>
-      <div class="tone-field">
-        <label for="toneDelayMix">MIX</label>
-        <input type="range" id="toneDelayMix" min="0" max="100" step="1" value="25">
-      </div>
-    </div>
-  </section>
-
 </main>
 
+<!-- Every open module window lives here, stacked by js/window-manager.js. -->
+<div class="tone-windows-layer" id="toneWindowsLayer"></div>
+<div class="tone-taskbar" id="toneTaskbar" aria-label="Minimized windows"></div>
+
 <script src="js/audio-engine.js" defer></script>
+<script src="js/window-manager.js" defer></script>
 <script src="js/sequencer.js" defer></script>
 <script src="js/synth.js" defer></script>
+<script src="js/delay.js" defer></script>
+<script src="js/sampler.js" defer></script>
+<script src="js/dj.js" defer></script>
+<script src="js/ai-jam.js" defer></script>
+<script src="js/recorder.js" defer></script>
+<script src="js/modules.js" defer></script>
+<script src="js/help.js" defer></script>
 <script src="js/app.js" defer></script>
 </body>
 </html>

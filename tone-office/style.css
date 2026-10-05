@@ -786,6 +786,43 @@ html.js-enter .tone-topbar {
   color: var(--tone-bg);
 }
 
+/* NOTE/KEY display toggle — a 2-up segmented version of .tone-toggle-
+   btn, same border/accent/typography tokens, just split into a group
+   so the active side reads clearly against the inactive one. */
+.tone-segmented {
+  display: flex;
+  border: 1px solid var(--tone-line);
+}
+
+.tone-segmented-btn {
+  border: none;
+  background: var(--tone-bg);
+  padding: 9px 14px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: background-color 150ms var(--tone-ease), color 150ms var(--tone-ease);
+}
+
+.tone-segmented-btn:first-child {
+  border-right: 1px solid var(--tone-line);
+}
+
+.tone-segmented-btn.tone-is-active {
+  background: var(--tone-accent);
+  color: var(--tone-bg);
+}
+
+.tone-synth-status {
+  display: flex;
+  gap: 16px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--tone-fg-muted);
+}
+
 /* ---------- FX ---------- */
 
 .tone-fx-controls {

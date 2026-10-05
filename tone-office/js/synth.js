@@ -1,87 +1,71 @@
 /**
  * TONE OFFICE — Synth
  * A simple subtractive voice (oscillator -> lowpass filter -> AR
- * envelope) with up to one voice per held note, routed through
- * audio-engine.js's shared delay bus. Playable three ways: the on-
- * screen keyboard (click/tap, and — see the pointermove handler below —
- * sliding across keys while still holding down glides from note to
- * note instead of needing a separate press per key), or the computer
- * keyboard (A S D F G H J K L for the white keys, W E T Y U for the
- * black ones — the GarageBand/Ableton "musical typing" layout), which
- * works even while this window is closed or minimized.
+ * envelope) with one voice per held note, routed through audio-
+ * engine.js's shared delay bus.
  *
- * The on-screen keyboard's range isn't fixed — widen the window and
- * more octaves appear on either side of the computer-keyboard-mapped
- * range (see computeVisibleRange below), narrow it and they drop away
- * again. The computer-keyboard mapping itself always stays pinned to
- * the same C4-D5 anchor regardless of how many extra octaves are
- * currently visible; notes outside that anchor are mouse/touch-only
- * and show their note name instead of a letter.
+ * Computer-keyboard performance mode (Ableton's "Computer MIDI
+ * Keyboard" is the reference point): keyboardMap below is the single
+ * source of truth for which physical key plays which scale degree —
+ * semitone offsets from the current octave's C, not absolute notes —
+ * so Z/X (octave down/up) just changes what pressNote() resolves an
+ * offset to, with nothing else to update. keyByOffset is the reverse
+ * of that same map, used only to render KEY-mode labels. Mouse/touch
+ * (click, or glide — hold and slide across keys without lifting) and
+ * the computer keyboard both funnel through the same pressNote()/
+ * releaseNote(), which is what actually calls noteOn()/noteOff() —
+ * there's one note-playing path, not two.
  *
- * ARP mode re-purposes noteOn/noteOff to only track which notes are
- * held (see heldNotes) — advanceArp() is what actually triggers sound
- * while it's on, called once per sequencer step (wired below, once,
- * at load time).
+ * ARP mode repurposes pressNote()/releaseNote() to only track which
+ * notes are held, instead of sounding them immediately — advanceArp()
+ * is what actually triggers sound while it's on, called once per
+ * sequencer step (wired below, once, at load time).
  */
 (function () {
   var NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-  var WHITE_PITCH_CLASSES = [0, 2, 4, 5, 7, 9, 11];
 
-  // The anchor range the computer keyboard always maps to — MIDI 60
-  // (C4) through 74 (D5), the same one-octave-plus-a-second this
-  // module always played before the keyboard could grow. Continuous
-  // (no gaps) — every semitone in between, including C#5, gets its
-  // own key now; only C#5 has no computer-key letter, same as any
-  // other note outside the mapped set below.
-  var BASE_LOW_MIDI = 60;
-  var BASE_HIGH_MIDI = 74;
-  var COMPUTER_KEY_BY_MIDI = {
-    60: "a", 61: "w", 62: "s", 63: "e", 64: "d", 65: "f", 66: "t",
-    67: "g", 68: "y", 69: "h", 70: "u", 71: "j", 72: "k", 74: "l",
+  // Centralized keyboard map (semitone offset from the current
+  // octave's C) — the only place this mapping is defined. keyByOffset
+  // is its exact reverse, built once below.
+  var keyboardMap = {
+    a: 0, w: 1, s: 2, e: 3, d: 4, f: 5, t: 6,
+    g: 7, y: 8, h: 9, u: 10, j: 11, k: 12,
   };
-  var MIDI_BY_COMPUTER_KEY = {};
-  Object.keys(COMPUTER_KEY_BY_MIDI).forEach(function (midi) {
-    MIDI_BY_COMPUTER_KEY[COMPUTER_KEY_BY_MIDI[midi]] = Number(midi);
+  var keyByOffset = {};
+  Object.keys(keyboardMap).forEach(function (k) {
+    keyByOffset[keyboardMap[k]] = k;
   });
+  var OFFSET_KIND = { 0: "white", 1: "black", 2: "white", 3: "black", 4: "white", 5: "white", 6: "black", 7: "white", 8: "black", 9: "white", 10: "black", 11: "white", 12: "white" };
 
-  // How far the keyboard can grow in either direction — 3 octaves
-  // below middle C to 3 above, plenty for a very wide window without
-  // generating an unplayably long row.
-  var MIN_MIDI = BASE_LOW_MIDI - 36;
-  var MAX_MIDI = BASE_HIGH_MIDI + 36;
-  // Matches the width the base 9-key range already rendered at before
-  // the keyboard could grow (flex:1 over ~450px of default window
-  // content) — so the default window size still shows exactly the
-  // base range, and only actually widening it adds more.
-  var MIN_WHITE_KEY_WIDTH = 48;
+  var DEFAULT_OCTAVE = 4;
+  var MIN_OCTAVE = 0;
+  var MAX_OCTAVE = 8;
+  var octave = DEFAULT_OCTAVE;
 
-  function isWhiteMidi(midi) {
-    return WHITE_PITCH_CLASSES.indexOf(((midi % 12) + 12) % 12) !== -1;
+  function baseMidi() {
+    return (octave + 1) * 12;
   }
 
   function noteNameFor(midi) {
-    return NOTE_NAMES[((midi % 12) + 12) % 12] + (Math.floor(midi / 12) - 1);
+    return NOTE_NAMES[((midi % 12) + 12) % 12];
   }
 
   function freqFor(midi) {
     return 440 * Math.pow(2, (midi - 69) / 12);
   }
 
-  function noteFor(midi) {
-    return {
-      id: String(midi),
-      midi: midi,
-      key: COMPUTER_KEY_BY_MIDI[midi] || null,
-      name: noteNameFor(midi),
-      freq: freqFor(midi),
-      kind: isWhiteMidi(midi) ? "white" : "black",
-    };
+  // Stable, octave-independent list ai-jam.js's riff generator picks
+  // scale degrees from — always the default octave, regardless of
+  // whatever octave the live performance keyboard is currently
+  // shifted to.
+  var BASE_NOTES = [];
+  for (var off = 0; off <= 12; off++) {
+    var m = (DEFAULT_OCTAVE + 1) * 12 + off;
+    BASE_NOTES.push({ midi: m, name: noteNameFor(m), offset: off });
   }
 
-  // Stable base range, independent of whatever the on-screen keyboard
-  // currently shows — what ai-jam.js's riff generator plays from.
-  var BASE_NOTES = [];
-  for (var m = BASE_LOW_MIDI; m <= BASE_HIGH_MIDI; m++) BASE_NOTES.push(noteFor(m));
+  var VELOCITY_LEVELS = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
+  var velocityIndex = VELOCITY_LEVELS.length - 1;
 
   var wave = "sawtooth";
   var cutoff = 2400;
@@ -89,21 +73,23 @@
   var releaseMs = 220;
   var peakGain = 0.32;
 
-  var activeVoices = {}; // note id -> { osc, filter, gain }
-  var heldNotes = [];
+  var activeVoices = {}; // midi -> { osc, filter, gain }
+  var midiHoldCount = {}; // midi -> number of identifiers currently holding it
+  var pressedByIdentifier = {}; // identifier (computer key, or "mouse-*") -> { midi, offset }
   var arpEnabled = false;
   var arpIndex = 0;
   var keyboardEl = null; // the currently-rendered on-screen keyboard, if open
-  var notesById = {}; // only the currently-visible range — rebuilt on resize
+  var keyLabelMode = "note"; // "note" | "keyboard" — display only, see render()
+  var octaveReadoutEl = null;
+  var velocityReadoutEl = null;
 
-  function startVoice(id, isArpGate) {
-    var note = notesById[id];
-    if (!note || activeVoices[id]) return;
+  function startVoice(midi, isArpGate) {
+    if (activeVoices[midi]) return;
     var ctx = window.ToneEngine.init();
 
     var osc = ctx.createOscillator();
     osc.type = wave;
-    osc.frequency.value = note.freq;
+    osc.frequency.value = freqFor(midi);
 
     var filter = ctx.createBiquadFilter();
     filter.type = "lowpass";
@@ -113,27 +99,27 @@
     var gain = ctx.createGain();
     gain.gain.setValueAtTime(0, ctx.currentTime);
     var attackSec = Math.max(attackMs / 1000, 0.002);
-    gain.gain.linearRampToValueAtTime(peakGain, ctx.currentTime + attackSec);
+    gain.gain.linearRampToValueAtTime(peakGain * VELOCITY_LEVELS[velocityIndex], ctx.currentTime + attackSec);
 
     osc.connect(filter);
     filter.connect(gain);
     window.ToneEngine.connectToBus(gain);
     osc.start();
 
-    activeVoices[id] = { osc: osc, filter: filter, gain: gain };
+    activeVoices[midi] = { osc: osc, filter: filter, gain: gain };
 
     if (isArpGate) {
       var stepSec = window.ToneSequencer ? window.ToneSequencer.stepSeconds() : 0.2;
       window.setTimeout(function () {
-        stopVoice(id);
+        stopVoice(midi);
       }, stepSec * 800);
     }
   }
 
-  function stopVoice(id) {
-    var voice = activeVoices[id];
+  function stopVoice(midi) {
+    var voice = activeVoices[midi];
     if (!voice) return;
-    delete activeVoices[id];
+    delete activeVoices[midi];
     var ctx = window.ToneEngine.context();
     var releaseSec = Math.max(releaseMs / 1000, 0.02);
     var now = ctx.currentTime;
@@ -144,42 +130,82 @@
   }
 
   function stopAllVoices() {
-    Object.keys(activeVoices).forEach(stopVoice);
+    Object.keys(activeVoices).forEach(function (midi) {
+      stopVoice(Number(midi));
+    });
   }
 
-  function findKeyEl(id) {
-    return keyboardEl ? keyboardEl.querySelector('.tone-key[data-key="' + id + '"]') : null;
+  // Direct, absolute-pitch API — used by ai-jam.js, and by advanceArp
+  // below. Unlike pressNote()/releaseNote(), this never touches
+  // on-screen highlighting (the note it plays may not even be in the
+  // currently-displayed octave) and ignores ARP mode (arp calls
+  // startVoice directly instead).
+  function noteOn(midi) {
+    midiHoldCount[midi] = (midiHoldCount[midi] || 0) + 1;
+    if (midiHoldCount[midi] === 1) startVoice(midi, false);
   }
 
-  function setPressedVisual(id, pressed) {
-    var el = findKeyEl(id);
+  function noteOff(midi) {
+    midiHoldCount[midi] = (midiHoldCount[midi] || 1) - 1;
+    if (midiHoldCount[midi] <= 0) {
+      delete midiHoldCount[midi];
+      stopVoice(midi);
+    }
+  }
+
+  function findKeyEl(offset) {
+    return keyboardEl ? keyboardEl.querySelector('.tone-key[data-offset="' + offset + '"]') : null;
+  }
+
+  function setPressedVisual(offset, pressed) {
+    var el = findKeyEl(offset);
     if (el) el.classList.toggle("tone-is-pressed", pressed);
   }
 
-  function noteOn(id) {
-    if (!notesById[id]) return;
-    if (heldNotes.indexOf(id) === -1) heldNotes.push(id);
-    setPressedVisual(id, true);
-    if (!arpEnabled) startVoice(id, false);
+  function offsetStillHeld(offset) {
+    return Object.keys(pressedByIdentifier).some(function (id) {
+      return pressedByIdentifier[id].offset === offset;
+    });
   }
 
-  function noteOff(id) {
-    var idx = heldNotes.indexOf(id);
-    if (idx !== -1) heldNotes.splice(idx, 1);
-    setPressedVisual(id, false);
-    if (!arpEnabled) stopVoice(id);
+  // The one path both mouse/touch and the computer keyboard call —
+  // see the module comment. `identifier` is whatever uniquely names
+  // this physical press (a computer-key letter, or a "mouse-*" token)
+  // so chords and simultaneous mouse+keyboard on the same key resolve
+  // correctly on release.
+  function pressNote(identifier, offset) {
+    if (pressedByIdentifier[identifier]) return;
+    var midi = baseMidi() + offset;
+    pressedByIdentifier[identifier] = { midi: midi, offset: offset };
+    setPressedVisual(offset, true);
+    if (!arpEnabled) noteOn(midi);
   }
 
-  function releaseAllHeld() {
-    heldNotes.slice().forEach(noteOff);
+  function releaseNote(identifier) {
+    var press = pressedByIdentifier[identifier];
+    if (!press) return;
+    delete pressedByIdentifier[identifier];
+    if (!offsetStillHeld(press.offset)) setPressedVisual(press.offset, false);
+    if (!arpEnabled) noteOff(press.midi);
+  }
+
+  function heldMidiList() {
+    var seen = [];
+    Object.keys(pressedByIdentifier).forEach(function (id) {
+      var midi = pressedByIdentifier[id].midi;
+      if (seen.indexOf(midi) === -1) seen.push(midi);
+    });
+    return seen;
   }
 
   function advanceArp() {
-    if (!arpEnabled || !heldNotes.length) return;
+    if (!arpEnabled) return;
+    var held = heldMidiList();
+    if (!held.length) return;
     stopAllVoices();
-    var id = heldNotes[arpIndex % heldNotes.length];
+    var midi = held[arpIndex % held.length];
     arpIndex++;
-    startVoice(id, true);
+    startVoice(midi, true);
   }
 
   // Locks the arp to the same 16th-note grid the sequencer runs on —
@@ -196,6 +222,14 @@
     arpEnabled = value;
     arpIndex = 0;
     stopAllVoices();
+    midiHoldCount = {};
+    if (!arpEnabled) {
+      // Resume normal sustain for whatever's still physically held,
+      // so switching ARP off mid-chord doesn't leave it silent.
+      Object.keys(pressedByIdentifier).forEach(function (id) {
+        noteOn(pressedByIdentifier[id].midi);
+      });
+    }
   }
 
   function setWave(value) {
@@ -206,8 +240,8 @@
     cutoff = hz;
     var ctx = window.ToneEngine.context();
     if (!ctx) return;
-    Object.keys(activeVoices).forEach(function (id) {
-      activeVoices[id].filter.frequency.setTargetAtTime(hz, ctx.currentTime, 0.01);
+    Object.keys(activeVoices).forEach(function (midi) {
+      activeVoices[midi].filter.frequency.setTargetAtTime(hz, ctx.currentTime, 0.01);
     });
   }
 
@@ -219,35 +253,60 @@
     releaseMs = ms;
   }
 
+  function setOctave(value) {
+    octave = Math.max(MIN_OCTAVE, Math.min(MAX_OCTAVE, value));
+    if (octaveReadoutEl) octaveReadoutEl.textContent = "OCT " + octave;
+  }
+
+  function setVelocity(index) {
+    velocityIndex = Math.max(0, Math.min(VELOCITY_LEVELS.length - 1, index));
+    if (velocityReadoutEl) velocityReadoutEl.textContent = "VEL " + (velocityIndex + 1) + "/" + VELOCITY_LEVELS.length;
+  }
+
   /* ---------- Computer keyboard — registered once, works globally ---------- */
 
-  var heldComputerKeys = {};
   function isTypingTarget(el) {
     var tag = el.tagName;
-    return tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA";
+    return tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA" || el.isContentEditable;
   }
 
   document.addEventListener("keydown", function (e) {
     if (isTypingTarget(e.target) || e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
     var k = e.key.toLowerCase();
-    var midi = MIDI_BY_COMPUTER_KEY[k];
-    if (midi == null || heldComputerKeys[k]) return;
-    heldComputerKeys[k] = true;
-    noteOn(String(midi));
+    if (k === "z") {
+      setOctave(octave - 1);
+      return;
+    }
+    if (k === "x") {
+      setOctave(octave + 1);
+      return;
+    }
+    if (k === "c") {
+      setVelocity(velocityIndex - 1);
+      return;
+    }
+    if (k === "v") {
+      setVelocity(velocityIndex + 1);
+      return;
+    }
+    var offset = keyboardMap[k];
+    if (offset === undefined) return;
+    window.ToneEngine.init();
+    pressNote(k, offset);
   });
 
   document.addEventListener("keyup", function (e) {
     var k = e.key.toLowerCase();
-    if (!heldComputerKeys[k]) return;
-    delete heldComputerKeys[k];
-    noteOff(String(MIDI_BY_COMPUTER_KEY[k]));
+    if (keyboardMap[k] === undefined) return;
+    releaseNote(k);
   });
 
   /* ---------- On-screen keyboard — click/tap, and glide across keys ---------- */
 
   var glideActive = false;
   var glidePointerId = null;
-  var glideId = null;
+  var glideOffset = null;
+  var GLIDE_ID = "mouse-glide";
 
   function keyAtPoint(x, y) {
     var el = document.elementFromPoint(x, y);
@@ -257,105 +316,39 @@
   document.addEventListener("pointermove", function (e) {
     if (!glideActive || e.pointerId !== glidePointerId) return;
     var el = keyAtPoint(e.clientX, e.clientY);
-    var newId = el ? el.dataset.key : null;
-    if (newId === glideId) return;
-    if (glideId) noteOff(glideId);
-    glideId = newId;
-    if (glideId) noteOn(glideId);
+    var newOffset = el ? Number(el.dataset.offset) : null;
+    if (newOffset === glideOffset) return;
+    if (glideOffset !== null) releaseNote(GLIDE_ID);
+    glideOffset = newOffset;
+    if (glideOffset !== null) pressNote(GLIDE_ID, glideOffset);
   });
 
   function endGlide(e) {
     if (!glideActive || e.pointerId !== glidePointerId) return;
     glideActive = false;
-    if (glideId) noteOff(glideId);
-    glideId = null;
+    if (glideOffset !== null) releaseNote(GLIDE_ID);
+    glideOffset = null;
   }
   document.addEventListener("pointerup", endGlide);
   document.addEventListener("pointercancel", endGlide);
 
-  /* ---------- Width-dependent range ---------- */
+  /* ---------- Rendering ---------- */
 
-  function fullWhiteMidiList() {
-    var list = [];
-    for (var midi = MIN_MIDI; midi <= MAX_MIDI; midi++) {
-      if (isWhiteMidi(midi)) list.push(midi);
-    }
-    return list;
+  function keyLabelFor(offset) {
+    if (keyLabelMode === "keyboard") return keyByOffset[offset].toUpperCase();
+    return BASE_NOTES[offset].name;
   }
 
-  function clamp(v, lo, hi) {
-    return Math.max(lo, Math.min(hi, v));
-  }
-
-  // Centers the widened range on the computer-key-mapped anchor
-  // (BASE_LOW_MIDI-BASE_HIGH_MIDI) so that range is always present —
-  // extra width adds whole octaves on both sides, up to MIN_MIDI/
-  // MAX_MIDI.
-  function computeVisibleRange(containerWidth) {
-    var whiteList = fullWhiteMidiList();
-    var baseStartIdx = whiteList.indexOf(BASE_LOW_MIDI);
-    var baseEndIdx = whiteList.indexOf(BASE_HIGH_MIDI);
-    var baseCount = baseEndIdx - baseStartIdx + 1;
-
-    var visibleCount = clamp(Math.floor(containerWidth / MIN_WHITE_KEY_WIDTH), baseCount, whiteList.length);
-    var extra = visibleCount - baseCount;
-    var before = Math.floor(extra / 2);
-    var startIdx = clamp(baseStartIdx - before, 0, whiteList.length - visibleCount);
-    var endIdx = startIdx + visibleCount - 1;
-
-    return { lowMidi: whiteList[startIdx], highMidi: whiteList[endIdx] };
-  }
-
-  var lastRange = null;
-
-  function renderKeyboard(containerWidth) {
+  function renderLabels() {
     if (!keyboardEl) return;
-    var range = computeVisibleRange(containerWidth);
-    if (lastRange && lastRange.lowMidi === range.lowMidi && lastRange.highMidi === range.highMidi) return;
-    lastRange = range;
-
-    releaseAllHeld();
-    stopAllVoices();
-
-    var notes = [];
-    for (var midi = range.lowMidi; midi <= range.highMidi; midi++) notes.push(noteFor(midi));
-    notesById = {};
-    notes.forEach(function (n) {
-      notesById[n.id] = n;
+    keyboardEl.querySelectorAll(".tone-key").forEach(function (el) {
+      el.querySelector(".tone-key-label").textContent = keyLabelFor(Number(el.dataset.offset));
     });
+  }
 
-    var whiteNotes = notes.filter(function (n) { return n.kind === "white"; });
-
-    keyboardEl.innerHTML = "";
-    notes.forEach(function (note) {
-      var key = document.createElement("button");
-      key.type = "button";
-      key.className = "tone-key tone-key-" + note.kind;
-      key.dataset.key = note.id;
-      key.setAttribute("aria-label", "Play " + note.name);
-
-      var label = document.createElement("span");
-      label.className = "tone-key-label";
-      label.textContent = note.key ? note.key.toUpperCase() : note.name;
-      key.appendChild(label);
-
-      if (note.kind === "black") {
-        var whiteBefore = notes.slice(0, notes.indexOf(note)).filter(function (n) { return n.kind === "white"; }).length;
-        var leftPercent = (whiteBefore / whiteNotes.length) * 100;
-        key.style.left = "calc(" + leftPercent + "% - var(--tone-black-key-width) / 2)";
-      }
-
-      key.addEventListener("pointerdown", function (e) {
-        e.preventDefault();
-        window.ToneEngine.init();
-        glideActive = true;
-        glidePointerId = e.pointerId;
-        glideId = note.id;
-        noteOn(note.id);
-      });
-
-      keyboardEl.appendChild(key);
-    });
+  function setKeyLabelMode(mode) {
+    keyLabelMode = mode === "keyboard" ? "keyboard" : "note";
+    renderLabels();
   }
 
   function buildWindow(container) {
@@ -416,35 +409,108 @@
       setArpEnabled(enabled);
     });
 
+    // Display toggle — labels only, never touches sound/pitch/mapping.
+    var displayField = document.createElement("div");
+    displayField.className = "tone-field";
+    var displayLabel = document.createElement("label");
+    displayLabel.textContent = "DISPLAY";
+    var segmented = document.createElement("div");
+    segmented.className = "tone-segmented";
+    var noteBtn = document.createElement("button");
+    noteBtn.type = "button";
+    noteBtn.className = "tone-segmented-btn";
+    noteBtn.textContent = "NOTE";
+    var keyBtn = document.createElement("button");
+    keyBtn.type = "button";
+    keyBtn.className = "tone-segmented-btn";
+    keyBtn.textContent = "KEY";
+    function syncDisplayButtons() {
+      noteBtn.classList.toggle("tone-is-active", keyLabelMode === "note");
+      keyBtn.classList.toggle("tone-is-active", keyLabelMode === "keyboard");
+    }
+    syncDisplayButtons();
+    noteBtn.addEventListener("click", function () {
+      setKeyLabelMode("note");
+      syncDisplayButtons();
+    });
+    keyBtn.addEventListener("click", function () {
+      setKeyLabelMode("keyboard");
+      syncDisplayButtons();
+    });
+    segmented.appendChild(noteBtn);
+    segmented.appendChild(keyBtn);
+    displayField.appendChild(displayLabel);
+    displayField.appendChild(segmented);
+
     controls.appendChild(waveField);
     controls.appendChild(cutoffField);
     controls.appendChild(attackField);
     controls.appendChild(releaseField);
     controls.appendChild(arpBtn);
+    controls.appendChild(displayField);
+    container.appendChild(controls);
 
     keyboardEl = document.createElement("div");
     keyboardEl.className = "tone-keyboard";
+    var whiteCount = Object.keys(OFFSET_KIND).filter(function (o) { return OFFSET_KIND[o] === "white"; }).length;
 
-    container.appendChild(controls);
-    container.appendChild(keyboardEl);
+    for (var offset = 0; offset <= 12; offset++) {
+      (function (offset) {
+        var kind = OFFSET_KIND[offset];
+        var key = document.createElement("button");
+        key.type = "button";
+        key.className = "tone-key tone-key-" + kind;
+        key.dataset.offset = String(offset);
+        key.setAttribute("aria-label", "Play " + BASE_NOTES[offset].name);
 
-    lastRange = null;
-    renderKeyboard(container.clientWidth);
+        var label = document.createElement("span");
+        label.className = "tone-key-label";
+        label.textContent = keyLabelFor(offset);
+        key.appendChild(label);
 
-    var resizeObserver = null;
-    if (window.ResizeObserver) {
-      resizeObserver = new ResizeObserver(function (entries) {
-        renderKeyboard(entries[0].contentRect.width);
-      });
-      resizeObserver.observe(container);
+        if (kind === "black") {
+          var whiteBefore = 0;
+          for (var o2 = 0; o2 < offset; o2++) if (OFFSET_KIND[o2] === "white") whiteBefore++;
+          var leftPercent = (whiteBefore / whiteCount) * 100;
+          key.style.left = "calc(" + leftPercent + "% - var(--tone-black-key-width) / 2)";
+        }
+
+        key.addEventListener("pointerdown", function (e) {
+          e.preventDefault();
+          window.ToneEngine.init();
+          glideActive = true;
+          glidePointerId = e.pointerId;
+          glideOffset = offset;
+          pressNote(GLIDE_ID, offset);
+        });
+
+        keyboardEl.appendChild(key);
+      })(offset);
     }
 
+    container.appendChild(keyboardEl);
+
+    var status = document.createElement("div");
+    status.className = "tone-synth-status";
+    octaveReadoutEl = document.createElement("span");
+    octaveReadoutEl.textContent = "OCT " + octave;
+    velocityReadoutEl = document.createElement("span");
+    velocityReadoutEl.textContent = "VEL " + (velocityIndex + 1) + "/" + VELOCITY_LEVELS.length;
+    status.appendChild(octaveReadoutEl);
+    status.appendChild(velocityReadoutEl);
+    container.appendChild(status);
+
+    var hint = document.createElement("p");
+    hint.className = "tone-hint";
+    hint.textContent = "A–K = PLAY · W/E/T/Y/U = SHARPS · Z/X = OCTAVE · C/V = VELOCITY";
+    container.appendChild(hint);
+
     return function cleanup() {
-      if (resizeObserver) resizeObserver.disconnect();
-      if (glideId) noteOff(glideId);
+      if (glideOffset !== null) releaseNote(GLIDE_ID);
       glideActive = false;
       keyboardEl = null;
-      notesById = {};
+      octaveReadoutEl = null;
+      velocityReadoutEl = null;
     };
   }
 

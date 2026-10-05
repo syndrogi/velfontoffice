@@ -9,10 +9,10 @@
  * Said plainly in the window itself, not just this comment.
  */
 (function () {
-  // Indices into ToneSynth.notes (a continuous chromatic C4-D5, 15
+  // Indices into ToneSynth.notes (a continuous chromatic C4-C5, 13
   // notes) that make up a major pentatonic scale across that range:
-  // C4 D4 E4 G4 A4 C5 D5.
-  var SCALE_INDICES = [0, 2, 4, 7, 9, 12, 14];
+  // C4 D4 E4 G4 A4 C5.
+  var SCALE_INDICES = [0, 2, 4, 7, 9, 12];
   var STEP_CHOICES = [-2, -1, -1, 1, 1, 2];
 
   function buildMelody(count) {
@@ -36,9 +36,9 @@
     sequence.forEach(function (scaleIdx, i) {
       var note = notes[SCALE_INDICES[scaleIdx]];
       window.setTimeout(function () {
-        window.ToneSynth.noteOn(note.id);
+        window.ToneSynth.noteOn(note.midi);
         window.setTimeout(function () {
-          window.ToneSynth.noteOff(note.id);
+          window.ToneSynth.noteOff(note.midi);
         }, noteDur * 1000);
       }, i * noteGap * 1000);
     });

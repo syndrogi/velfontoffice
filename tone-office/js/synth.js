@@ -1,7 +1,7 @@
 /**
  * TONE OFFICE — Synth
  * A simple subtractive voice (oscillator -> lowpass filter -> AR
- * envelope) with up to one voice per held key, routed through
+ * envelope) with up to one voice per held note, routed through
  * audio-engine.js's shared delay bus. Playable three ways: the on-
  * screen keyboard (click/tap, and — see the pointermove handler below —
  * sliding across keys while still holding down glides from note to
@@ -10,35 +10,78 @@
  * black ones — the GarageBand/Ableton "musical typing" layout), which
  * works even while this window is closed or minimized.
  *
- * ARP mode re-purposes noteOn/noteOff to only track which keys are
- * held (see heldKeys) — advanceArp() is what actually triggers sound
+ * The on-screen keyboard's range isn't fixed — widen the window and
+ * more octaves appear on either side of the computer-keyboard-mapped
+ * range (see computeVisibleRange below), narrow it and they drop away
+ * again. The computer-keyboard mapping itself always stays pinned to
+ * the same C4-D5 anchor regardless of how many extra octaves are
+ * currently visible; notes outside that anchor are mouse/touch-only
+ * and show their note name instead of a letter.
+ *
+ * ARP mode re-purposes noteOn/noteOff to only track which notes are
+ * held (see heldNotes) — advanceArp() is what actually triggers sound
  * while it's on, called once per sequencer step (wired below, once,
  * at load time).
  */
 (function () {
-  // Equal-tempered frequencies, A4 = 440Hz. One octave plus a second,
-  // C4-D5 — enough range to actually play a line, small enough to fit
-  // one on-screen row.
-  var NOTES = [
-    { key: "a", name: "C4", freq: 261.6256, kind: "white" },
-    { key: "w", name: "C#4", freq: 277.1826, kind: "black" },
-    { key: "s", name: "D4", freq: 293.6648, kind: "white" },
-    { key: "e", name: "D#4", freq: 311.1270, kind: "black" },
-    { key: "d", name: "E4", freq: 329.6276, kind: "white" },
-    { key: "f", name: "F4", freq: 349.2282, kind: "white" },
-    { key: "t", name: "F#4", freq: 369.9944, kind: "black" },
-    { key: "g", name: "G4", freq: 391.9954, kind: "white" },
-    { key: "y", name: "G#4", freq: 415.3047, kind: "black" },
-    { key: "h", name: "A4", freq: 440.0000, kind: "white" },
-    { key: "u", name: "A#4", freq: 466.1638, kind: "black" },
-    { key: "j", name: "B4", freq: 493.8833, kind: "white" },
-    { key: "k", name: "C5", freq: 523.2511, kind: "white" },
-    { key: "l", name: "D5", freq: 587.3295, kind: "white" },
-  ];
-  var notesByKey = {};
-  NOTES.forEach(function (n) {
-    notesByKey[n.key] = n;
+  var NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+  var WHITE_PITCH_CLASSES = [0, 2, 4, 5, 7, 9, 11];
+
+  // The anchor range the computer keyboard always maps to — MIDI 60
+  // (C4) through 74 (D5), the same one-octave-plus-a-second this
+  // module always played before the keyboard could grow. Continuous
+  // (no gaps) — every semitone in between, including C#5, gets its
+  // own key now; only C#5 has no computer-key letter, same as any
+  // other note outside the mapped set below.
+  var BASE_LOW_MIDI = 60;
+  var BASE_HIGH_MIDI = 74;
+  var COMPUTER_KEY_BY_MIDI = {
+    60: "a", 61: "w", 62: "s", 63: "e", 64: "d", 65: "f", 66: "t",
+    67: "g", 68: "y", 69: "h", 70: "u", 71: "j", 72: "k", 74: "l",
+  };
+  var MIDI_BY_COMPUTER_KEY = {};
+  Object.keys(COMPUTER_KEY_BY_MIDI).forEach(function (midi) {
+    MIDI_BY_COMPUTER_KEY[COMPUTER_KEY_BY_MIDI[midi]] = Number(midi);
   });
+
+  // How far the keyboard can grow in either direction — 3 octaves
+  // below middle C to 3 above, plenty for a very wide window without
+  // generating an unplayably long row.
+  var MIN_MIDI = BASE_LOW_MIDI - 36;
+  var MAX_MIDI = BASE_HIGH_MIDI + 36;
+  // Matches the width the base 9-key range already rendered at before
+  // the keyboard could grow (flex:1 over ~450px of default window
+  // content) — so the default window size still shows exactly the
+  // base range, and only actually widening it adds more.
+  var MIN_WHITE_KEY_WIDTH = 48;
+
+  function isWhiteMidi(midi) {
+    return WHITE_PITCH_CLASSES.indexOf(((midi % 12) + 12) % 12) !== -1;
+  }
+
+  function noteNameFor(midi) {
+    return NOTE_NAMES[((midi % 12) + 12) % 12] + (Math.floor(midi / 12) - 1);
+  }
+
+  function freqFor(midi) {
+    return 440 * Math.pow(2, (midi - 69) / 12);
+  }
+
+  function noteFor(midi) {
+    return {
+      id: String(midi),
+      midi: midi,
+      key: COMPUTER_KEY_BY_MIDI[midi] || null,
+      name: noteNameFor(midi),
+      freq: freqFor(midi),
+      kind: isWhiteMidi(midi) ? "white" : "black",
+    };
+  }
+
+  // Stable base range, independent of whatever the on-screen keyboard
+  // currently shows — what ai-jam.js's riff generator plays from.
+  var BASE_NOTES = [];
+  for (var m = BASE_LOW_MIDI; m <= BASE_HIGH_MIDI; m++) BASE_NOTES.push(noteFor(m));
 
   var wave = "sawtooth";
   var cutoff = 2400;
@@ -46,15 +89,16 @@
   var releaseMs = 220;
   var peakGain = 0.32;
 
-  var activeVoices = {}; // key -> { osc, filter, gain }
-  var heldKeys = [];
+  var activeVoices = {}; // note id -> { osc, filter, gain }
+  var heldNotes = [];
   var arpEnabled = false;
   var arpIndex = 0;
   var keyboardEl = null; // the currently-rendered on-screen keyboard, if open
+  var notesById = {}; // only the currently-visible range — rebuilt on resize
 
-  function startVoice(key, isArpGate) {
-    var note = notesByKey[key];
-    if (!note || activeVoices[key]) return;
+  function startVoice(id, isArpGate) {
+    var note = notesById[id];
+    if (!note || activeVoices[id]) return;
     var ctx = window.ToneEngine.init();
 
     var osc = ctx.createOscillator();
@@ -76,20 +120,20 @@
     window.ToneEngine.connectToBus(gain);
     osc.start();
 
-    activeVoices[key] = { osc: osc, filter: filter, gain: gain };
+    activeVoices[id] = { osc: osc, filter: filter, gain: gain };
 
     if (isArpGate) {
       var stepSec = window.ToneSequencer ? window.ToneSequencer.stepSeconds() : 0.2;
       window.setTimeout(function () {
-        stopVoice(key);
+        stopVoice(id);
       }, stepSec * 800);
     }
   }
 
-  function stopVoice(key) {
-    var voice = activeVoices[key];
+  function stopVoice(id) {
+    var voice = activeVoices[id];
     if (!voice) return;
-    delete activeVoices[key];
+    delete activeVoices[id];
     var ctx = window.ToneEngine.context();
     var releaseSec = Math.max(releaseMs / 1000, 0.02);
     var now = ctx.currentTime;
@@ -103,35 +147,39 @@
     Object.keys(activeVoices).forEach(stopVoice);
   }
 
-  function findKeyEl(key) {
-    return keyboardEl ? keyboardEl.querySelector('.tone-key[data-key="' + key + '"]') : null;
+  function findKeyEl(id) {
+    return keyboardEl ? keyboardEl.querySelector('.tone-key[data-key="' + id + '"]') : null;
   }
 
-  function setPressedVisual(key, pressed) {
-    var el = findKeyEl(key);
+  function setPressedVisual(id, pressed) {
+    var el = findKeyEl(id);
     if (el) el.classList.toggle("tone-is-pressed", pressed);
   }
 
-  function noteOn(key) {
-    if (!notesByKey[key]) return;
-    if (heldKeys.indexOf(key) === -1) heldKeys.push(key);
-    setPressedVisual(key, true);
-    if (!arpEnabled) startVoice(key, false);
+  function noteOn(id) {
+    if (!notesById[id]) return;
+    if (heldNotes.indexOf(id) === -1) heldNotes.push(id);
+    setPressedVisual(id, true);
+    if (!arpEnabled) startVoice(id, false);
   }
 
-  function noteOff(key) {
-    var idx = heldKeys.indexOf(key);
-    if (idx !== -1) heldKeys.splice(idx, 1);
-    setPressedVisual(key, false);
-    if (!arpEnabled) stopVoice(key);
+  function noteOff(id) {
+    var idx = heldNotes.indexOf(id);
+    if (idx !== -1) heldNotes.splice(idx, 1);
+    setPressedVisual(id, false);
+    if (!arpEnabled) stopVoice(id);
+  }
+
+  function releaseAllHeld() {
+    heldNotes.slice().forEach(noteOff);
   }
 
   function advanceArp() {
-    if (!arpEnabled || !heldKeys.length) return;
+    if (!arpEnabled || !heldNotes.length) return;
     stopAllVoices();
-    var key = heldKeys[arpIndex % heldKeys.length];
+    var id = heldNotes[arpIndex % heldNotes.length];
     arpIndex++;
-    startVoice(key, true);
+    startVoice(id, true);
   }
 
   // Locks the arp to the same 16th-note grid the sequencer runs on —
@@ -158,8 +206,8 @@
     cutoff = hz;
     var ctx = window.ToneEngine.context();
     if (!ctx) return;
-    Object.keys(activeVoices).forEach(function (key) {
-      activeVoices[key].filter.frequency.setTargetAtTime(hz, ctx.currentTime, 0.01);
+    Object.keys(activeVoices).forEach(function (id) {
+      activeVoices[id].filter.frequency.setTargetAtTime(hz, ctx.currentTime, 0.01);
     });
   }
 
@@ -182,23 +230,24 @@
   document.addEventListener("keydown", function (e) {
     if (isTypingTarget(e.target) || e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
     var k = e.key.toLowerCase();
-    if (!notesByKey[k] || heldComputerKeys[k]) return;
+    var midi = MIDI_BY_COMPUTER_KEY[k];
+    if (midi == null || heldComputerKeys[k]) return;
     heldComputerKeys[k] = true;
-    noteOn(k);
+    noteOn(String(midi));
   });
 
   document.addEventListener("keyup", function (e) {
     var k = e.key.toLowerCase();
     if (!heldComputerKeys[k]) return;
     delete heldComputerKeys[k];
-    noteOff(k);
+    noteOff(String(MIDI_BY_COMPUTER_KEY[k]));
   });
 
   /* ---------- On-screen keyboard — click/tap, and glide across keys ---------- */
 
   var glideActive = false;
   var glidePointerId = null;
-  var glideKey = null;
+  var glideId = null;
 
   function keyAtPoint(x, y) {
     var el = document.elementFromPoint(x, y);
@@ -208,21 +257,106 @@
   document.addEventListener("pointermove", function (e) {
     if (!glideActive || e.pointerId !== glidePointerId) return;
     var el = keyAtPoint(e.clientX, e.clientY);
-    var newKey = el ? el.dataset.key : null;
-    if (newKey === glideKey) return;
-    if (glideKey) noteOff(glideKey);
-    glideKey = newKey;
-    if (glideKey) noteOn(glideKey);
+    var newId = el ? el.dataset.key : null;
+    if (newId === glideId) return;
+    if (glideId) noteOff(glideId);
+    glideId = newId;
+    if (glideId) noteOn(glideId);
   });
 
   function endGlide(e) {
     if (!glideActive || e.pointerId !== glidePointerId) return;
     glideActive = false;
-    if (glideKey) noteOff(glideKey);
-    glideKey = null;
+    if (glideId) noteOff(glideId);
+    glideId = null;
   }
   document.addEventListener("pointerup", endGlide);
   document.addEventListener("pointercancel", endGlide);
+
+  /* ---------- Width-dependent range ---------- */
+
+  function fullWhiteMidiList() {
+    var list = [];
+    for (var midi = MIN_MIDI; midi <= MAX_MIDI; midi++) {
+      if (isWhiteMidi(midi)) list.push(midi);
+    }
+    return list;
+  }
+
+  function clamp(v, lo, hi) {
+    return Math.max(lo, Math.min(hi, v));
+  }
+
+  // Centers the widened range on the computer-key-mapped anchor
+  // (BASE_LOW_MIDI-BASE_HIGH_MIDI) so that range is always present —
+  // extra width adds whole octaves on both sides, up to MIN_MIDI/
+  // MAX_MIDI.
+  function computeVisibleRange(containerWidth) {
+    var whiteList = fullWhiteMidiList();
+    var baseStartIdx = whiteList.indexOf(BASE_LOW_MIDI);
+    var baseEndIdx = whiteList.indexOf(BASE_HIGH_MIDI);
+    var baseCount = baseEndIdx - baseStartIdx + 1;
+
+    var visibleCount = clamp(Math.floor(containerWidth / MIN_WHITE_KEY_WIDTH), baseCount, whiteList.length);
+    var extra = visibleCount - baseCount;
+    var before = Math.floor(extra / 2);
+    var startIdx = clamp(baseStartIdx - before, 0, whiteList.length - visibleCount);
+    var endIdx = startIdx + visibleCount - 1;
+
+    return { lowMidi: whiteList[startIdx], highMidi: whiteList[endIdx] };
+  }
+
+  var lastRange = null;
+
+  function renderKeyboard(containerWidth) {
+    if (!keyboardEl) return;
+    var range = computeVisibleRange(containerWidth);
+    if (lastRange && lastRange.lowMidi === range.lowMidi && lastRange.highMidi === range.highMidi) return;
+    lastRange = range;
+
+    releaseAllHeld();
+    stopAllVoices();
+
+    var notes = [];
+    for (var midi = range.lowMidi; midi <= range.highMidi; midi++) notes.push(noteFor(midi));
+    notesById = {};
+    notes.forEach(function (n) {
+      notesById[n.id] = n;
+    });
+
+    var whiteNotes = notes.filter(function (n) { return n.kind === "white"; });
+
+    keyboardEl.innerHTML = "";
+    notes.forEach(function (note) {
+      var key = document.createElement("button");
+      key.type = "button";
+      key.className = "tone-key tone-key-" + note.kind;
+      key.dataset.key = note.id;
+      key.setAttribute("aria-label", "Play " + note.name);
+
+      var label = document.createElement("span");
+      label.className = "tone-key-label";
+      label.textContent = note.key ? note.key.toUpperCase() : note.name;
+      key.appendChild(label);
+
+      if (note.kind === "black") {
+        var whiteBefore = notes.slice(0, notes.indexOf(note)).filter(function (n) { return n.kind === "white"; }).length;
+        var leftPercent = (whiteBefore / whiteNotes.length) * 100;
+        key.style.left = "calc(" + leftPercent + "% - var(--tone-black-key-width) / 2)";
+      }
+
+      key.addEventListener("pointerdown", function (e) {
+        e.preventDefault();
+        window.ToneEngine.init();
+        glideActive = true;
+        glidePointerId = e.pointerId;
+        glideId = note.id;
+        noteOn(note.id);
+      });
+
+      keyboardEl.appendChild(key);
+    });
+  }
 
   function buildWindow(container) {
     var controls = document.createElement("div");
@@ -290,50 +424,32 @@
 
     keyboardEl = document.createElement("div");
     keyboardEl.className = "tone-keyboard";
-    var whiteNotes = NOTES.filter(function (n) { return n.kind === "white"; });
-
-    NOTES.forEach(function (note) {
-      var key = document.createElement("button");
-      key.type = "button";
-      key.className = "tone-key tone-key-" + note.kind;
-      key.dataset.key = note.key;
-      key.setAttribute("aria-label", "Play " + note.name);
-
-      var label = document.createElement("span");
-      label.className = "tone-key-label";
-      label.textContent = note.key.toUpperCase();
-      key.appendChild(label);
-
-      if (note.kind === "black") {
-        var whiteBefore = NOTES.slice(0, NOTES.indexOf(note)).filter(function (n) { return n.kind === "white"; }).length;
-        var leftPercent = (whiteBefore / whiteNotes.length) * 100;
-        key.style.left = "calc(" + leftPercent + "% - var(--tone-black-key-width) / 2)";
-      }
-
-      key.addEventListener("pointerdown", function (e) {
-        e.preventDefault();
-        window.ToneEngine.init();
-        glideActive = true;
-        glidePointerId = e.pointerId;
-        glideKey = note.key;
-        noteOn(note.key);
-      });
-
-      keyboardEl.appendChild(key);
-    });
 
     container.appendChild(controls);
     container.appendChild(keyboardEl);
 
+    lastRange = null;
+    renderKeyboard(container.clientWidth);
+
+    var resizeObserver = null;
+    if (window.ResizeObserver) {
+      resizeObserver = new ResizeObserver(function (entries) {
+        renderKeyboard(entries[0].contentRect.width);
+      });
+      resizeObserver.observe(container);
+    }
+
     return function cleanup() {
-      if (glideKey) noteOff(glideKey);
+      if (resizeObserver) resizeObserver.disconnect();
+      if (glideId) noteOff(glideId);
       glideActive = false;
       keyboardEl = null;
+      notesById = {};
     };
   }
 
   window.ToneSynth = {
-    notes: NOTES,
+    notes: BASE_NOTES,
     noteOn: noteOn,
     noteOff: noteOff,
     advanceArp: advanceArp,

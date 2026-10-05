@@ -22,7 +22,7 @@
     {
       id: "synth",
       name: "SYNTH",
-      description: "A subtractive synth voice (oscillator through a lowpass filter). Play it by clicking/dragging across the on-screen keyboard — holding down and sliding to another key glides the note across, no need to lift and re-press — or with the computer keyboard (A S D F G H J K L for white keys, W E T Y U for black), which works even while this window is closed. WAVE picks the oscillator shape; CUTOFF sweeps the filter live, even while a note is held; ATTACK/RELEASE shape the envelope. ARP arpeggiates every key currently held, locked to the sequencer's own clock.",
+      description: "A subtractive synth voice (oscillator through a lowpass filter). Play it by clicking/dragging across the on-screen keyboard — holding down and sliding to another key glides the note across, no need to lift and re-press — or with the computer keyboard (A S D F G H J K L for white keys, W E T Y U for black), which works even while this window is closed. Resize the window wider to reveal more octaves on either side; the computer-keyboard letters always stay pinned to the same middle range, and the extra keys show their note name instead of a letter since there's no key mapped to them. WAVE picks the oscillator shape; CUTOFF sweeps the filter live, even while a note is held; ATTACK/RELEASE shape the envelope. ARP arpeggiates every note currently held, locked to the sequencer's own clock.",
       defaultWidth: 480,
       defaultHeight: 340,
       build: function (container) { return window.ToneSynth.buildWindow(container); },

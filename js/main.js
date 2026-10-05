@@ -130,9 +130,9 @@
  * here — just the shared anchor-scroll/active-link behavior below.
  */
 (function () {
-  // In-page anchor links (Office/Archive/About) — scrolled to with JS
-  // instead of the browser's native anchor-jump so the URL stays plain
-  // (no #archive appended). scroll-margin-top on .section-placeholder
+  // In-page anchor links (Office/About) — scrolled to with JS instead
+  // of the browser's native anchor-jump so the URL stays plain (no
+  // #office appended). scroll-margin-top on .section-placeholder
   // already accounts for the fixed header, so scrollIntoView needs no
   // extra offset math.
   var anchorLinks = document.querySelectorAll(

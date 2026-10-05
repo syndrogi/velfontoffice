@@ -1,0 +1,499 @@
+/* ==========================================================================
+   TONE OFFICE — a playable step sequencer + synth.
+   Dark, flat, hairline-bordered — Teenage Engineering's exposed-grid
+   hardware language crossed with Ableton's dark session view. One
+   accent color, square corners, mono type throughout (same IBM Plex
+   Mono the rest of the site already loads). Semantic layer over
+   /css/tokens.css's shared primitives, like shop/style.css and
+   beta-office/css/base.css — this section just happens to be dark-
+   theme-first, so most of its own tokens are new literals rather than
+   primitives this site doesn't share elsewhere yet.
+   ========================================================================== */
+
+:root {
+  --tone-bg: #0a0a0a;
+  --tone-bg-raised: #141414;
+  --tone-fg: var(--color-white, #f5f5f5);
+  --tone-fg-muted: rgba(245, 245, 245, 0.6);
+  --tone-fg-faint: rgba(245, 245, 245, 0.32);
+  --tone-line: rgba(245, 245, 245, 0.14);
+  --tone-accent: #ff5a1f;
+  --tone-accent-dim: rgba(255, 90, 31, 0.28);
+  --tone-font: "IBM Plex Mono", ui-monospace, monospace;
+  --tone-ease: var(--ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
+  --tone-edge: 32px;
+  --tone-black-key-width: 34px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body.tone-office {
+  background: var(--tone-bg);
+  color: var(--tone-fg);
+  margin: 0;
+}
+
+body.tone-office {
+  font-family: var(--tone-font);
+  min-height: 100vh;
+}
+
+button,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* ==========================================================================
+   Topbar — same role as beta-office's: always-visible exit + context badge.
+   ========================================================================== */
+
+.tone-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px var(--tone-edge);
+  pointer-events: none;
+}
+
+.tone-exit {
+  pointer-events: auto;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 10px;
+  border: 1px solid var(--tone-line);
+  color: var(--tone-fg);
+  background: var(--tone-bg-raised);
+  transition: color 150ms var(--tone-ease), background-color 150ms var(--tone-ease), border-color 150ms var(--tone-ease);
+}
+
+.tone-exit:hover,
+.tone-exit:focus-visible {
+  border-color: var(--tone-accent);
+  color: var(--tone-accent);
+}
+
+.tone-badge {
+  pointer-events: none;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tone-fg-muted);
+  text-align: right;
+}
+
+/* ==========================================================================
+   Gate — audio can't start before a user gesture, so nothing plays
+   until this is dismissed. See js/app.js's enter().
+   ========================================================================== */
+
+.tone-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: var(--tone-bg);
+  transition: opacity 300ms var(--tone-ease);
+}
+
+.tone-gate.tone-is-gone {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tone-gate-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 28px;
+  border: 1px solid var(--tone-accent);
+  background: transparent;
+  color: var(--tone-fg);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 150ms var(--tone-ease), color 150ms var(--tone-ease);
+}
+
+.tone-gate-btn:hover,
+.tone-gate-btn:focus-visible {
+  background: var(--tone-accent);
+  color: var(--tone-bg);
+}
+
+.tone-gate-mark {
+  font-size: 11px;
+}
+
+.tone-gate-hint {
+  font-size: 11px;
+  color: var(--tone-fg-faint);
+  letter-spacing: 0.04em;
+}
+
+/* ==========================================================================
+   Rack — the main playable surface.
+   ========================================================================== */
+
+.tone-rack {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 96px var(--tone-edge) 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.tone-module {
+  border: 1px solid var(--tone-line);
+  background: var(--tone-bg-raised);
+  padding: 20px;
+}
+
+.tone-module-title {
+  margin: 0 0 16px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tone-fg-muted);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--tone-line);
+}
+
+/* ---------- Shared field/control styling ---------- */
+
+.tone-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 96px;
+}
+
+.tone-field label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tone-fg-faint);
+}
+
+.tone-field input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 3px;
+  background: var(--tone-line);
+  outline: none;
+}
+
+.tone-field input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  background: var(--tone-fg);
+  border: none;
+  cursor: pointer;
+  transition: background-color 150ms var(--tone-ease);
+}
+
+.tone-field input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 0;
+  background: var(--tone-fg);
+  border: none;
+  cursor: pointer;
+}
+
+.tone-field input[type="range"]:hover::-webkit-slider-thumb,
+.tone-field input[type="range"]:focus-visible::-webkit-slider-thumb {
+  background: var(--tone-accent);
+}
+
+.tone-field-value {
+  font-size: 11px;
+  color: var(--tone-fg-muted);
+}
+
+.tone-select {
+  border: 1px solid var(--tone-line);
+  background: var(--tone-bg);
+  color: var(--tone-fg);
+  padding: 7px 8px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ---------- Transport ---------- */
+
+.tone-transport {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.tone-play-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--tone-fg);
+  background: transparent;
+  padding: 10px 18px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  transition: background-color 150ms var(--tone-ease), color 150ms var(--tone-ease), border-color 150ms var(--tone-ease);
+}
+
+.tone-play-icon {
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 8px solid currentColor;
+}
+
+.tone-play-btn.tone-is-playing {
+  background: var(--tone-accent);
+  border-color: var(--tone-accent);
+  color: var(--tone-bg);
+}
+
+.tone-play-btn.tone-is-playing .tone-play-icon {
+  width: 8px;
+  height: 10px;
+  border: none;
+  background: currentColor;
+}
+
+.tone-tap-btn {
+  border: 1px solid var(--tone-line);
+  background: transparent;
+  padding: 8px 14px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: border-color 150ms var(--tone-ease), color 150ms var(--tone-ease);
+}
+
+.tone-tap-btn:hover,
+.tone-tap-btn:focus-visible {
+  border-color: var(--tone-accent);
+  color: var(--tone-accent);
+}
+
+.tone-field-bpm,
+.tone-field-volume {
+  min-width: 140px;
+}
+
+/* ---------- Sequencer ---------- */
+
+.tone-seq-tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tone-seq-track {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.tone-seq-track-label {
+  width: 56px;
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--tone-fg-muted);
+}
+
+.tone-seq-steps {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  gap: 4px;
+}
+
+.tone-seq-step {
+  aspect-ratio: 1;
+  border: 1px solid var(--tone-line);
+  background: var(--tone-bg);
+  cursor: pointer;
+  padding: 0;
+  transition: background-color 120ms var(--tone-ease), border-color 120ms var(--tone-ease);
+}
+
+.tone-seq-step.tone-is-beat {
+  border-color: rgba(245, 245, 245, 0.22);
+}
+
+.tone-seq-step.tone-is-active {
+  background: var(--tone-accent-dim);
+  border-color: var(--tone-accent);
+}
+
+.tone-seq-step.tone-is-playhead {
+  box-shadow: inset 0 0 0 2px var(--tone-fg);
+}
+
+.tone-seq-step.tone-is-active.tone-is-playhead {
+  background: var(--tone-accent);
+  box-shadow: inset 0 0 0 2px var(--tone-fg);
+}
+
+/* ---------- Synth ---------- */
+
+.tone-synth-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.tone-toggle-btn {
+  border: 1px solid var(--tone-line);
+  background: transparent;
+  padding: 9px 16px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  align-self: flex-end;
+  transition: background-color 150ms var(--tone-ease), border-color 150ms var(--tone-ease), color 150ms var(--tone-ease);
+}
+
+.tone-toggle-btn.tone-is-active {
+  background: var(--tone-accent);
+  border-color: var(--tone-accent);
+  color: var(--tone-bg);
+}
+
+.tone-keyboard {
+  position: relative;
+  display: flex;
+  height: 150px;
+  user-select: none;
+  touch-action: none;
+}
+
+.tone-key {
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 10px;
+  transition: background-color 80ms linear;
+}
+
+.tone-key-white {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  background: var(--tone-fg);
+  color: var(--tone-bg);
+  border-right: 1px solid var(--tone-bg);
+}
+
+.tone-key-white:last-child {
+  border-right: none;
+}
+
+.tone-key-black {
+  position: absolute;
+  top: 0;
+  z-index: 2;
+  width: var(--tone-black-key-width);
+  height: 60%;
+  background: var(--tone-bg);
+  color: var(--tone-fg);
+  border: 1px solid var(--tone-line);
+}
+
+.tone-key-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+
+.tone-key.tone-is-pressed {
+  background: var(--tone-accent);
+  color: var(--tone-bg);
+}
+
+/* ---------- FX ---------- */
+
+.tone-fx-controls {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 720px) {
+  :root {
+    --tone-edge: 18px;
+    --tone-black-key-width: 26px;
+  }
+
+  .tone-badge {
+    display: none;
+  }
+
+  .tone-rack {
+    padding-top: 80px;
+    gap: 16px;
+  }
+
+  .tone-seq-track-label {
+    width: 44px;
+    font-size: 9px;
+  }
+
+  .tone-seq-steps {
+    gap: 3px;
+  }
+
+  .tone-keyboard {
+    height: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tone-seq-steps {
+    grid-template-columns: repeat(16, minmax(0, 1fr));
+  }
+
+  .tone-seq-track-label {
+    width: 36px;
+  }
+}

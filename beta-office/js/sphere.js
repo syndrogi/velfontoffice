@@ -28,7 +28,7 @@
   var PRIMARY = [
     { label: "SHOP", href: "/shop/", meta: "Collections from VELFONT OFFICE." },
     { label: "OFFICE", href: "/#office", meta: "Internal structure, process, and the working methods behind VELFONT OFFICE." },
-    { label: "ARCHIVE", href: "/#archive", meta: "A growing record of collections, references, and research." },
+    { label: "TONE OFFICE", href: "/tone-office/", meta: "A playable step sequencer and synth, built with Web Audio." },
     { label: "ABOUT", href: "/#about", meta: "An incomplete documentation by Velcrogi." },
     { label: "CONTACT", href: "/", meta: "Reach VELFONT OFFICE." },
   ];

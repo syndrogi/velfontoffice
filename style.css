@@ -398,7 +398,7 @@ a {
 
 /* Mobile nav — a plain, always-visible bar directly under the fixed
    header (see the max-width: 768px rule below for its layout), not an
-   off-canvas drawer, so shop/office/archive/about/etc. are all on
+   off-canvas drawer, so shop/office/about/etc. are all on
    screen from first paint on mobile instead of behind a toggle. Hidden
    entirely above that breakpoint, where .main-nav/.more cover the same
    links inline in the header. */

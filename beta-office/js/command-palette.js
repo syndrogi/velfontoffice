@@ -16,7 +16,7 @@
     { label: "Toggle Grid", run: function () { window.BetaGrid && window.BetaGrid.toggle(); } },
     { label: "Invert Page", run: function () { window.BetaColor && window.BetaColor.invert(); } },
     { label: "Reset Experiments", run: function () { window.BetaApp && window.BetaApp.resetAll(); } },
-    { label: "Open Archive", run: function () { window.location.href = "/#archive"; } },
+    { label: "Open Tone Office", run: function () { window.location.href = "/tone-office/"; } },
     { label: "Go Home", run: function () { window.location.href = "/"; } },
     { label: "Randomize", run: function () { window.BetaApp && window.BetaApp.randomizeAll(); } },
     { label: "Close All Windows", run: function () { window.BetaWM && window.BetaWM.closeAll(); } },

@@ -41,6 +41,14 @@
     window.WorkstationGroups.resetAll();
     window.WorkstationTransport.setBpm(120);
     window.WorkstationTransport.setTimeSignature(4, 4);
+    // Every pad is silent on a brand new project — correct (no EP-133
+    // factory samples to fall back on), but pressing pad keys with
+    // nothing loaded anywhere is a confusing first impression. Auto-
+    // loading the generated (not sampled) demo kit into Group A only
+    // means pads 1-5 make sound immediately; B/C/D stay empty for the
+    // user's own sounds, same "don't fill every slot" balance the
+    // Sequencer module's starter pattern already strikes.
+    if (window.WorkstationSampler) window.WorkstationSampler.loadDemoKit("A");
     notify();
     return current;
   }

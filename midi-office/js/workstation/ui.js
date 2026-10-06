@@ -76,12 +76,21 @@
 
       '<div class="ws-mode-body" id="wsModeBody"></div>' +
 
+      '<div class="ws-row ws-project-row">' +
+        '<input type="text" class="ws-project-name" id="wsProjectName" placeholder="PROJECT NAME" maxlength="24">' +
+        '<button type="button" class="ws-mini" id="wsNewProject">NEW</button>' +
+        '<button type="button" class="ws-mini" id="wsSaveProject">SAVE</button>' +
+        '<select class="ws-select" id="wsProjectList"><option value="">LOAD PROJECT&hellip;</option></select>' +
+        '<button type="button" class="ws-mini" id="wsLoadProject">LOAD</button>' +
+        '<button type="button" class="ws-mini" id="wsDeleteProject">DELETE</button>' +
+        '<span class="ws-project-status" id="wsProjectStatus"></span>' +
+      '</div>' +
+
       '<div class="ws-row ws-footer-row">' +
         '<button type="button" class="ws-mini" id="wsMinus">MINUS</button>' +
         '<button type="button" class="ws-mini" id="wsPlus">PLUS</button>' +
         '<button type="button" class="ws-mini" id="wsLoadDemo">LOAD DEMO KIT</button>' +
         '<button type="button" class="ws-mini" id="wsCommit">COMMIT</button>' +
-        '<button type="button" class="ws-mini" id="wsSave">SAVE</button>' +
         '<span class="ws-hint">[Backquote]=FUNCTION &middot; 1-9 0 - = PADS &middot; Space=PLAY &middot; Enter=REC &middot; Shift/Backspace/Tab=modifiers &middot; Esc=PANIC</span>' +
       '</div>';
     return el;
@@ -344,9 +353,101 @@
       window.WorkstationProjects.commitScene();
       refreshDisplay();
     });
-    qs("#wsSave").addEventListener("click", function () {
-      window.WorkstationProjects.saveProject().catch(function () { /* surfaced via display if needed */ });
+  }
+
+  function setProjectStatus(text, isError) {
+    var el = qs("#wsProjectStatus");
+    if (!el) return;
+    el.textContent = text;
+    el.classList.toggle("ws-is-error", !!isError);
+    window.clearTimeout(setProjectStatus._t);
+    setProjectStatus._t = window.setTimeout(function () {
+      if (el) el.textContent = "";
+    }, 3000);
+  }
+
+  function refreshProjectList(selectId) {
+    var select = qs("#wsProjectList");
+    if (!select) return Promise.resolve();
+    if (!window.WorkstationStorage.isAvailable()) {
+      select.innerHTML = '<option value="">STORAGE UNAVAILABLE</option>';
+      select.disabled = true;
+      return Promise.resolve();
+    }
+    return window.WorkstationProjects.listProjects().then(function (projects) {
+      select.innerHTML = '<option value="">LOAD PROJECT&hellip;</option>';
+      projects.sort(function (a, b) { return (b.updatedAt || "").localeCompare(a.updatedAt || ""); });
+      projects.forEach(function (p) {
+        var opt = document.createElement("option");
+        opt.value = p.id;
+        opt.textContent = p.name + " (" + new Date(p.updatedAt).toLocaleString() + ")";
+        if (p.id === selectId) opt.selected = true;
+        select.appendChild(opt);
+      });
     });
+  }
+
+  function wireProjectControls() {
+    var nameInput = qs("#wsProjectName");
+    var current = window.WorkstationProjects.getCurrent();
+    if (current) nameInput.value = current.name;
+
+    nameInput.addEventListener("change", function () {
+      window.WorkstationProjects.rename(nameInput.value.trim() || "UNTITLED");
+      refreshDisplay();
+    });
+
+    qs("#wsNewProject").addEventListener("click", function () {
+      window.WorkstationProjects.newProject("UNTITLED");
+      nameInput.value = "UNTITLED";
+      refreshDisplay();
+      renderModeBody();
+      setProjectStatus("NEW PROJECT");
+    });
+
+    qs("#wsSaveProject").addEventListener("click", function () {
+      window.WorkstationProjects.saveProject().then(function (record) {
+        setProjectStatus("SAVED");
+        return refreshProjectList(record.id);
+      }).catch(function () {
+        setProjectStatus("SAVE FAILED — STORAGE UNAVAILABLE", true);
+      });
+    });
+
+    qs("#wsLoadProject").addEventListener("click", function () {
+      var select = qs("#wsProjectList");
+      var id = select.value;
+      if (!id) {
+        setProjectStatus("PICK A PROJECT FIRST", true);
+        return;
+      }
+      window.WorkstationProjects.loadProject(id).then(function (project) {
+        nameInput.value = project.name;
+        qs("#wsBpm").value = window.WorkstationTransport.getBpm();
+        refreshDisplay();
+        renderModeBody();
+        setProjectStatus("LOADED");
+      }).catch(function () {
+        setProjectStatus("LOAD FAILED", true);
+      });
+    });
+
+    qs("#wsDeleteProject").addEventListener("click", function () {
+      var select = qs("#wsProjectList");
+      var id = select.value;
+      if (!id) {
+        setProjectStatus("PICK A PROJECT FIRST", true);
+        return;
+      }
+      window.WorkstationProjects.deleteProject(id).then(function () {
+        setProjectStatus("DELETED");
+        return refreshProjectList();
+      }).catch(function () {
+        setProjectStatus("DELETE FAILED", true);
+      });
+    });
+
+    refreshProjectList();
   }
 
   function handleMinus() {
@@ -375,6 +476,7 @@
     buildModeButtons();
     buildPads();
     wireTransport();
+    wireProjectControls();
 
     window.WorkstationKeyboard.onPadVisual(flashPad);
     window.WorkstationKeyboard.onModeChange(function () {

@@ -1515,3 +1515,42 @@ html.js-enter .tone-topbar {
 .ws-fx-sc-targets .ws-field {
   gap: 4px;
 }
+
+/* ---- Project management (js/workstation/ui.js) ---- */
+
+.ws-project-row {
+  align-items: center;
+  border-top: 1px solid var(--tone-line);
+  border-bottom: 1px solid var(--tone-line);
+  padding: 10px 0;
+}
+
+.ws-project-name {
+  border: 1px solid var(--tone-line);
+  background: var(--tone-bg);
+  color: var(--tone-fg);
+  padding: 7px 9px;
+  font-size: 10px;
+  font-family: var(--tone-font);
+  min-width: 120px;
+}
+
+.ws-select {
+  border: 1px solid var(--tone-line);
+  background: var(--tone-bg);
+  color: var(--tone-fg);
+  padding: 7px 8px;
+  font-size: 10px;
+  max-width: 180px;
+}
+
+.ws-project-status {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--tone-fg-muted);
+}
+
+.ws-project-status.ws-is-error {
+  color: var(--tone-accent);
+}

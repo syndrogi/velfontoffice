@@ -91,7 +91,32 @@
         '<button type="button" class="ws-mini" id="wsPlus">PLUS</button>' +
         '<button type="button" class="ws-mini" id="wsLoadDemo">LOAD DEMO KIT</button>' +
         '<button type="button" class="ws-mini" id="wsCommit">COMMIT</button>' +
+        '<button type="button" class="ws-mini" id="wsKeysBtn" aria-haspopup="true" aria-expanded="false" aria-controls="wsKeymapOverlay">KEYS</button>' +
+        '<button type="button" class="ws-mini" id="wsManualBtn">MANUAL</button>' +
         '<span class="ws-hint">[Backquote]=FUNCTION &middot; 1-9 0 - = PADS &middot; Space=PLAY &middot; Enter=REC &middot; Shift/Backspace/Tab=modifiers &middot; Esc=PANIC</span>' +
+      '</div>' +
+
+      '<div class="ws-keymap-overlay" id="wsKeymapOverlay">' +
+        '<div class="ws-keymap-head">' +
+          '<span>KEYBOARD MAP</span>' +
+          '<button type="button" class="ws-keymap-close" id="wsKeymapClose" aria-label="Close">&times;</button>' +
+        '</div>' +
+        '<pre class="ws-keymap-diagram">[Backquote/~/₩] = FUNCTION\n\n' +
+          '[ 1 ][ 2 ][ 3 ][ 4 ][ 5 ][ 6 ][ 7 ][ 8 ][ 9 ][ 0 ][ - ][ = ]\n' +
+          '  P1   P2   P3   P4   P5   P6   P7   P8   P9  P10  P11  P12</pre>' +
+        '<div class="ws-keymap-rows">' +
+          '<div><kbd>FUNCTION</kbd>+<kbd>1-4</kbd><span>Group A-D</span></div>' +
+          '<div><kbd>FUNCTION</kbd>+<kbd>5-0</kbd><span>Sound / Keys / Sequencer / Sample / FX / Mixer mode</span></div>' +
+          '<div><kbd>FUNCTION</kbd>+<kbd>-</kbd> / <kbd>=</kbd><span>Previous / next mode</span></div>' +
+          '<div><kbd>Space</kbd><span>Play / Stop</span></div>' +
+          '<div><kbd>Enter</kbd><span>Arm / disarm record</span></div>' +
+          '<div><kbd>Shift</kbd><span>Secondary-function modifier (hold + pad)</span></div>' +
+          '<div><kbd>Backspace</kbd><span>Erase modifier (hold + pad)</span></div>' +
+          '<div><kbd>Tab</kbd><span>Note-repeat modifier (hold + pad)</span></div>' +
+          '<div><kbd>[</kbd> / <kbd>]</kbd><span>Minus / Plus (scroll, step cursor)</span></div>' +
+          '<div><kbd>Esc</kbd><span>Panic — stop every voice</span></div>' +
+        '</div>' +
+        '<p class="ws-keymap-note">The Synth module elsewhere in MIDI OFFICE has its own, separate computer-keyboard mapping (A S D F G H J K for white keys, W E T Y U for black, Z/X octave, C/V velocity). The two never conflict — disjoint physical keys, by design.</p>' +
       '</div>';
     return el;
   }
@@ -353,6 +378,20 @@
     qs("#wsCommit").addEventListener("click", function () {
       window.WorkstationProjects.commitScene();
       refreshDisplay();
+    });
+
+    var keysBtn = qs("#wsKeysBtn");
+    var keymapOverlay = qs("#wsKeymapOverlay");
+    keysBtn.addEventListener("click", function () {
+      var open = keymapOverlay.classList.toggle("ws-is-open");
+      keysBtn.setAttribute("aria-expanded", String(open));
+    });
+    qs("#wsKeymapClose").addEventListener("click", function () {
+      keymapOverlay.classList.remove("ws-is-open");
+      keysBtn.setAttribute("aria-expanded", "false");
+    });
+    qs("#wsManualBtn").addEventListener("click", function () {
+      window.open("/midi-office/manual/", "_blank", "noopener");
     });
   }
 

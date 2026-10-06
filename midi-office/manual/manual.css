@@ -1,0 +1,169 @@
+/* ==========================================================================
+   MIDI OFFICE Manual — a plain, readable reference page. Reuses every
+   --tone-* token from ../style.css (loaded first) so it feels like
+   part of MIDI OFFICE rather than a separate document.
+   ========================================================================== */
+
+body.manual-page {
+  display: block;
+}
+
+.manual-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 0;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-top: 72px;
+  min-height: 100vh;
+}
+
+.manual-toc {
+  position: sticky;
+  top: 72px;
+  align-self: start;
+  max-height: calc(100vh - 72px);
+  overflow-y: auto;
+  border-right: 1px solid var(--tone-line);
+  padding: 20px 16px;
+}
+
+.manual-toc-search {
+  width: 100%;
+  border: 1px solid var(--tone-line);
+  background: var(--tone-bg);
+  color: var(--tone-fg);
+  font-family: var(--tone-font);
+  font-size: 11px;
+  padding: 8px 9px;
+  margin-bottom: 14px;
+}
+
+.manual-toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.manual-toc-list li a {
+  display: block;
+  padding: 6px 8px;
+  font-size: 11px;
+  color: var(--tone-fg-muted);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+}
+
+.manual-toc-list li a:hover,
+.manual-toc-list li a:focus-visible {
+  color: var(--tone-fg);
+  border-left-color: var(--tone-accent);
+  background: var(--tone-bg-raised);
+}
+
+.manual-toc-list li.ws-is-hidden {
+  display: none;
+}
+
+.manual-content {
+  padding: 32px 48px 120px;
+  max-width: 720px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.manual-content h1 {
+  font-size: 22px;
+  margin: 0 0 8px;
+}
+
+.manual-content > .manual-intro {
+  color: var(--tone-fg-muted);
+  margin-bottom: 36px;
+  font-size: 13px;
+}
+
+.manual-content section {
+  margin-bottom: 44px;
+  scroll-margin-top: 84px;
+}
+
+.manual-content section h2 {
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--tone-line);
+}
+
+.manual-content section h3 {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tone-fg-muted);
+  margin: 18px 0 6px;
+}
+
+.manual-content section p {
+  margin: 0 0 10px;
+}
+
+.manual-content section ul,
+.manual-content section ol {
+  margin: 0 0 10px;
+  padding-left: 20px;
+}
+
+.manual-content section li {
+  margin-bottom: 4px;
+}
+
+.manual-content code,
+.manual-content kbd {
+  font-family: var(--tone-font);
+  font-size: 0.92em;
+  border: 1px solid var(--tone-line);
+  padding: 1px 5px;
+  background: var(--tone-bg-raised);
+}
+
+.manual-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 14px;
+  font-size: 12px;
+}
+
+.manual-content th,
+.manual-content td {
+  border: 1px solid var(--tone-line);
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.manual-content .manual-limitation {
+  border-left: 2px solid var(--tone-accent);
+  padding: 8px 12px;
+  background: var(--tone-bg-raised);
+  color: var(--tone-fg-muted);
+  font-size: 12px;
+}
+
+@media (max-width: 760px) {
+  .manual-layout {
+    grid-template-columns: 1fr;
+  }
+  .manual-toc {
+    position: static;
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid var(--tone-line);
+  }
+  .manual-content {
+    padding: 24px 20px 100px;
+  }
+}

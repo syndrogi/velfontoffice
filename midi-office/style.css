@@ -1554,3 +1554,93 @@ html.js-enter .tone-topbar {
 .ws-project-status.ws-is-error {
   color: var(--tone-accent);
 }
+
+/* ---- Keyboard-map overlay (js/workstation/ui.js) ---- */
+
+.ws-keymap-overlay {
+  display: none;
+  position: absolute;
+  top: 60px;
+  right: 14px;
+  z-index: 50;
+  width: min(360px, calc(100% - 28px));
+  max-height: 70%;
+  overflow-y: auto;
+  background: var(--tone-bg);
+  border: 1px solid var(--tone-fg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+  padding: 12px;
+  font-size: 11px;
+}
+
+.ws-keymap-overlay.ws-is-open {
+  display: block;
+}
+
+.ws-keymap-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--tone-line);
+}
+
+.ws-keymap-close {
+  border: 1px solid var(--tone-line);
+  background: var(--tone-bg);
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ws-keymap-diagram {
+  font-family: var(--tone-font);
+  font-size: 10px;
+  line-height: 1.6;
+  white-space: pre;
+  overflow-x: auto;
+  margin-bottom: 10px;
+  padding: 8px;
+  background: var(--tone-bg-raised);
+}
+
+.ws-keymap-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.ws-keymap-rows > div {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ws-keymap-rows kbd {
+  display: inline-block;
+  min-width: 1.4em;
+  padding: 1px 5px;
+  border: 1px solid var(--tone-fg-muted);
+  font-family: var(--tone-font);
+  font-size: 10px;
+  text-align: center;
+}
+
+.ws-keymap-rows span {
+  color: var(--tone-fg-muted);
+}
+
+.ws-keymap-note {
+  font-size: 10px;
+  color: var(--tone-fg-faint);
+  line-height: 1.5;
+  border-top: 1px solid var(--tone-line);
+  padding-top: 8px;
+}

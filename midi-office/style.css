@@ -1052,3 +1052,260 @@ html.js-enter .tone-topbar {
     max-width: calc(100vw - 24px);
   }
 }
+
+/* ==========================================================================
+   EP-133 Workstation — js/workstation/*.js. An original display/panel
+   language (not a copy of the EP-133's own screen/icon artwork):
+   monospace readout rows, flat hairline-bordered buttons/pads, same
+   --tone-* tokens the rest of MIDI OFFICE already uses.
+   ========================================================================== */
+
+.ws-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 11px;
+}
+
+.ws-display {
+  border: 1px solid var(--tone-fg);
+  background: var(--tone-bg-raised);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--tone-font);
+}
+
+.ws-display-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ws-dv {
+  color: var(--tone-fg-muted);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.ws-dv-big {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--tone-fg);
+}
+
+.ws-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.ws-btn {
+  border: 1px solid var(--tone-line);
+  background: var(--tone-bg);
+  padding: 7px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background-color 120ms var(--tone-ease), color 120ms var(--tone-ease), border-color 120ms var(--tone-ease);
+}
+
+.ws-btn:hover,
+.ws-btn:focus-visible {
+  border-color: var(--tone-accent);
+}
+
+.ws-btn.ws-is-active {
+  background: var(--tone-accent);
+  border-color: var(--tone-accent);
+  color: var(--tone-bg);
+}
+
+.ws-groups,
+.ws-modes {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.ws-transport {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ws-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--tone-fg-muted);
+}
+
+.ws-field input[type="range"] {
+  width: 90px;
+}
+
+.ws-field select {
+  border: 1px solid var(--tone-line);
+  background: var(--tone-bg);
+  color: var(--tone-fg);
+  font-size: 10px;
+  padding: 4px;
+}
+
+.ws-pads {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  flex: 1;
+  min-width: 220px;
+}
+
+.ws-pad {
+  aspect-ratio: 1;
+  border: 1px solid var(--tone-fg);
+  background: var(--tone-bg);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 80ms linear, color 80ms linear;
+}
+
+.ws-pad.ws-is-active {
+  background: var(--tone-accent);
+  border-color: var(--tone-accent);
+  color: var(--tone-bg);
+}
+
+.ws-knobs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 140px;
+}
+
+.ws-mode-body {
+  border: 1px solid var(--tone-line);
+  padding: 10px;
+  min-height: 80px;
+}
+
+.ws-hint-block {
+  font-size: 11px;
+  color: var(--tone-fg-faint);
+}
+
+.ws-footer-row {
+  align-items: center;
+}
+
+.ws-mini {
+  border: 1px solid var(--tone-line);
+  background: var(--tone-bg);
+  padding: 6px 10px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.ws-mini.ws-is-active {
+  background: var(--tone-accent);
+  border-color: var(--tone-accent);
+  color: var(--tone-bg);
+}
+
+.ws-mini:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ws-hint {
+  font-size: 9px;
+  color: var(--tone-fg-faint);
+  letter-spacing: 0.02em;
+}
+
+.ws-seq-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ws-seq-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ws-seq-row-label {
+  width: 18px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--tone-fg-muted);
+  flex-shrink: 0;
+}
+
+.ws-seq-steps {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  gap: 2px;
+}
+
+.ws-seq-step {
+  aspect-ratio: 1;
+  border: 1px solid var(--tone-line);
+  background: var(--tone-bg);
+  cursor: pointer;
+  padding: 0;
+}
+
+.ws-seq-step.ws-is-beat {
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+.ws-seq-step.ws-is-on {
+  background: var(--tone-accent-dim);
+  border-color: var(--tone-accent);
+}
+
+.ws-seq-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.ws-sound-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ws-waveform {
+  width: 100%;
+  height: 60px;
+  border: 1px solid var(--tone-line);
+  background: var(--tone-bg);
+}
+
+.ws-editor-fields {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+  .ws-pads {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

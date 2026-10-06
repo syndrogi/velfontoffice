@@ -83,6 +83,30 @@
 <script src="js/dj.js" defer></script>
 <script src="js/ai-jam.js" defer></script>
 <script src="js/recorder.js" defer></script>
+
+<!-- EP-133 Workstation — see js/workstation/. Loaded in dependency
+     order: storage has none; audio-engine depends on the existing
+     js/audio-engine.js above; patterns/groups are pure data; projects
+     ties storage+groups+patterns together; transport reads patterns'
+     TICKS_PER_QUARTER at load time so it must come after; sequencer
+     reads transport+patterns+groups at load time so it's last of the
+     core; sampler/keyboard/ui/app only touch the others inside
+     function bodies, so their relative order is flexible. -->
+<script src="js/workstation/storage.js" defer></script>
+<script src="js/workstation/audio-engine.js" defer></script>
+<script src="js/workstation/patterns.js" defer></script>
+<script src="js/workstation/groups.js" defer></script>
+<script src="js/workstation/projects.js" defer></script>
+<script src="js/workstation/transport.js" defer></script>
+<script src="js/workstation/sequencer.js" defer></script>
+<script src="js/workstation/sampler.js" defer></script>
+<script src="js/workstation/keyboard.js" defer></script>
+<!-- sound-editor.js / effects.js / mixer.js / keys-mode.js / midi.js
+     land next — ui.js already guards for their absence (falls back
+     to a plain mode label) so the kernel is testable without them. -->
+<script src="js/workstation/ui.js" defer></script>
+<script src="js/workstation/app.js" defer></script>
+
 <script src="js/modules.js" defer></script>
 <script src="js/help.js" defer></script>
 <script src="js/app.js" defer></script>

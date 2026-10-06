@@ -67,5 +67,13 @@
       defaultHeight: 300,
       build: function (container) { return window.ToneRecorder.buildWindow(container); },
     },
+    {
+      id: "workstation",
+      name: "EP-133 WORKSTATION",
+      description: "A groovebox inspired by Teenage Engineering's EP-133 K.O. II workflow — 4 independent groups (A-D), each with 12 sound pads, its own patterns, mute groups, and fader. Play pads 1-9 0 - = on your keyboard; hold Backquote (the key left of 1) as FUNCTION for FUNCTION+1-4 (groups), FUNCTION+5-0 (modes: sound/keys/sequencer/sample/fx/mixer), FUNCTION+-/= (previous/next mode). Space plays/stops, Enter arms record, Shift/Backspace/Tab are secondary modifiers, Esc is panic (stops every sounding voice). Load your own samples or generate a demo kit, sequence a real multi-group pattern with live or step recording, edit each sound's trim/pitch/pan/envelope, run it through delay/reverb/distortion/chorus/filter/compressor plus punch-in performance FX and sidechain ducking, play melodically in Keys mode, and save the whole project to this browser via IndexedDB. See the MANUAL (HELP panel) for the full keyboard map and every mode's controls.",
+      defaultWidth: 720,
+      defaultHeight: 640,
+      build: function (container) { return window.Workstation.buildWindow(container); },
+    },
   ];
 })();

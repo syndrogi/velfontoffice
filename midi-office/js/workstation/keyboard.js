@@ -71,6 +71,10 @@
 
   function onModeChange(fn) {
     modeListeners.push(fn);
+    return function off() {
+      var idx = modeListeners.indexOf(fn);
+      if (idx !== -1) modeListeners.splice(idx, 1);
+    };
   }
 
   function getMode() {
@@ -79,6 +83,10 @@
 
   function onPadVisual(fn) {
     padVisualListeners.push(fn);
+    return function off() {
+      var idx = padVisualListeners.indexOf(fn);
+      if (idx !== -1) padVisualListeners.splice(idx, 1);
+    };
   }
 
   function flashPad(padIndex, active) {

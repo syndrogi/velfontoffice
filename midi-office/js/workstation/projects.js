@@ -19,6 +19,10 @@
 
   function onChange(fn) {
     changeListeners.push(fn);
+    return function off() {
+      var idx = changeListeners.indexOf(fn);
+      if (idx !== -1) changeListeners.splice(idx, 1);
+    };
   }
 
   function notify() {

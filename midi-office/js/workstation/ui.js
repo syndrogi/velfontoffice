@@ -165,6 +165,7 @@
   }
 
   function refreshDisplay() {
+    if (!root) return; // window closed since this refresh was scheduled
     var transportState = window.WorkstationTransport.getState();
     var project = window.WorkstationProjects.getCurrent();
     var letter = window.WorkstationGroups.getActiveLetter();
@@ -478,18 +479,29 @@
     wireTransport();
     wireProjectControls();
 
-    window.WorkstationKeyboard.onPadVisual(flashPad);
-    window.WorkstationKeyboard.onModeChange(function () {
-      refreshDisplay();
-      renderModeBody();
-    });
-    window.WorkstationGroups.onChange(function () {
-      refreshDisplay();
-      renderModeBody();
-    });
-    window.WorkstationTransport.onStateChange(scheduleRefresh);
-    window.WorkstationSequencer.onStep(scheduleRefresh);
-    window.WorkstationProjects.onChange(refreshDisplay);
+    // Every one of these returns an unregister function — this window
+    // can be closed and reopened arbitrarily many times (window-
+    // manager.js calls buildWindow() fresh on each open), so each
+    // registration from a PREVIOUS open must be torn down in cleanup()
+    // below or they stack: N opens means N copies of refreshDisplay()
+    // firing on every single state change, each one trying to touch
+    // whichever `root`/`modeBodyEl` was current *at registration time*
+    // — including ones already nulled out by an earlier cleanup(),
+    // which throws trying to query a null root.
+    var unsubs = [
+      window.WorkstationKeyboard.onPadVisual(flashPad),
+      window.WorkstationKeyboard.onModeChange(function () {
+        refreshDisplay();
+        renderModeBody();
+      }),
+      window.WorkstationGroups.onChange(function () {
+        refreshDisplay();
+        renderModeBody();
+      }),
+      window.WorkstationTransport.onStateChange(scheduleRefresh),
+      window.WorkstationSequencer.onStep(scheduleRefresh),
+      window.WorkstationProjects.onChange(refreshDisplay),
+    ];
 
     if (!window.WorkstationProjects.getCurrent()) {
       window.WorkstationProjects.newProject("UNTITLED");
@@ -498,6 +510,9 @@
     renderModeBody();
 
     return function cleanup() {
+      unsubs.forEach(function (off) {
+        if (typeof off === "function") off();
+      });
       root = null;
       modeBodyEl = null;
       padEls = [];

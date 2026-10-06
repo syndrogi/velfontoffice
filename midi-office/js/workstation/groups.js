@@ -30,6 +30,10 @@
 
   function onChange(fn) {
     listeners.push(fn);
+    return function off() {
+      var idx = listeners.indexOf(fn);
+      if (idx !== -1) listeners.splice(idx, 1);
+    };
   }
 
   function notify() {

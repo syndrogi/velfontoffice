@@ -63,6 +63,10 @@
 
   function onStep(fn) {
     stepListeners.push(fn);
+    return function off() {
+      var idx = stepListeners.indexOf(fn);
+      if (idx !== -1) stepListeners.splice(idx, 1);
+    };
   }
 
   function notifyStep(tick) {

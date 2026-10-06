@@ -66,6 +66,10 @@
 
   function onStateChange(fn) {
     stateListeners.push(fn);
+    return function off() {
+      var idx = stateListeners.indexOf(fn);
+      if (idx !== -1) stateListeners.splice(idx, 1);
+    };
   }
 
   function notifyState() {

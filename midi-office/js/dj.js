@@ -1,5 +1,5 @@
 /**
- * TONE OFFICE — DJ Decks
+ * MIDI OFFICE — DJ Decks
  * Two independent decks, each loading its own audio file (nothing
  * uploads anywhere), looping once played, with its own speed control —
  * mixed together with a single crossfader. No beat-matching or

@@ -1,5 +1,5 @@
 /**
- * TONE OFFICE — AI Jam
+ * MIDI OFFICE — AI Jam
  * Not a real AI model — there's no backend here to call one, and
  * claiming otherwise would just be a fabricated feature. It's weighted
  * randomness plus a few music-theory rules: "generate beat" reshuffles

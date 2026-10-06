@@ -1,5 +1,5 @@
 /**
- * TONE OFFICE — Module Registry
+ * MIDI OFFICE — Module Registry
  * One entry per window the dock (app.js) and the Help panel (help.js)
  * both read from — single source of truth, so a new module only needs
  * one entry here to show up in both places automatically.

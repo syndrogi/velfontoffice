@@ -1,5 +1,5 @@
 /**
- * TONE OFFICE — Sampler
+ * MIDI OFFICE — Sampler
  * Load an audio file from your own computer (nothing uploads anywhere
  * — see audio-engine.js's decodeFile), chop it into equal slices, and
  * either tap pads to play a slice directly or lay slices out on a

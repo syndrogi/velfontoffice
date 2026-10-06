@@ -1,5 +1,5 @@
 /**
- * TONE OFFICE — Bootstrap
+ * MIDI OFFICE — Bootstrap
  * Builds the dock from js/modules.js and wires the shared transport.
  * No "tap to enter" gate — every module already calls
  * window.ToneEngine.init() defensively the moment it's actually used

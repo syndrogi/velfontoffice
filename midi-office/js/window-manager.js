@@ -1,5 +1,5 @@
 /**
- * TONE OFFICE — Window Manager
+ * MIDI OFFICE — Window Manager
  * Same small-floating-windows feel as beta-office: drag, resize,
  * minimize to a taskbar chip, maximize, close. Unlike beta-office,
  * every module here is small (7, not 99) and already loaded eagerly —

@@ -1,5 +1,5 @@
 /**
- * TONE OFFICE — Sequencer
+ * MIDI OFFICE — Sequencer
  * A 4-track, 16-step drum machine. Every sound is synthesized live with
  * Web Audio primitives (oscillators + filtered noise) — no sample files
  * to fetch or license.

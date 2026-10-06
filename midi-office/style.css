@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TONE OFFICE — a playable studio in small draggable windows.
+   MIDI OFFICE — a playable studio in small draggable windows.
    White, flat, hairline-bordered — beta-office's own window language
    (see ../beta-office/css/shell.css for the sibling version of this
    chrome), same IBM Plex Mono, same --color-accent-red hover accent
@@ -27,13 +27,13 @@
 }
 
 html,
-body.tone-office {
+body.midi-office {
   background: var(--tone-bg);
   color: var(--tone-fg);
   margin: 0;
 }
 
-body.tone-office {
+body.midi-office {
   font-family: var(--tone-font);
   min-height: 100vh;
 }

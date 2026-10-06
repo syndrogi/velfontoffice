@@ -1,5 +1,5 @@
 /**
- * TONE OFFICE — Delay
+ * MIDI OFFICE — Delay
  * The UI for the one shared effect send every synth note already
  * passes through (see audio-engine.js's delay bus) — this window just
  * exposes its three knobs. Drum hits, sampler pads, and DJ decks skip

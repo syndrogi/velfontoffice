@@ -1,5 +1,5 @@
 /**
- * TONE OFFICE — Help
+ * MIDI OFFICE — Help
  * A searchable reference reading straight from js/modules.js — the
  * same list the dock buttons build from — so a new module shows up
  * here automatically the moment it's added there. Clicking an entry

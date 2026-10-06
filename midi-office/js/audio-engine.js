@@ -1,5 +1,5 @@
 /**
- * TONE OFFICE — Audio Engine
+ * MIDI OFFICE — Audio Engine
  * One shared AudioContext and effect bus every module routes through,
  * instead of each building its own graph. Nothing in here makes sound
  * by itself — it's wiring other modules connect to.

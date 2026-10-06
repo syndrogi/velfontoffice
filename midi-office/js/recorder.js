@@ -1,5 +1,5 @@
 /**
- * TONE OFFICE — Recorder
+ * MIDI OFFICE — Recorder
  * Captures the master bus (audio-engine.js's getRecorderStream — a tap
  * on the exact signal sent to the speakers, post-volume) via
  * MediaRecorder, and offers each take back as a downloadable file.
@@ -83,7 +83,7 @@
       var url = URL.createObjectURL(blob);
       takes.unshift({
         url: url,
-        name: "tone-office-take-" + (takes.length + 1),
+        name: "midi-office-take-" + (takes.length + 1),
         extension: "." + (type.indexOf("ogg") !== -1 ? "ogg" : type.indexOf("mp4") !== -1 ? "m4a" : "webm"),
       });
       renderTakes();

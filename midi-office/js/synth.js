@@ -1,5 +1,5 @@
 /**
- * TONE OFFICE — Synth
+ * MIDI OFFICE — Synth
  * A simple subtractive voice (oscillator -> lowpass filter -> AR
  * envelope) with one voice per held note, routed through audio-
  * engine.js's shared delay bus.

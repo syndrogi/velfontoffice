@@ -63,7 +63,1369 @@
   </nav>
 
   <main class="manual-content" id="manualContent">
-    <!-- Filled in from the generated manual sections. -->
+<p class="manual-intro">An original VELFONT OFFICE reference for MIDI OFFICE's EP-133 Workstation module — not a copy of any Teenage Engineering manual. Every section describes what is actually implemented in this codebase today, including the gaps.</p>
+
+    <section id="quick-start">
+<h2>Quick Start</h2>
+<ol>
+<li>Open MIDI OFFICE</li>
+<li>Open the EP-133 WORKSTATION window from the dock</li>
+<li>A demo kit auto-loads into Group A so pads 1-5 already make sound</li>
+<li>Press pads 1-9 0 - = to play</li>
+<li>FUNCTION+1-4 to switch groups, load your own sounds via SOUND mode</li>
+<li>Set BPM with the transport slider or TAP</li>
+<li>Press Space to play, Enter to arm record, then hit pads live or step-record</li>
+<li>FUNCTION+9 for FX, FUNCTION+6 for Keys mode</li>
+<li>Edit sounds in SOUND mode (trim/pitch/pan/envelope/chop)</li>
+<li>Save the project with the SAVE button (persists via IndexedDB)</li>
+</ol>
+<p><em>Note on step 9: trim, pan, play mode, attack/release, and chop are all genuinely editable controls in SOUND mode today. Pitch is not — <code>sound.pitch</code> exists in the data model and does affect playback, but no slider currently sets it, so it stays at its default for every sound (see 04 PADS, LIMITATIONS).</em></p>
+</section>
+
+<section id="01-introduction">
+<h2>01 Introduction</h2>
+<h3>WHAT IT DOES</h3>
+<p>MIDI OFFICE Workstation — labeled "EP-133 WORKSTATION" on the MIDI OFFICE dock — is an original VELFONT OFFICE instrument, built entirely on the Web Audio API (<code>js/workstation/audio-engine.js</code>, layered on the page's shared <code>window.ToneEngine</code> context). Its interaction model is explicitly inspired by Teenage Engineering's EP-133 K.O. II workflow: four pad groups (A–D), six operating modes, a FUNCTION-key modifier that turns the twelve sound pads into a number pad for picking a group or mode, and EP-133-style vocabulary like PANIC, MUTE GROUP, and CHOP. None of that is hidden — it's credited here and in the module's own description in <code>js/modules.js</code>.</p>
+<p>What this module is <em>not</em>: a copy of the EP-133's physical or visual design, and not a container for any of its factory sounds. Every sound you can hear out of this instrument is either synthesized on the fly in the browser (the five-voice demo kit — see <code>sampler.js</code>'s <code>renderDemo()</code>) or loaded from your own audio files or microphone. The signal path, voice allocation, effects, and persistence are this codebase's own implementation from the ground up.</p>
+<h3>HOW TO USE IT</h3>
+<p>Open the "EP-133 WORKSTATION" window from the MIDI OFFICE dock. It behaves like every other MIDI OFFICE module window (<code>js/window-manager.js</code>): draggable, closable, reopenable at will. The first time its window opens with no project loaded, <code>ui.js</code> creates a new untitled project automatically so the panel is never shown empty.</p>
+<h3>LIMITATIONS</h3>
+<p>Because this is a ground-up implementation rather than a port, a few EP-133-inspired concepts are present in the data model or UI copy but not fully wired to audio yet (for example, a sound's TIME MODE/VALUE fields are deliberately "stored only" — see <code>sound-editor.js</code>'s own file-level comment). Where that's true, the relevant section below says so plainly rather than implying feature parity with the hardware.</p>
+</section>
+
+<section id="02-interface">
+<h2>02 Interface</h2>
+<h3>WHAT IT DOES</h3>
+<p>The whole instrument is one panel (<code>.ws-panel</code>, built by <code>buildPanel()</code> in <code>ui.js</code>), stacked top to bottom: a text display readout, group/mode selector buttons, a transport row, the 12-pad grid plus three knobs, a mode-specific body area, a project row, and a footer row of utility buttons.</p>
+<h3>HOW TO USE IT</h3>
+<ul>
+<li><strong>Display readout</strong> (<code>#wsDisplay</code>, three rows): the top row shows PROJECT name, BPM (one decimal), the time signature, and MIDI connection status (<code>WorkstationMidi.getStatusText()</code>). The main row shows the current MODE (uppercase), the active GROUP letter, the transport's BAR.STEP position (e.g. "1.1"), and the selected PAD number (or "PAD —" if none is selected). The bottom row shows PARAM, VALUE, the PLAY/STOP state, the REC ON/OFF state, and an FX status string.</li>
+<li><strong>Group buttons</strong> (<code>#wsGroups</code>): four buttons, GROUP A–D. Clicking one calls <code>WorkstationGroups.setActiveLetter()</code> — the same call FUNCTION+1-4 makes from the keyboard (see 03).</li>
+<li><strong>Mode buttons</strong> (<code>#wsModes</code>): six buttons, one per mode — SOUND, KEYS, SEQUENCER, SAMPLE, FX, MIXER — each calling <code>WorkstationKeyboard.setMode()</code>.</li>
+<li><strong>Transport row</strong>: PLAY (toggles play/stop), REC (toggles record arm), TAP (tap-tempo, writes the computed BPM back into the BPM field), a BPM slider (40–240), and a MET select (OFF/ON/REC). This is the Workstation's <em>own</em> clock (<code>workstation/transport.js</code>) — separate from the page-level shared transport at the top of <code>index.html</code>.</li>
+<li><strong>12-pad grid</strong> (<code>#wsPads</code>): see 04 PADS.</li>
+<li><strong>Knobs</strong>: FADER (0–100) is wired to <code>WorkstationGroups.setFader()</code> for the active group — moving it changes that group's own output level. X and Y are present as range inputs but currently have no event listeners attached anywhere in the codebase; moving them has no audible or visible effect yet.</li>
+<li><strong>Mode-body area</strong> (<code>#wsModeBody</code>): re-rendered on every mode/group/pad change. SOUND, FX, MIXER, and KEYS modes each mount their own dedicated editor (<code>sound-editor.js</code>, <code>effects.js</code>, <code>mixer.js</code>, <code>keys-mode.js</code>); SEQUENCER mode renders an inline 12-lane step grid built directly in <code>ui.js</code>. SAMPLE mode currently falls back to the generic "SAMPLE mode — select a pad to edit." placeholder here — the actual hold-a-pad-to-record-from-mic behavior works through the pads themselves (<code>padDown</code>/<code>padUp</code> in <code>keyboard.js</code>), it just has no dedicated visual panel in the mode body yet.</li>
+<li><strong>Project row</strong>: a project-name text field, NEW, SAVE, a LOAD-PROJECT <code>&lt;select&gt;</code> populated from IndexedDB, LOAD, and DELETE, plus a status span that shows transient messages ("SAVED", "LOADED", etc.) for a few seconds.</li>
+</ul>
+<h3>LIMITATIONS</h3>
+<ul>
+<li>The PARAM and VALUE readout cells are never updated by any module — <code>refreshDisplay()</code> sets every other display field but has no <code>setDv("param", …)</code> or <code>setDv("value", …)</code> call anywhere. They stay at their initial placeholder text ("—") no matter what you do.</li>
+<li>The X and Y knobs are visually present but functionally inert — there is currently no code path that reads their value.</li>
+<li>SAMPLE mode has no dedicated mode-body UI (no waveform/record indicator), unlike every other mode.</li>
+</ul>
+</section>
+
+<section id="03-keyboard-map">
+<h2>03 Keyboard Map</h2>
+<h3>WHAT IT DOES</h3>
+<p>The computer keyboard is the primary controller for the Workstation. <code>keyboard.js</code> registers one global <code>keydown</code>/<code>keyup</code> listener pair on <code>document</code>, active the whole time the page is open (not just while the Workstation window has focus), and matches every binding on <code>KeyboardEvent.code</code> — the physical key position — rather than <code>.key</code>, the character the current layout would actually type. That's a deliberate choice: the key physically to the left of "1" reports <code>code: "Backquote"</code> whether a US layout prints a backtick there, a Korean layout prints ₩, or any other layout prints something else entirely. Binding FUNCTION to that code means it resolves to the same physical key everywhere, with no per-layout configuration needed.</p>
+<h3>HOW TO USE IT</h3>
+<p>Three modifier keys are tracked as simple held/released booleans (set <code>true</code> on <code>keydown</code>, <code>false</code> on <code>keyup</code>): Shift, Backspace, and Tab. FUNCTION (Backquote) is tracked the same way. Holding any combination of these changes what a pad press does; releasing them returns to default pad behavior. All of this is suspended while focus is inside a text input, <code>&lt;select&gt;</code>, <code>&lt;textarea&gt;</code>, or any <code>contenteditable</code> element, and while Cmd/Ctrl/Alt is held — so typing a project name never also triggers pads.</p>
+<h3>KEYBOARD COMMANDS</h3>
+<table>
+<thead>
+<tr>
+<th>Key (by <code>code</code>)</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Digit1</code>…<code>Digit9</code>, <code>Digit0</code>, <code>Minus</code>, <code>Equal</code></td>
+<td>Pads 1–12 (bare press) — see 04 PADS</td>
+</tr>
+<tr>
+<td><code>Backquote</code> (physical key left of "1") held</td>
+<td>FUNCTION modifier</td>
+</tr>
+<tr>
+<td>FUNCTION + <code>Digit1</code>–<code>Digit4</code></td>
+<td>Switch active group to A / B / C / D</td>
+</tr>
+<tr>
+<td>FUNCTION + <code>Digit5</code>,<code>6</code>,<code>7</code>,<code>8</code>,<code>9</code>,<code>0</code></td>
+<td>Switch mode to SOUND / KEYS / SEQUENCER / SAMPLE / FX / MIXER (in that order)</td>
+</tr>
+<tr>
+<td>FUNCTION + <code>Minus</code></td>
+<td>Previous mode (cycles)</td>
+</tr>
+<tr>
+<td>FUNCTION + <code>Equal</code></td>
+<td>Next mode (cycles)</td>
+</tr>
+<tr>
+<td><code>Space</code></td>
+<td>Toggle play/stop</td>
+</tr>
+<tr>
+<td><code>Enter</code></td>
+<td>Toggle record arm</td>
+</tr>
+<tr>
+<td>Real <code>Shift</code> (<code>ShiftLeft</code>/<code>ShiftRight</code>) held</td>
+<td>Secondary-function modifier: in SEQUENCER mode, Shift+pad marks that pad as the nudge target for the next <code>[</code>/<code>]</code> press; Shift+pad while note-repeat (<code>Tab</code>) is also held latches that pad's repeat so it keeps firing after release</td>
+</tr>
+<tr>
+<td><code>Backspace</code> held</td>
+<td>Erase modifier: pad press erases that pad's events — its whole lane in the active pattern while playing (one-level undo is pushed first), or just the event at the step cursor while stopped</td>
+</tr>
+<tr>
+<td><code>Tab</code> held</td>
+<td>Note-repeat modifier — <strong>stands in for the EP-133's own physical TIMING button</strong>; Tab+pad retriggers that pad at the current timing interval for as long as both are held, auto-starting playback if it wasn't running</td>
+</tr>
+<tr>
+<td><code>BracketLeft</code></td>
+<td>MINUS — nudges a Shift-selected pad's notes back a step (SEQUENCER), or moves the step-record cursor back (SEQUENCER, stopped), or falls through to the panel's own MINUS button (currently only acts in SOUND mode, cycling the selected pad)</td>
+</tr>
+<tr>
+<td><code>BracketRight</code></td>
+<td>PLUS — the same three cases, forward/next</td>
+</tr>
+<tr>
+<td><code>Escape</code></td>
+<td>Panic / all-notes-off</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Minus/Equal vs. <code>[</code>/<code>]</code> — not a bug.</strong> FUNCTION+<code>Minus</code>/FUNCTION+<code>Equal</code> (previous/next <em>mode</em>) and <code>BracketLeft</code>/<code>BracketRight</code> (MINUS/PLUS — the EP-133's own scroll/increment concept) are two entirely different physical keys that both happen to express a "previous/next" idea. They do different things and don't overlap; this is intentional, not a mapping error.</p>
+<p><strong>Escape is handled outside this file.</strong> <code>keyboard.js</code> itself does nothing special with <code>Escape</code> — panic is wired as a completely separate <code>keydown</code> listener inside <code>audio-engine.js</code>, matched on <code>e.key === "Escape"</code>, which immediately stops every currently-registered voice across all four groups and resets sidechain-duck state. It fires unconditionally, regardless of FUNCTION/Shift/erase state.</p>
+<p><strong>This module and the Synth module's keyboard performance mode are completely disjoint — by construction, not by accident.</strong> <code>js/synth.js</code> registers its own global keyboard listener for its own "computer MIDI keyboard" performance mode: <code>A S D F G H J K</code> (white keys), <code>W E T Y U</code> (black keys), <code>Z</code>/<code>X</code> (octave down/up), <code>C</code>/<code>V</code> (velocity down/up). None of those keys appear anywhere in this module's table above. Both listeners run at all times, and both are always "live" regardless of which window is open or focused — so you can play the Synth and trigger Workstation pads at the same moment without either module stealing the other's input.</p>
+<h3>RELATED PARAMETERS</h3>
+<ul>
+<li><code>velocityFromKeydown()</code> always returns <code>1</code> — see 04 PADS for why.</li>
+<li>A <code>heldPads</code> map guards against the OS repeating a <code>keydown</code> event while a key stays physically down, so a held pad key doesn't re-trigger the sound every few milliseconds.</li>
+</ul>
+<h3>LIMITATIONS</h3>
+<ul>
+<li>While FUNCTION is held, <code>Space</code>, <code>Enter</code>, and <code>BracketLeft</code>/<code>BracketRight</code> do nothing at all rather than combining with FUNCTION for some other action — the FUNCTION branch in <code>keyboard.js</code> always returns before reaching those checks.</li>
+<li><code>[</code>/<code>]</code> only do something in SEQUENCER mode, or in SOUND mode with a pad already selected; in any other mode they are silently inert.</li>
+<li>Worth knowing, though it causes no actual conflict: the Synth module matches on <code>KeyboardEvent.key</code> (the character a layout produces) rather than <code>.code</code>. On a non‑QWERTY physical layout, Synth's <code>A S D F…</code> keys land on whichever physical keys type those characters — unlike this module's FUNCTION/pad bindings, which stay on the same physical keys everywhere. That's a difference between the two modules' approaches, not a defect in either.</li>
+</ul>
+</section>
+
+<section id="04-pads">
+<h2>04 Pads</h2>
+<h3>WHAT IT DOES</h3>
+<p>The twelve on-screen pads (<code>#wsPads</code>, built by <code>buildPads()</code> in <code>ui.js</code>) are dual-purpose, exactly matching the EP-133's own "the 12 sample pads double as a number pad" idea: the same twelve physical keys (<code>Digit1</code>…<code>Digit9</code>, <code>Digit0</code>, <code>Minus</code>, <code>Equal</code>) either trigger a sound directly, or — the instant FUNCTION is held — stop being sound triggers entirely and become group/mode shortcuts instead (see 03). There's no separate hardware number pad or extra key row; it's the same twelve controls serving two roles depending on one modifier.</p>
+<h3>HOW TO USE IT</h3>
+<p>A pad can be hit with a mouse (<code>pointerdown</code>/<code>pointerup</code>/<code>pointerleave</code>/<code>pointercancel</code>), touch, or a mapped keyboard key — all three funnel into the exact same <code>padDown()</code>/<code>padUp()</code> dispatch in <code>keyboard.js</code>, so behavior never differs by input device. Clicking a pad (as distinct from pressing-and-holding it) also <em>selects</em> it for editing: the display's PAD readout updates and the mode-body area re-renders around that pad (e.g. SOUND mode's editor for it). What a bare pad hit actually triggers depends on the active mode — in most modes it plays the pad's assigned sound (and records it, live or step, if record is armed); FX mode uses the pad as a momentary performance-effect punch-in instead; SAMPLE mode uses press-and-hold to record from the microphone onto that pad.</p>
+<h3>KEYBOARD COMMANDS</h3>
+<p><code>Digit1</code>…<code>Digit9</code> → pads 1–9, <code>Digit0</code> → pad 10, <code>Minus</code> → pad 11, <code>Equal</code> → pad 12 (bare press). Hold FUNCTION and the same twelve keys select a group or mode instead — full table in 03 KEYBOARD MAP.</p>
+<h3>RELATED PARAMETERS</h3>
+<ul>
+<li>Which sound a pad plays is per-group (<code>WorkstationGroups.getPadSound(letter, padIndex)</code>) — see 05 GROUPS.</li>
+<li><code>velocity</code>, passed into <code>padDown()</code>/<code>triggerPad()</code> on every hit.</li>
+</ul>
+<h3>LIMITATIONS</h3>
+<ul>
+<li><strong>Velocity is fixed for every keyboard, mouse, and touch hit — this is an honest hardware limitation, not a bug.</strong> A computer keyboard has no pressure or force sensing at all, so <code>velocityFromKeydown()</code> in <code>keyboard.js</code> unconditionally returns <code>1</code> (full velocity) for every key hit. Mouse/touch pad presses are equally fixed: the pointer handler built in <code>ui.js</code>'s <code>buildPads()</code> also hardcodes velocity <code>1</code> on <code>pointerdown</code>. There is no way for a computer keyboard or a mouse/touchscreen to report anything but full velocity — only genuine MIDI hardware can. The Web MIDI bridge (<code>workstation/midi.js</code>) <em>does</em> forward real variable velocity correctly: <code>handleNoteOn()</code> reads the actual 0–127 velocity byte off the incoming Note On message and converts it to a 0–1 value before calling <code>triggerPad()</code>, rather than hardcoding it.</li>
+<li><code>sound.pitch</code> exists in the sound data model and genuinely affects playback (it's added into the semitone shift computed in <code>sampler.js</code>'s <code>triggerSoundVoice()</code>), but no control anywhere in the SOUND-mode editor currently sets it — so every sound's pitch stays at its default (0) unless something else in a later build adds that field. This is a real gap, flagged here rather than glossed over (see the QUICK START note below as well).</li>
+</ul>
+</section>
+
+<section id="05-groups">
+<h2>05 Groups</h2>
+<h3>WHAT IT DOES</h3>
+<p>Four independent groups — A, B, C, D (<code>workstation/groups.js</code>) — each own a completely separate set of state for the life of a project: their own 12 pad-sound assignments (<code>soundIds</code>), their own pattern list and which pattern is currently active, their own mute-group table (which pads cut each other off), and their own fader level. Switching which group is "active" — via FUNCTION+1-4 on the keyboard, or by clicking a GROUP button in the panel — only changes which group's state the keyboard and on-screen panel currently point at for <em>editing</em>. It never clears, resets, or otherwise touches the other three groups' data; all four exist permanently in the same state object until a new project is started (<code>resetAll()</code>) or a different project is loaded (<code>restore()</code>).</p>
+<p>Crucially, all four groups' active patterns play back <strong>simultaneously</strong> whenever the transport is running — <code>sequencer.js</code>'s <code>onTransportTick()</code> iterates every one of the four letters on every single tick unconditionally, regardless of which one is active. "Active group" is purely an editing/input-focus concept; it has no effect on what's audible.</p>
+<h3>HOW TO USE IT</h3>
+<p>Click GROUP A/B/C/D in the panel, or hold FUNCTION and press pad 1/2/3/4, to change which group the pads, FADER knob, sequencer grid, and sound editor currently act on. Everything you then do — load a sound onto a pad, draw sequencer steps, assign a mute group, move the FADER — reads and writes that group's own data only; switch to a different group and the exact same controls now operate on that group's separate state instead. To build a multi-group arrangement, load/sequence Group A, switch to Group B and do the same, and so on — all of it plays back together without needing every group to be "active" at once (only one can be, by definition, but all four are always audible).</p>
+<h3>KEYBOARD COMMANDS</h3>
+<p>FUNCTION+<code>Digit1</code> → Group A, FUNCTION+<code>Digit2</code> → Group B, FUNCTION+<code>Digit3</code> → Group C, FUNCTION+<code>Digit4</code> → Group D.</p>
+<h3>RELATED PARAMETERS</h3>
+<ul>
+<li><code>soundIds</code> (12 slots per group) — which sound each of that group's pads triggers; see 04 PADS.</li>
+<li><code>patternIds</code> / <code>activePatternId</code> — the group's sequencer patterns and which one is currently playing/editable.</li>
+<li><code>muteGroups</code> — an array of pad-index arrays; when a pad that's a member of one fires, every <em>other</em> member of the same mute group in that same group is cut off immediately (<code>WorkstationSampler.cutMuteGroup()</code>).</li>
+<li><code>fader</code> — a 0–1 gain value feeding that group's own output bus in <code>audio-engine.js</code> (<code>groupFader[letter]</code>), independent of the other three groups' faders.</li>
+</ul>
+<h3>LIMITATIONS</h3>
+<ul>
+<li>Each group's state also carries a <code>faderTarget</code> field (default <code>"volume"</code>), evidently meant to let the FADER knob control something other than plain output level per group — but nothing anywhere in the codebase ever reads or changes this field. The FADER knob always controls gain directly today; <code>faderTarget</code> is currently unused scaffolding.</li>
+</ul>
+</section>
+
+<section id="06-projects">
+<h2>06 Projects</h2>
+<h3>WHAT IT DOES</h3>
+<p>A project is the top-level container the EP-133 workstation saves and loads as one unit. In <code>projects.js</code> it's a single in-memory object (<code>current</code>) holding:</p>
+<ul>
+<li><code>tempo</code>, <code>timeSigNum</code>/<code>timeSigDen</code> — read from/written to <code>transport.js</code> on save/load</li>
+<li><code>scenes[]</code> — named snapshots of which pattern each of the 4 groups has active (EP-133's "commit" concept)</li>
+<li><code>songPositions[]</code> — an ordered list of scene references, capped at <code>MAX_SONG_POSITIONS</code> = 99</li>
+<li>the full state of all 4 groups (A-D) — each group's 12 pad-sound assignments, its pattern list/active pattern, its mute-group slots, and its fader — owned by <code>groups.js</code>, pulled in via <code>WorkstationGroups.serialize()</code>/<code>restore()</code></li>
+</ul>
+<p><strong>NEW</strong> (<code>newProject()</code>) resets all 4 groups to empty, resets tempo to 120 BPM / 4/4, and auto-loads the generated 5-sound demo kit onto Group A pads 1-5 (via <code>WorkstationSampler.loadDemoKit("A")</code>) so the pads aren't silent on first load — groups B/C/D stay empty for the user's own sounds.</p>
+<p><strong>SAVE</strong> (<code>saveProject()</code>) writes to IndexedDB across the normalized stores <code>storage.js</code> defines: one <code>projects</code> record (name/tempo/time-sig/scenes/song positions), one <code>groups</code> record per group, one <code>patterns</code> record per pattern any group references, and — via <code>sampler.js</code>'s <code>serializeSounds()</code> — one <code>sounds</code> record per pad that has ever held a sound. Any sound that currently has a decoded <code>AudioBuffer</code> gets that buffer encoded to a WAV <code>Blob</code> and written into the separate <code>blobs</code> store (keyed <code>blob_&lt;soundId&gt;</code>); the sound record only stores the <code>blobId</code> reference. This means <strong>actual audio data, not just pad metadata, survives a save → reload round trip</strong> — confirmed by the save path (<code>bufferToWavBlob</code>) and the load path (<code>restoreSounds()</code> decoding the blob straight back into an <code>AudioBuffer</code> via <code>decodeAudioData</code>).</p>
+<p><strong>LOAD</strong> (<code>loadProject(id)</code>) reads the project record plus every <code>groups</code>/<code>patterns</code>/<code>sounds</code> record indexed by that project's id, rebuilds <code>groups.js</code>'s state via <code>restore()</code>, registers patterns, and asks <code>sampler.js</code> to restore each sound (decoding its blob if it has one).</p>
+<p><strong>DELETE</strong> (<code>deleteProject(id)</code>) cascades through <code>storage.js</code>'s <code>deleteProjectCascade()</code>: deletes every <code>groups</code>/<code>sounds</code>/<code>patterns</code>/<code>scenes</code> record indexed to that project, plus every <code>blobs</code> record any of those sounds referenced, then deletes the <code>projects</code> record itself.</p>
+<p><strong>COMMIT</strong> is the one scene-related control actually wired to the UI: the footer's COMMIT button calls <code>commitScene()</code>, which snapshots <code>activePatternId</code> for every group (A-D) into a new scene named <code>SCENE N</code>.</p>
+<h3>HOW TO USE IT</h3>
+<p>The project row at the bottom of the panel: a name field, <strong>NEW</strong>, <strong>SAVE</strong>, a <strong>LOAD PROJECT…</strong> dropdown + <strong>LOAD</strong>, and <strong>DELETE</strong>. Renaming is a text field that commits on blur/change. <strong>COMMIT</strong> lives in the footer row next to MINUS/PLUS/LOAD DEMO KIT.</p>
+<h3>KEYBOARD COMMANDS</h3>
+<p>None. Every project control (NEW/SAVE/LOAD/DELETE/rename/COMMIT) is a mouse/touch button or text input in the project row; <code>keyboard.js</code>'s global bindings cover pads, modes, groups, and transport only and never reach this row.</p>
+<h3>RELATED PARAMETERS</h3>
+<p><code>tempo</code> (BPM), <code>timeSigNum</code>/<code>timeSigDen</code>, <code>scenes[]</code>, <code>songPositions[]</code> (max 99).</p>
+<h3>LIMITATIONS</h3>
+<ul>
+<li><strong>Scene recall and song mode have no UI.</strong> <code>projects.js</code> fully implements <code>getScenes()</code>, <code>recallScene()</code>, <code>addSceneToSong()</code>, <code>setSongPosition()</code>, <code>cutSongPosition()</code>, <code>insertSongPosition()</code>, and <code>getSongPositions()</code>, but <code>ui.js</code> never calls any of them. COMMIT will happily create scene after scene, but there is currently no panel to see the list of committed scenes, recall one back onto the groups, or assemble/play a song (ordered scene sequence). The data model and backend logic for EP-133-style song mode exist; the front-end for it does not yet.</li>
+<li><strong>Storage degrades gracefully, not silently.</strong> <code>WorkstationStorage.isAvailable()</code> just checks for a global <code>indexedDB</code>. When it's false (some private-browsing modes), the LOAD PROJECT dropdown shows a disabled <strong>"STORAGE UNAVAILABLE"</strong> option, and SAVE/LOAD/DELETE each reject and surface a "…FAILED" status message rather than throwing. NEW is unaffected since it never touches storage.</li>
+</ul>
+</section>
+
+<section id="07-sounds">
+<h2>07 Sounds</h2>
+<h3>WHAT IT DOES</h3>
+<p>Every pad's sound is one object created by <code>sampler.js</code>'s <code>createSound()</code>, used identically whether the sound came from a file, the mic, or the demo kit. The fields that actually exist on it:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>trimStart</code> / <code>trimEnd</code></td>
+<td>fractions (0–1) of the buffer's total duration marking the region that actually plays</td>
+</tr>
+<tr>
+<td><code>pitch</code></td>
+<td>manual semitone shift, applied on top of any Keys-mode relative shift</td>
+</tr>
+<tr>
+<td><code>gain</code></td>
+<td>peak multiplier combined with hit velocity</td>
+</tr>
+<tr>
+<td><code>pan</code></td>
+<td>stereo position, -1..1, via a <code>StereoPannerNode</code></td>
+</tr>
+<tr>
+<td><code>playMode</code></td>
+<td><code>oneshot</code> | <code>key</code> | <code>legato</code> — see below</td>
+</tr>
+<tr>
+<td><code>attack</code> / <code>release</code></td>
+<td>ms, linear gain-ramp times</td>
+</tr>
+<tr>
+<td><code>reverse</code></td>
+<td>boolean; flips playback direction (see 09 CHOP/REVERSE)</td>
+</tr>
+<tr>
+<td><code>timeMode</code> / <code>timeValue</code></td>
+<td><code>free</code>|<code>bpm</code>|<code>bar</code> + a number — <strong>stored only</strong>, see LIMITATIONS</td>
+</tr>
+<tr>
+<td><code>midiChannel</code></td>
+<td>1–16 — <strong>stored only</strong>, see LIMITATIONS</td>
+</tr>
+<tr>
+<td><code>rootNote</code></td>
+<td>MIDI note 0–127; the sound's own pitch reference</td>
+</tr>
+<tr>
+<td><code>muteGroupId</code></td>
+<td>defaults to -1 — <strong>present but unused</strong>, see LIMITATIONS</td>
+</tr>
+<tr>
+<td><code>chop</code></td>
+<td><code>null</code>, or <code>{ slices: [...], mode }</code> after a CHOP operation (09)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What <code>playMode</code> actually does</strong> (<code>triggerSoundVoice()</code> in <code>sampler.js</code>):</p>
+<ul>
+<li><strong><code>oneshot</code></strong> — no stop time is ever scheduled for the voice, so it always plays its full trimmed length start-to-finish once triggered, regardless of how briefly or long the pad is held. It also never gets a release phase: <code>buildEnvelope()</code> only applies the release ramp when a stop time exists, and oneshot voices never have one.</li>
+<li><strong><code>key</code></strong> — polyphonic. Re-triggering the same pad starts a brand-new, independent voice layered on top of whatever is already sounding; nothing cuts the earlier voice off except its own natural envelope release.</li>
+<li><strong><code>legato</code></strong> — monophonic per pad. The module tracks one current voice per <code>"&lt;letter&gt;:&lt;padIndex&gt;"</code> key (<code>legatoVoiceByPad</code>); a new hit stops that previous voice (cancels its gain, schedules <code>src.stop</code> ~50ms out) before starting the new one, so only the most recent hit on that specific pad is ever audible.</li>
+</ul>
+<h3>HOW TO USE IT</h3>
+<p>Sounds aren't created explicitly — selecting any pad in Sound Edit mode lazily creates an empty one via <code>ensurePadSound()</code> if it doesn't have one yet. Every field above is edited from the Sound Edit panel's sub-modes; see <strong>09 SOUND EDIT</strong> for the control-by-control walkthrough.</p>
+<h3>KEYBOARD COMMANDS</h3>
+<p>The 12 pad keys (<code>1</code>–<code>9</code>, <code>0</code>, <code>-</code>, <code>=</code>) trigger whichever sound is assigned to that pad in the active group, in whatever mode currently dispatches pad presses to playback (Sound/Sequencer/FX modes trigger directly; Keys mode maps keys to notes instead — see <code>keys-mode.js</code>). <code>FUNCTION</code> (backtick, held) <code>+ 1</code>–<code>4</code> switches the active group (A–D), changing which 12 sounds the pad keys refer to. There is no dedicated key for editing a sound's parameters — that's pointer-only (09).</p>
+<h3>RELATED PARAMETERS</h3>
+<p>Group fader (<code>groups.js</code>, per-group not per-sound) sits downstream of each sound's own gain/pan. Mute-group cutoff (07's <code>muteGroupId</code> field vs. the group-level mechanism that's actually used) is detailed in 09.</p>
+<h3>LIMITATIONS</h3>
+<ul>
+<li><strong><code>midiChannel</code> is stored but not enforced.</strong> <code>midi.js</code>'s incoming Note On/Off handling strips the channel nibble off the status byte (<code>status &amp; 0xF0</code>) and never reads any sound's <code>midiChannel</code> — every external MIDI message is dispatched to a pad purely by note number, regardless of channel. Setting this field currently has no effect on playback.</li>
+<li><strong><code>muteGroupId</code> is vestigial.</strong> It's initialized to -1 on every sound and saved/loaded with it, but nothing in the codebase ever reads or writes it afterward. Actual mute-group membership is tracked separately, per pad index, in <code>groups.js</code>'s own <code>muteGroups</code> array (toggled from Sound Edit's MUTE GROUP section — see 09). The field exists on the data model; it has no effect on anything.</li>
+<li><code>timeMode</code>/<code>timeValue</code> are stored only — see 09 TIME.</li>
+</ul>
+</section>
+
+<section id="08-sampling">
+<h2>08 Sampling</h2>
+<h3>WHAT IT DOES</h3>
+<p><strong>File load</strong> — <code>loadFileToPad(letter, padIndex, file)</code>, reached via the LOAD FILE button (a hidden <code>&lt;input type="file" accept="audio/*"&gt;</code>) or by dragging an audio file anywhere onto the Sound Edit panel while a pad is selected. Both paths call the same <code>reuseDecode(file)</code> → <code>window.ToneEngine.decodeFile(file)</code>, which is plain <code>FileReader.readAsArrayBuffer</code> + <code>AudioContext.decodeAudioData</code> — entirely in-browser. No <code>fetch</code>/<code>XHR</code> is involved anywhere in that path; the file becomes an in-memory <code>AudioBuffer</code> and is never transmitted anywhere. Loading a file resets <code>trimStart</code>/<code>trimEnd</code> to the full range and clears any existing chop.</p>
+<p><strong>Demo kit</strong> — explicitly <strong>not</strong> EP-133 factory or sampled content. <code>loadDemoKit(letter)</code> renders 5 short sounds (kick, snare, hat, clap, tone) with an <code>OfflineAudioContext</code> using oscillators and filtered noise (<code>renderDemo()</code>), synthesized procedurally at save time, not sampled from anywhere. <code>projects.js</code> auto-runs this onto Group A pads 1–5 on every <strong>NEW</strong> project; the footer's <strong>LOAD DEMO KIT</strong> button re-runs it on demand onto whichever group is currently active (overwriting that group's first 5 pads).</p>
+<p><strong>Mic sampling</strong> — <code>startRecordingToPad</code>/<code>stopRecordingToPad</code>, wired to pad-down/pad-up while the current mode is <code>"sample"</code> (<code>keyboard.js</code>'s <code>padDown</code>/<code>padUp</code>). The first recording attempt lazily requests one shared <code>getUserMedia({ audio: true })</code> stream; each pad-hold then creates its own <code>MediaRecorder</code>, buffers <code>ondataavailable</code> chunks, and on pad-release stops the recorder — whose <code>onstop</code> handler assembles the chunks into a <code>Blob</code>, decodes it, and loads it onto that pad as <code>"REC n"</code>. If the user denies the permission prompt or has no input device, the rejection is caught and swallowed (<code>.catch</code> with a no-op comment) — nothing throws into the rest of the app, the pad simply doesn't get a new sound, and file-based loading is unaffected. A fresh <code>getUserMedia</code> call (and permission prompt, if the browser re-offers it) is attempted again on the next recording try, since a failed request never caches a stream.</p>
+<p><strong>Waveform extraction ("resampling")</strong> — <code>getWaveformPeaks(soundId, numBuckets)</code> downsamples the raw buffer's channel-0 samples into <code>numBuckets</code> <code>[min, max]</code> pairs, one per horizontal pixel of the Trim waveform canvas (09). Results are cached per <code>soundId:numBuckets</code> key and invalidated whenever a new buffer is loaded onto that sound via <code>loadFileToPad</code>/<code>loadBufferToPad</code> (both delete the cache entry).</p>
+<h3>HOW TO USE IT</h3>
+<p>Open Sound Edit (<code>sound</code> mode), select a pad, then either click <strong>LOAD FILE</strong> or drag an audio file onto the panel. To record from the mic, switch to <strong>SAMPLE</strong> mode and hold the pad key (or click-and-hold the on-screen pad) you want to record onto; release to stop and finalize.</p>
+<h3>KEYBOARD COMMANDS</h3>
+<p><code>FUNCTION + 8</code> switches to <strong>SAMPLE</strong> mode (<code>MODE_CODE_INDEX</code>: <code>Digit5</code>=sound, <code>Digit6</code>=keys, <code>Digit7</code>=sequencer, <code>Digit8</code>=sample, <code>Digit9</code>=fx, <code>Digit0</code>=mixer). Once in SAMPLE mode, holding any pad key (<code>1</code>–<code>9</code>, <code>0</code>, <code>-</code>, <code>=</code>) starts recording onto that pad; releasing it stops and loads the take. File load and drag-and-drop are pointer-only — no keyboard path.</p>
+<h3>LIMITATIONS</h3>
+<ul>
+<li><strong>Dropping a file with no pad selected is silently ignored, not safely ignored.</strong> The drag-and-drop listener only calls <code>e.preventDefault()</code> when a pad is currently selected (<code>activeTarget.padIndex != null</code>); if nothing is selected, the drop falls through to the browser's own default handling of a dropped file (which can navigate the tab away from the page) instead of showing any "select a pad first" feedback.</li>
+<li><strong>A pad's old chop marks can outlive a new recording.</strong> <code>loadFileToPad</code> explicitly clears <code>sound.chop</code> on load, but <code>loadBufferToPad</code> (used by both mic recording and the demo kit) does not. Recording a new take, or reloading the demo kit, onto a pad that was previously chopped leaves the stale <code>chop.slices</code> data (and its tick-marks on the waveform) attached to the new, unrelated audio until CHOP EQUAL/CHOP ATTACK is run again.</li>
+</ul>
+</section>
+
+<section id="09-sound-edit">
+<h2>09 Sound Edit</h2>
+<h3>WHAT IT DOES</h3>
+<p>Sound Edit (<code>sound-editor.js</code>) is one scrollable panel that owns no audio itself — every read/write goes through <code>WorkstationSampler</code> and <code>WorkstationGroups</code>; this module only builds the DOM. Selecting a pad renders, top to bottom: a <strong>SAMPLE</strong> file-load section, a <strong>TRIM</strong> waveform, a <strong>CHOP</strong> section (with the REVERSE toggle), and then the six sections that actually mirror the EP-133's Sound Edit sub-modes:</p>
+<ol>
+<li><strong>Sound Mode</strong> — <code>playMode</code> (ONESHOT/KEY/LEGATO select) and <code>pan</code> (range slider, -100..100, read out as <code>L##</code>/<code>R##</code>/<code>C</code>). See 07 for what each <code>playMode</code> does on playback.</li>
+<li><strong>Trim</strong> — a 240×60 waveform canvas (<code>getWaveformPeaks</code>) with <strong>START</strong>/<strong>END</strong> sliders (0–1000, read out as a %) that set <code>trimStart</code>/<code>trimEnd</code>. Each slider is clamped against the other with a minimum 1% gap so the trimmed region can never collapse to zero or invert. The canvas draws the full waveform faint outside the trim window and solid inside it, with accent-colored vertical lines marking the exact start/end.</li>
+<li><strong>Envelope</strong> — <code>attack</code> (0–1000ms) and <code>release</code> (0–3000ms) sliders. Note: <code>release</code> only has an audible effect outside <code>oneshot</code> mode, since oneshot voices never get a stop time to release from (07).</li>
+<li><strong>Time</strong> — <code>timeMode</code> (FREE/BPM/BAR) and a numeric <code>timeValue</code> (1–999). <strong>This is deliberately stored-only.</strong> No Web Audio primitive does pitch-preserving time-stretch without a real DSP pipeline (phase vocoder or similar) — out of scope here — so <code>setParam()</code> just records these two fields on the sound exactly like any other parameter, and no playback path reads them back. The panel says so directly: <em>"Stored only — does not yet time-stretch playback (no pitch-preserving stretch implemented)."</em> Treat TIME as a note-taking field for now, not a working feature.</li>
+<li><strong>MIDI</strong> — <code>midiChannel</code> (1–16) and <code>rootNote</code> (0–127 slider, displayed as a note name like <code>C4</code>). ROOT NOTE genuinely works: it's the <code>rootMidi</code> fed into pitch math on every trigger, and it's what Keys mode shifts relative pitch against. CHANNEL does not currently affect anything — see LIMITATIONS.</li>
+<li><strong>Mute Group</strong> — 8 numbered toggle buttons. Clicking one calls <code>toggleMuteGroupMember(letter, slotIndex, padIndex)</code>, adding/removing this pad from that slot's member list in <code>groups.js</code>. The status line reads "MUTE GROUP N" or "NOT IN A MUTE GROUP" via <code>getMuteGroupFor</code>. <strong>This one does work end-to-end:</strong> when <code>sequencer.js</code>'s <code>triggerPad</code> fires a hit, it looks up that pad's mute group and calls <code>cutMuteGroup()</code>, which immediately <code>stop()</code>s every other currently-sounding voice belonging to another member of the same slot — so "only the last-pressed sound in a mute group plays, cutting off the others" is accurate for pad hits dispatched through the keyboard, on-screen pads, or incoming MIDI.</li>
+</ol>
+<p><strong>File load / drag-and-drop</strong> — see 08 for the mechanics; this panel's SAMPLE section is the entry point (LOAD FILE button), and the panel's container is the drop target.</p>
+<p><strong>CHOP</strong> — a SLICES number field (1–64, default 8) plus two buttons: <strong>CHOP EQUAL</strong> (<code>chopEqual</code>, divides the trimmed region into N equal fractional slices) and <strong>CHOP ATTACK</strong> (<code>chopAttack</code>, a real energy-based onset detector: walks a 10ms-window RMS envelope of the buffer, picks the N loudest peaks at least <code>envelope.length/(2N)</code> windows apart, sorts them into time order, and uses them as slice boundaries — a genuinely working heuristic, explicitly not the EP-133's own undocumented DSP-level beat-tracking). Both buttons are disabled with no buffer loaded. Slice boundaries are drawn as tick-marks on the Trim waveform, and a status line reports <code>"N SLICES (EQUAL|ATTACK)"</code> or <code>"NOT CHOPPED"</code>.</p>
+<p><strong>REVERSE</strong> — a toggle in the CHOP row. Flipping it doesn't mutate the buffer in place; <code>sampler.js</code> lazily builds and caches a reversed copy (<code>getReversedBuffer</code>) the first time the sound next plays, and the trim offset math is adjusted so the same trimmed <em>time window</em> stays anchored while its contents play backward.</p>
+<h3>HOW TO USE IT</h3>
+<p>Switch to <strong>SOUND</strong> mode, then select a pad either by clicking it on-screen (this also momentarily triggers it, since the pad element's <code>pointerdown</code> plays the sound and its <code>click</code> independently sets the edit target) or by cycling with MINUS/PLUS. Every field in every section below is a pointer-driven range/select/number input or button — adjust and the parameter is written immediately via <code>setParam()</code>.</p>
+<h3>KEYBOARD COMMANDS</h3>
+<p><code>FUNCTION + 5</code> switches to <strong>SOUND</strong> mode. While in Sound mode, <code>[</code> / <code>]</code> (<code>BracketLeft</code>/<code>BracketRight</code>) cycle the selected pad -1/+1 (<code>ui.js</code>'s <code>handleMinus</code>/<code>handlePlus</code>) — the one keyboard shortcut this mode has. Every other control in this panel (file load, CHOP/REVERSE, every slider/select/number field, the 8 mute-group buttons) is pointer-only; there are no dedicated key bindings for them.</p>
+<h3>RELATED PARAMETERS</h3>
+<p><code>trimStart</code>/<code>trimEnd</code>, <code>attack</code>/<code>release</code>, <code>playMode</code>, <code>pan</code>, <code>timeMode</code>/<code>timeValue</code>, <code>midiChannel</code>/<code>rootNote</code>, <code>chop</code>, <code>reverse</code> — all on the sound record described in 07.</p>
+<h3>LIMITATIONS</h3>
+<ul>
+<li><strong>CHOP slices aren't actually playable yet.</strong> <code>chopEqual</code>/<code>chopAttack</code> compute and store real slice boundaries, and <code>sampler.js</code> even exports a working <code>playChopSlice(letter, padIndex, soundId, sliceIndex, ...)</code> capable of playing one slice in isolation — but nothing in <code>keyboard.js</code>, <code>ui.js</code>, or <code>sound-editor.js</code> ever calls it. Pressing the pad after chopping still plays the sound's ordinary <code>trimStart</code>–<code>trimEnd</code> region exactly as before; CHOP currently only gives you slice boundaries and visual tick-marks, not a way to actually trigger an individual slice from the running app.</li>
+<li><strong>TIME mode is stored-only by design</strong>, not a bug — see the WHAT IT DOES note above. Do not expect sounds assigned a BPM/BAR time value to actually stretch to fit the tempo; nothing reads these fields back during playback.</li>
+<li><strong>MIDI CHANNEL is stored-only in practice</strong> — see 07's LIMITATIONS; incoming MIDI note dispatch ignores channel entirely.</li>
+<li><strong>Mute-group slots aren't mutually exclusive in the data.</strong> Clicking a new slot only adds/removes membership in <em>that</em> slot — it doesn't clear the pad from any slot it's already in. A pad accidentally assigned to two slots will have both the UI (<code>getMuteGroupFor</code> returns the first match found) and the actual playback cutoff logic only ever "see" its lowest-numbered slot; membership in a higher-numbered slot becomes effectively inert for that pad until it's removed from the lower one.</li>
+</ul>
+</section>
+
+<section id="10-sequencer">
+<h2>10 Sequencer</h2>
+<h3>WHAT IT DOES</h3>
+<p>The sequencer is built on a lookahead scheduler, the standard Web Audio pattern for drift-free timing: <code>transport.js</code> never fires a sound directly off <code>setInterval</code>. Instead, <code>scheduler()</code> compares <code>AudioContext.currentTime</code> against a rolling 0.1-second lookahead window, schedules every tick that falls inside that window at its exact <code>AudioContext</code> time, then re-polls itself via <code>setTimeout</code> every 25ms. Because playback time always comes from the audio clock and not from when the timer callback happens to fire, the sequencer doesn't audibly drift even under UI jank — a classic <code>setInterval</code>-driven sequencer would.</p>
+<p>Tick resolution is 96 ticks per quarter note (matching <code>patterns.js</code>), with the on-screen step grid fixed at 16th-note steps (24 ticks each). Finer tick math — note-repeat intervals, swing, and per-note offset (<code>offsetTicks</code>) — all operate at the full 96-tick resolution underneath that 16-step grid.</p>
+<p>Every group (A, B, C, D) plays its own active pattern simultaneously, every time the transport is running — <code>onTransportTick()</code> loops over all four groups unconditionally. "Active group" (switched with FUNCTION+1-4) only steers which group the keyboard and UI are currently pointed at for editing/recording; it has no effect on what's audible. There is no per-group mute or solo control.</p>
+<p><strong>Mute groups</strong>: a pad can be assigned to one of 8 mute-group slots per group (set per-pad in the Sound Editor's MUTE GROUP section). Whenever a pad in a slot is triggered — whether by sequencer playback, a live pad hit, or note repeat, since all three funnel through the same <code>triggerPad()</code> in <code>sequencer.js</code> — every other pad currently sounding in that same slot is stopped (a fast ~50ms gain fade-out, not an instant hard cut). This is the classic "open hi-hat gets cut by closed hi-hat" behavior.</p>
+<p><strong>Note repeat</strong>: holding Tab (this app's stand-in for the EP-133's physical TIMING button) and pressing a pad retriggers that pad continuously at a selected timing interval (one of <code>1/1, 1/2, 1/4, 1/8, 1/8T, 1/16, 1/16T, 1/32</code>), and starts the transport automatically if it wasn't already running. Holding Shift+pad while Tab is still held latches the repeat so it keeps firing after you release both keys — press Shift+pad again (still under Tab) to un-latch it.</p>
+<h3>HOW TO USE IT</h3>
+<ol>
+<li>Press FUNCTION (Backquote/<code>~</code>/<code>₩</code>) + 1-4 to pick the group whose pattern you want to work on.</li>
+<li>Press FUNCTION + 7 to open SEQUENCER mode. A 12-row × 16-step grid appears for that group's active pattern (each row is a pad; a pattern is auto-created if the group doesn't have one yet).</li>
+<li>Press Space to start the transport — every group with an active pattern starts playing back at once.</li>
+<li>To retrigger a pad on a timing grid without recording it, hold Tab and press the pad; add Shift to latch it so it keeps repeating hands-free.</li>
+<li>Use the BARS dropdown (in the Sequencer mode body) to change the active pattern's length (1/2/4/8 bars), UNDO to swap back the last snapshot, and QUANTIZE to govern how live-recorded hits land (see §11).</li>
+</ol>
+<h3>KEYBOARD COMMANDS</h3>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Space</td>
+<td>Play / Stop (all four groups together)</td>
+</tr>
+<tr>
+<td>FUNCTION + 1–4</td>
+<td>Switch active group</td>
+</tr>
+<tr>
+<td>FUNCTION + 7</td>
+<td>Open Sequencer mode</td>
+</tr>
+<tr>
+<td>Tab (hold) + pad</td>
+<td>Note repeat that pad at the current timing interval</td>
+</tr>
+<tr>
+<td>Shift + pad, while Tab held</td>
+<td>Latch / un-latch that pad's note repeat</td>
+</tr>
+</tbody>
+</table>
+<h3>RELATED PARAMETERS</h3>
+<ul>
+<li>BPM (40–399), tap tempo, time signature, swing (0–1, delayed on off-beat 8th-tick groups only), metronome mode (OFF/ON/REC) — all <code>transport.js</code> settings that directly shape sequencer feel.</li>
+<li>Mute group slot assignment — Sound Editor, per pad, 8 slots per group.</li>
+<li>Timing interval for note repeat — <code>WorkstationSequencer.TIMING_INTERVALS</code>, default <code>"1/16"</code>.</li>
+</ul>
+<h3>LIMITATIONS</h3>
+<ul>
+<li><strong>The note-repeat timing interval cannot currently be changed from the running app.</strong> <code>setTimingInterval()</code>/<code>getTimingInterval()</code> exist on <code>WorkstationSequencer</code> and the full 8-value interval table is implemented, but nothing in the UI or <code>keyboard.js</code> ever calls <code>setTimingInterval()</code>. In practice, note repeat always fires at the hardcoded default of <code>1/16</code>, regardless of the richer interval list the code supports.</li>
+<li>Swing is a deliberately simplified approximation (delaying every odd 8th-tick group within a quarter note by a fraction of a step), not a reproduction of the EP-133's own internal swing curve, and it's applied uniformly to every pattern regardless of that pattern's own resolution.</li>
+</ul>
+</section>
+
+<section id="11-live-recording">
+<h2>11 Live Recording</h2>
+<h3>WHAT IT DOES</h3>
+<p>Pressing Enter arms recording. Arming calls <code>transport.setRecording(true)</code>, which auto-starts playback if the transport wasn't already running — you don't have to separately press Space first. Pressing Enter again disarms recording without stopping playback.</p>
+<p>While the transport is both recording and playing, hitting any pad (keyboard or on-screen) writes an event into the <strong>currently active group's active pattern</strong>, at the clock's current position, via <code>liveRecordHit()</code>. Whether that hit lands exactly on the grid or at its true timing depends on the QUANTIZE toggle (in the Sequencer mode body, default ON):</p>
+<ul>
+<li><strong>Quantized</strong> (QUANTIZE on): the current tick is rounded to the nearest 16th-note step; the event is written with <code>offsetTicks: 0</code>.</li>
+<li><strong>Free-time</strong> (QUANTIZE off): the event is written at its exact tick position within the step — the fractional offset is kept as <code>offsetTicks</code> rather than rounded away.</li>
+</ul>
+<p>A single-level undo snapshot of the pattern is pushed before every write, shared with the same undo mechanism step sequencing uses (see §12). Recording never clears anything first — a hit always layers onto whatever is already in the pattern, so in practice there is only one recording behavior: overdub-style accumulation.</p>
+<h3>HOW TO USE IT</h3>
+<ol>
+<li>Select the group whose pattern you want to record into (FUNCTION + 1-4).</li>
+<li>Press Enter to arm recording — playback starts automatically if it wasn't running.</li>
+<li>Play pads (keyboard keys or on-screen) in time; each hit lands in that group's active pattern at the current playhead position.</li>
+<li>Toggle QUANTIZE in the Sequencer mode body beforehand, depending on whether you want hits snapped to the 16th-note grid or kept at their exact timing.</li>
+<li>Press Enter again to stop recording (playback keeps going), or Space to stop everything.</li>
+</ol>
+<h3>KEYBOARD COMMANDS</h3>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Enter</td>
+<td>Arm / disarm recording (auto-starts playback on arm, if stopped)</td>
+</tr>
+<tr>
+<td>Space</td>
+<td>Start / stop playback independently</td>
+</tr>
+<tr>
+<td>Pad keys (1–9, 0, −, =)</td>
+<td>The actual recorded input while armed and playing</td>
+</tr>
+<tr>
+<td>FUNCTION + 1–4</td>
+<td>Switch which group's active pattern receives the recording</td>
+</tr>
+</tbody>
+</table>
+<h3>RELATED PARAMETERS</h3>
+<ul>
+<li>QUANTIZE toggle (Sequencer mode body) — on by default.</li>
+<li>Each group's active pattern (the one actually written to).</li>
+</ul>
+<h3>LIMITATIONS</h3>
+<ul>
+<li><strong>Recorded note length is always fixed, not captured from how long you hold the pad.</strong> <code>liveRecordHit()</code> only runs on key-down; nothing in this app writes on key-up, so every recorded event gets the pattern default duration (one 16th-note step, <code>ticksPerStep()</code>) regardless of actual hold time. Sustained hits aren't represented.</li>
+<li><strong>Overdub is unused scaffolding.</strong> <code>transport.js</code>'s <code>setRecording(value, overdub)</code> accepts a second argument and stores it as <code>isOverdub</code>, but <code>keyboard.js</code>'s record-arm toggle never passes it, so it's always <code>false</code> and nothing reads it anywhere. There is no actual "replace" recording mode to contrast with overdub — all recording behaves the same (additive) way described above.</li>
+<li><strong>No count-in.</strong> <code>transport.js</code> reserves a <code>"cnt"</code> metronome mode and its own comments describe it as "handled by sequencer.js's count-in routine directly," but no such routine exists anywhere in <code>sequencer.js</code>, and the on-screen metronome dropdown only offers OFF/ON/REC — <code>"cnt"</code> isn't even selectable. Recording begins the instant it's armed, with no pre-roll bar.</li>
+</ul>
+</section>
+
+<section id="12-step-sequencing">
+<h2>12 Step Sequencing</h2>
+<h3>WHAT IT DOES</h3>
+<p>While the transport is stopped, a step cursor (one shared value in <code>sequencer.js</code>, independent of which group you're pointed at) marks a single step of the active group's active pattern. <code>[</code> and <code>]</code> (<code>BracketLeft</code>/<code>BracketRight</code> — this app's stand-in for the EP-133's MINUS/PLUS concept) move that cursor back/forward one step, wrapping at the pattern's length.</p>
+<p>Two input paths write the same data:</p>
+<ul>
+<li><strong>Keyboard path</strong>: with recording armed (Enter), pressing a pad while stopped calls <code>stepRecordHit()</code>, which places a hit on that pad's lane at the cursor's current step.</li>
+<li><strong>Mouse path</strong>: clicking a cell directly in the on-screen step grid (12 rows, one per pad) calls the exact same underlying write (<code>WorkstationPatterns.setEvent</code>) — except a grid click is a toggle (click an empty cell to add a hit, click a filled one to remove it), while the keyboard path only ever adds/overwrites a hit at the cursor (removing one requires Backspace, below).</li>
+</ul>
+<p><strong>Erase</strong>: Backspace + pad, while stopped, erases just that pad's hit at the cursor's step (<code>eraseAtCursor</code>). <strong>Undo</strong> is single-level and per-pattern: every write (grid click, step-record, erase, quantize, nudge) snapshots the pattern first, and the UNDO button swaps the live pattern with that one stored snapshot — pressing UNDO again swaps back, rather than walking further back through a history of edits.</p>
+<h3>HOW TO USE IT</h3>
+<ol>
+<li>Stop the transport (Space, if it's running).</li>
+<li>Open SEQUENCER mode (FUNCTION + 7) for the group you want to edit.</li>
+<li>Either: move the cursor with <code>[</code>/<code>]</code>, arm recording (Enter), and press a pad to drop a hit at the cursor — or just click the corresponding cell in the grid directly. Both write identically.</li>
+<li>Hold Backspace and press a pad to erase its hit at the cursor step.</li>
+<li>Use UNDO in the Sequencer mode body to swap back the last change; use BARS to change the pattern's length.</li>
+</ol>
+<h3>KEYBOARD COMMANDS</h3>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[</code> / <code>]</code></td>
+<td>Move step cursor −1 / +1 (only while stopped, in Sequencer mode — otherwise <code>[</code>/<code>]</code> do something else entirely: nudge a Shift-selected pad's recorded notes, or scroll pads in Sound mode)</td>
+</tr>
+<tr>
+<td>Enter</td>
+<td>Arm recording (required before a pad press writes a step)</td>
+</tr>
+<tr>
+<td>Pad keys (1–9, 0, −, =)</td>
+<td>Write a hit at the cursor's step, on that pad's lane</td>
+</tr>
+<tr>
+<td>Backspace (hold) + pad</td>
+<td>Erase that pad's hit at the cursor step</td>
+</tr>
+<tr>
+<td>—</td>
+<td>Clicking a grid cell directly needs no keyboard state at all</td>
+</tr>
+</tbody>
+</table>
+<h3>RELATED PARAMETERS</h3>
+<ul>
+<li>BARS selector (1/2/4/8 bars → pattern length of 16/32/64/128 steps).</li>
+<li>UNDO button (single-level, per pattern).</li>
+<li>QUANTIZE only affects <em>live</em> recording (§11) — step-record and grid clicks always write <code>offsetTicks: 0</code>, i.e. they're inherently exactly on-grid regardless of that toggle.</li>
+</ul>
+<h3>LIMITATIONS</h3>
+<ul>
+<li><strong>The on-screen grid only ever shows the first 16 steps</strong> (<code>Math.min(pattern.lengthSteps, 16)</code>), i.e. bar 1, no matter how long the pattern actually is. For a 2/4/8-bar pattern (set via BARS), steps past 16 have no clickable cell anywhere in the UI. The keyboard cursor can still reach them — <code>[</code>/<code>]</code> wraps at the pattern's real length, and Enter+pad / Backspace+pad can still write/erase there — but there's no way to see those later steps, let alone click them directly.</li>
+<li><strong>Keyboard-driven step edits don't repaint anything.</strong> Moving the cursor, writing a step with Enter+pad, or erasing with Backspace+pad only mutates the pattern and cursor data — none of those call back into the UI. The grid and the digital BAR.STEP readout only refresh when something else happens to trigger a redraw (clicking a grid cell, changing BARS, pressing UNDO/QUANTIZE, switching MODE or GROUP, or starting/stopping the transport). A step you just placed or erased from the keyboard won't visibly light up or clear until one of those other actions fires.</li>
+<li><strong>Backspace+pad isn't scoped to "the step grid" the way it sounds.</strong> It only erases a single step while stopped. The identical key combo, pressed while the transport is <em>playing</em>, instead wipes that pad's entire lane for the whole pattern (<code>eraseLane</code>) — a much bigger action with the same shortcut, gated purely on transport state.</li>
+<li>Undo is a two-state swap, not a history stack — pressing UNDO twice returns you to exactly where you started, it does not walk back through multiple prior edits.</li>
+</ul>
+</section>
+
+<section id="13-keys-mode">
+<h2>13 Keys Mode</h2>
+<h3>WHAT IT DOES</h3>
+<p>Keys mode turns one pad's sound (the "source pad," the same <code>selectedPad</code> concept the Sound Editor uses) into a melodic instrument played across all 12 physical pads, mapped onto a chosen scale. The source pad is shared state — not per-group, not per-pad — set whenever a pad is selected elsewhere in the UI.</p>
+<p>Six real scales are implemented with correct semitone patterns, as degree offsets from the source sound's root note:</p>
+<table>
+<thead>
+<tr>
+<th>Scale</th>
+<th>Semitone offsets</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chromatic</td>
+<td>0,1,2,3,4,5,6,7,8,9,10,11</td>
+</tr>
+<tr>
+<td>Major</td>
+<td>0,2,4,5,7,9,11</td>
+</tr>
+<tr>
+<td>Natural minor</td>
+<td>0,2,3,5,7,8,10</td>
+</tr>
+<tr>
+<td>Major pentatonic</td>
+<td>0,2,4,7,9</td>
+</tr>
+<tr>
+<td>Minor pentatonic</td>
+<td>0,3,5,7,10</td>
+</tr>
+<tr>
+<td>Blues</td>
+<td>0,3,5,6,7,10</td>
+</tr>
+</tbody>
+</table>
+<p>Each physical pad's degree is <code>padIndex % degrees.length</code>; every full pass through the degree list bumps the result up one octave. So a 5-note pentatonic scale still gives all 12 pads a note — pads 6–12 don't go silent, they wrap upward into higher octaves instead of running out of scale degrees.</p>
+<p>OCTAVE (−3 to +3, ×12 semitones) and TRANSPOSE (−12 to +12 semitones) stack on top of the scale degree before the result is clamped to a valid MIDI note (0–127). A non-interactive reference strip shows, live, which note each of the 12 pads currently plays.</p>
+<p><strong>Polyphony</strong>: every physical pad gets its own independent voice (tracked per physical pad index) — chords are fully polyphonic — <em>unless</em> the source sound's own <code>playMode</code> is <code>"legato"</code>. In that case, <code>sampler.js</code>'s existing legato voice-stealing (keyed by group letter + the <em>source</em> pad index, not the physical key pressed) cuts the previous note the instant a new one starts, making legato sounds monophonic in Keys mode automatically. Keys-mode.js does not implement this cutoff itself — it's a side effect of passing the source pad index into the same <code>triggerNote()</code> every other sound path uses.</p>
+<h3>HOW TO USE IT</h3>
+<ol>
+<li>Select a pad with a sound loaded — either in Sound mode, or by clicking (not key-pressing) any of the 12 on-screen pads while already in Keys mode.</li>
+<li>Press FUNCTION + 6 to switch to KEYS mode.</li>
+<li>Play the 12 pads (keyboard or on-screen) to hear the scale across them.</li>
+<li>Adjust OCTAVE −/+, TRANSPOSE, and SCALE; the reference strip updates immediately to show the resulting note per pad.</li>
+</ol>
+<h3>KEYBOARD COMMANDS</h3>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FUNCTION + 6</td>
+<td>Switch to Keys mode</td>
+</tr>
+<tr>
+<td>Pad keys (1–9, 0, −, =)</td>
+<td>Note on (press) / note off (release), mapped across the scale</td>
+</tr>
+<tr>
+<td>FUNCTION + 1–4</td>
+<td>Switch active group (changes which group's source-pad sound is playing)</td>
+</tr>
+<tr>
+<td>—</td>
+<td>OCTAVE, TRANSPOSE, and SCALE have no keyboard shortcut — they're pointer-only (buttons, a number input, a select)</td>
+</tr>
+<tr>
+<td>—</td>
+<td>Changing the source pad itself is also pointer-only — clicking an on-screen pad sets it as source; the computer keyboard's pad keys only ever play notes, never reassign the source</td>
+</tr>
+</tbody>
+</table>
+<h3>RELATED PARAMETERS</h3>
+<ul>
+<li>Source pad (<code>selectedPad</code> / <code>sourcePadIndex</code>), shared across groups and pads.</li>
+<li>OCTAVE shift, TRANSPOSE, SCALE — module-level, persist until changed.</li>
+<li>The source sound's own <code>rootNote</code> (defaults to MIDI 60 / C4 if unset) and <code>playMode</code> (<code>oneshot</code> / <code>key</code> / <code>legato</code>) — <code>playMode</code> is what actually decides polyphonic vs. monophonic behavior here, not anything in <code>keys-mode.js</code>.</li>
+</ul>
+<h3>LIMITATIONS</h3>
+<ul>
+<li><strong>No velocity sensing from the computer keyboard</strong>, same limitation as pad hits generally (§04): <code>keyboard.js</code>'s <code>velocityFromKeydown()</code> always returns a fixed <code>1</code>, so every note played in Keys mode via the keyboard sounds at full velocity regardless of how it's triggered. The EP-133's physical pads are pressure-sensitive; a browser keyboard has no equivalent signal to read.</li>
+<li>If no source pad is selected, Keys mode plays nothing at all — <code>noteOn()</code> returns immediately — on any pad, keyboard or on-screen; the UI shows a hint explaining this, but there's no fallback sound.</li>
+</ul>
+<hr />
+</section>
+
+<section id="14-patterns">
+<h2>14 Patterns</h2>
+<h3>WHAT IT DOES</h3>
+<p>Each group (A–D) holds pattern data as 12 lanes — one per pad — where every lane is a <strong>sparse list of events</strong>, not a fixed-size grid array. An event is keyed by <code>step</code> and carries <code>velocity</code> (0–1), <code>durationTicks</code>, and <code>offsetTicks</code> (a signed sub-step timing nudge). Timing runs on 96 ticks-per-quarter-note internally (<code>patterns.js</code>'s <code>TICKS_PER_QUARTER</code>), even though the visible step grid is always 16th notes (24 ticks per step) — that headroom is what lets free-time recording and per-note nudge be expressed as tick math instead of rounding to the nearest step.</p>
+<p>Pattern length (<code>lengthSteps</code>) is adjustable in 16-step, one-bar increments through the <strong>BARS</strong> selector shown in Sequencer mode, offering 1/2/4/8 bars on screen. <code>setLength()</code> itself will accept anything up to 32 bars (512 steps, <code>MAX_STEPS</code>), but the dropdown only exposes the first four multiples.</p>
+<p><code>patterns.js</code> also implements:
+- <strong>Nudge</strong> — <code>nudge(patternId, padIndex, stepDelta)</code> shifts every event on one pad (or, with <code>padIndex</code> as <code>null</code>, every event in the whole pattern) forward or back by whole steps, wrapping at the pattern boundary. This is the EP-133 "offset notes" / "offset all notes" idea.
+- <strong>Quantize-in-place</strong> — <code>quantize(patternId, padIndex)</code> zeroes <code>offsetTicks</code> on a pad's (or the whole pattern's) existing events, snapping anything recorded free-time back onto the grid without touching which step they're on.
+- <strong>Bar copy/paste</strong> — <code>copyBar(patternId, barIndex, barSteps)</code> reads one bar's events into a lightweight clipboard object (step-relative, not a full pattern); <code>pasteBar(patternId, barIndex, clipboard)</code> clears that destination bar across every lane and writes the clipboard events in.
+- <strong>Pattern clone</strong> — <code>clonePattern(sourceId, groupLetter)</code> deep-copies an entire pattern (all 12 lanes, current length) into a new pattern id, named <code>"&lt;source&gt; COPY"</code>.</p>
+<h3>HOW TO USE IT</h3>
+<p>Open Sequencer mode, pick a group, and use the grid rendered by <code>renderSequencerBody()</code>: each row is a pad (1–12), each cell is a step. Clicking an unlit cell writes a full-velocity (1.0) event at that step; clicking a lit cell erases it. The <strong>BARS</strong> dropdown resizes <code>lengthSteps</code> for the active pattern (1/2/4/8 bars). <strong>UNDO</strong> reverts the pattern to the snapshot taken just before the last pattern-affecting action — single level, matching the EP-133's own one-step-back model (a second undo redoes, it doesn't go further back).</p>
+<h3>KEYBOARD COMMANDS</h3>
+<table>
+<thead>
+<tr>
+<th>Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hold <strong>Shift</strong> + press a pad, then <strong>[</strong></td>
+<td>Nudge that pad's events back one step</td>
+</tr>
+<tr>
+<td>Hold <strong>Shift</strong> + press a pad, then <strong>]</strong></td>
+<td>Nudge that pad's events forward one step</td>
+</tr>
+</tbody>
+</table>
+<h3>RELATED PARAMETERS</h3>
+<ul>
+<li><strong>BARS</strong> selector (Sequencer mode) → <code>WorkstationPatterns.setLength</code></li>
+<li><strong>UNDO</strong> button (Sequencer mode) → <code>WorkstationSequencer.pushUndo</code> / <code>undo</code> (single-level snapshot)</li>
+</ul>
+<h3>LIMITATIONS</h3>
+<ul>
+<li><strong>Bar copy/paste has no UI or keyboard path.</strong> <code>copyBar</code>/<code>pasteBar</code> are fully implemented in <code>patterns.js</code>, but no button, menu item, or key combination in <code>ui.js</code>/<code>keyboard.js</code> calls either function. There is currently no way to copy or paste a bar from the running app.</li>
+<li><strong>Whole-pattern clone has no UI or keyboard path.</strong> <code>clonePattern</code> exists and works, but nothing in the panel invokes it.</li>
+<li><strong>Whole-pattern nudge has no UI or keyboard path.</strong> <code>WorkstationSequencer.offsetAll()</code> (which calls <code>nudge()</code> with <code>padIndex: null</code>) exists, but only the single-pad nudge (<code>offsetPad</code>, bound to Shift + pad + <code>[</code>/<code>]</code>) is reachable today.</li>
+<li><strong>Quantize-in-place has no UI or keyboard path, and is a different thing from the on-screen QUANTIZE toggle.</strong> The QUANTIZE button shown in the Sequencer body toggles <code>WorkstationSequencer</code>'s <code>quantizeEnabled</code> flag, which only changes how a <em>new</em> live-recorded hit is stored (snapped to the nearest step vs. kept at its free-time <code>offsetTicks</code>). It never touches events already sitting in the pattern. The actual "snap existing events back to the grid" function — <code>WorkstationPatterns.quantize()</code> / <code>WorkstationSequencer.quantizePad()</code> — is implemented but not wired to anything clickable or keyboard-bound.</li>
+<li>The BARS dropdown's ceiling (8 bars) is a UI choice, not the data model's: <code>setLength()</code> itself permits up to 32 bars.</li>
+</ul>
+</section>
+
+<section id="15-song-scenes">
+<h2>15 Song / Scenes</h2>
+<h3>WHAT IT DOES</h3>
+<p>A <strong>scene</strong> is a named snapshot of which pattern is currently active in each of the four groups. <code>commitScene(name)</code> (<code>projects.js</code>) reads <code>activePatternId</code> off every group via <code>WorkstationGroups.getGroup(letter)</code>, bundles those four pattern ids into <code>groupPatternIds</code>, and pushes the scene onto <code>current.scenes</code> (auto-named <code>"SCENE " + (count+1)</code> if no name is passed). <code>getScenes()</code> returns that list. <code>recallScene(sceneId)</code> does the inverse: for every letter the scene recorded a pattern for, it calls <code>WorkstationGroups.setActivePattern(letter, patternId)</code>, putting all four groups back exactly where they were at commit time.</p>
+<p><strong>Song mode</strong> is a separate, ordered list — <code>current.songPositions</code>, capped at 99 slots (<code>MAX_SONG_POSITIONS</code>) — where each entry is a scene id. <code>addSceneToSong(sceneId)</code> appends one (and refuses once the array is full); <code>setSongPosition(index, sceneId)</code> overwrites a specific slot; <code>cutSongPosition(index)</code> removes one, shifting later entries back; <code>insertSongPosition(index, sceneId)</code> inserts one, shifting later entries forward. <code>getSongPositions()</code> returns the array as-is — it is a list of scene ids, not resolved patterns, so playing it back would mean walking the list and calling <code>recallScene</code> for each position in turn.</p>
+<h3>HOW TO USE IT</h3>
+<p>The only control currently wired to any of this is the <strong>COMMIT</strong> button in the panel's footer row (<code>#wsCommit</code>), which calls <code>commitScene()</code> with no arguments — so every scene created from the UI is auto-named "SCENE 1", "SCENE 2", etc.; there is no text field to name a scene before committing. Committed scenes live on the in-memory project object and are written to (and read back from) IndexedDB alongside the rest of project state when you SAVE / LOAD a project (<code>scenes</code> and <code>songPositions</code> are both part of the project record in <code>projects.js</code>'s <code>saveProject</code>/<code>loadProject</code>).</p>
+<h3>KEYBOARD COMMANDS</h3>
+<p>None. No key in <code>keyboard.js</code> is bound to <code>commitScene</code>, <code>recallScene</code>, or any song-position function.</p>
+<h3>RELATED PARAMETERS</h3>
+<ul>
+<li><strong>COMMIT</strong> button → <code>WorkstationProjects.commitScene()</code></li>
+<li>Each group's active pattern (set via the pad/group controls described in the Groups and Patterns sections) is exactly what a scene captures and later restores.</li>
+</ul>
+<h3>LIMITATIONS</h3>
+<p>This section is more scaffolding than feature today. <code>recallScene</code>, <code>addSceneToSong</code>, <code>setSongPosition</code>, <code>cutSongPosition</code>, <code>insertSongPosition</code>, and <code>getSongPositions</code> are all implemented in <code>projects.js</code>, but <strong>none of them are wired to any button, list, or keyboard shortcut</strong> in <code>ui.js</code> or <code>keyboard.js</code>. In concrete terms:</p>
+<ul>
+<li>You can create scenes (COMMIT), and they persist across save/load — but there is currently no way, from the app itself, to see the list of committed scenes, to recall one, to add a scene to a song, to reorder/cut/insert song positions, or to play a song back.</li>
+<li>Because the UI always calls <code>commitScene()</code> with no name, the <code>name</code> parameter the function accepts is unreachable from the panel — scenes can only ever get the auto-generated "SCENE N" name unless something calls <code>commitScene("...")</code> directly.</li>
+</ul>
+<p>Song mode should be read as a data model only right now, not a usable feature of the panel.</p>
+</section>
+
+<section id="16-fader">
+<h2>16 Fader</h2>
+<h3>WHAT IT DOES</h3>
+<p><code>#wsFader</code> is the single range input in the panel's <code>ws-knobs</code> block (default 80, range 0–100). Its <code>input</code> listener, wired in <code>ui.js</code>'s <code>wireTransport()</code>, calls <code>WorkstationGroups.setFader(activeLetter, value / 100)</code> — <strong><code>activeLetter</code></strong> being whichever group is currently selected via the GROUP A/B/C/D buttons, not a fixed channel. <code>setFader()</code> (<code>groups.js</code>) clamps the value to 0–1, stores it on that group's own state, and — when the audio engine module is present — calls <code>WorkstationAudio.setGroupFader(letter, value)</code>. That function ramps the group's real <code>groupFader</code> <code>GainNode</code> (<code>setTargetAtTime</code>, 0.01s) inside the actual signal path: <code>voice → groupInput → groupDuck (sidechain) → groupFader → workstationMaster</code>. So <code>#wsFader</code> is real-time audio control, not a cosmetic readout — moving it is audible immediately on whichever group is active.</p>
+<h3>HOW TO USE IT</h3>
+<p>Select a group with the GROUP A/B/C/D buttons, then drag FADER to set that group's level. Switching the active group afterward does <strong>not</strong> move the slider to reflect the newly-active group's own stored level (see Limitations) — the slider's visual position is independent of which group it will next act on.</p>
+<h3>KEYBOARD COMMANDS</h3>
+<p>None bound.</p>
+<h3>RELATED PARAMETERS</h3>
+<p>Mixer mode (<code>mixer.js</code>) renders its own per-channel FADER slider for each group plus a MASTER strip. When nothing is muted or soloed, Mixer's channel fader and the main panel's <code>#wsFader</code> (for that same active group) are <strong>two separate UI controls writing the same underlying value</strong> — both ultimately call <code>WorkstationGroups.setFader()</code>, which drives the one real <code>groupFader</code> gain node for that letter. They are not two independent audio paths; they're two knobs pointed at one number.</p>
+<h3>LIMITATIONS</h3>
+<ul>
+<li><strong>Documented inconsistency between the two controls (per <code>mixer.js</code>'s own comments):</strong> <code>groups.js</code> only stores one fader number per group, but Mixer mode needs to force a channel to 0 for mute/solo without losing the user's dialed-in level, so <code>mixer.js</code> keeps a separate local <code>storedFader</code> per group and resyncs it from the live value on each render — <em>except</em> for channels it's currently forcing silent. The main panel's <code>#wsFader</code> bypasses that bookkeeping entirely and writes straight to <code>WorkstationGroups.setFader()</code>. Concretely: if a group is muted, or losing a solo contest, in Mixer mode, and the user then drags <code>#wsFader</code> for that same (active) group on the main panel, it will audibly override the mute/solo silence — and stays overridden until Mixer mode is reopened and re-renders, which reapplies whatever it last decided. <code>mixer.js</code> calls this out directly as a known limitation and notes that fixing it would require teaching <code>ui.js</code> about mixer state, which it considers out of scope for that file.</li>
+<li><strong><code>#wsFader</code>'s own displayed position never resyncs.</strong> It's set once to 80 at panel build time; nothing updates its <code>.value</code> when the active group changes, when a project loads, or when Mixer mode changes that group's level elsewhere. The slider you see is not a reliable readout of the active group's actual current fader value.</li>
+</ul>
+</section>
+
+<section id="17-xy-parameters">
+<h2>17 X/Y Parameters</h2>
+<h3>WHAT IT DOES</h3>
+<p><code>#wsKnobX</code> and <code>#wsKnobY</code> are two range inputs (0–100, default 50) rendered in the panel shell alongside FADER (<code>ui.js</code>'s <code>buildPanel()</code>, in the <code>ws-knobs</code> block). A full search of every workstation module turns up no <code>input</code>, <code>change</code>, or any other listener attached to either element anywhere in the codebase — they exist in the markup only.</p>
+<h3>HOW TO USE IT</h3>
+<p>They can be dragged like any other slider, but doing so currently has no effect on any sound, pattern, effect, or project setting. There is nothing to "use" here yet.</p>
+<h3>KEYBOARD COMMANDS</h3>
+<p>None — there is no bound parameter for a key to target.</p>
+<h3>RELATED PARAMETERS</h3>
+<p>The working version of this same "two generic knobs, relabeled per context" idea already exists in <strong>FX mode</strong>: <code>effects.js</code>'s <code>render()</code>/<code>buildFxMarkup()</code>/<code>wireFxControls()</code> build <code>#wsFxP1</code> and <code>#wsFxP2</code>, whose on-screen labels change per selected effect type (<code>PARAM_LABELS</code>: DELAY → LENGTH/FEEDBACK, REVERB → LENGTH/COLOR, DISTORTION → DRIVE/COLOR, CHORUS → RATE/DEPTH, FILTER → CUTOFF/RESONANCE, COMPRESSOR → DRIVE/SPEED), and each one calls <code>setParam(0 | 1, value)</code>, which drives the real Web Audio node parameters for whichever effect is currently active (e.g., <code>delay.delayTime</code> / feedback gain for DELAY) in real time. If <code>#wsKnobX</code>/<code>#wsKnobY</code> are ever connected to something, this is the pattern already proven in the app.</p>
+<h3>LIMITATIONS</h3>
+<p><code>#wsKnobX</code> and <code>#wsKnobY</code> in the main panel shell are <strong>not wired to any parameter today</strong> — not a sound parameter, not a pattern parameter, not an effect parameter, not a project setting. They should be treated as reserved/placeholder controls, not functioning ones, until a future change gives them a real target.</p>
+</section>
+
+<section id="18-timing">
+<h2>18 Timing</h2>
+<h3>WHAT IT DOES</h3>
+<p><code>sequencer.js</code> keeps a <code>TIMING_INTERVALS</code> map of eight named note values — <code>1/1</code>, <code>1/2</code>, <code>1/4</code>, <code>1/8</code>, <code>1/8T</code>, <code>1/16</code>, <code>1/16T</code>, <code>1/32</code> — each resolved to a length in sequencer ticks, derived from <code>patterns.js</code>'s 96-ticks-per-quarter-note clock (so <code>1/4</code> = 96 ticks, <code>1/8</code> = 48, <code>1/16</code> = 24, <code>1/32</code> = 12, <code>1/2</code> = 192, <code>1/1</code> = 384). The <code>T</code>-suffixed values are triplet subdivisions — two-thirds of the matching straight value's tick length, rounded to the nearest whole tick with <code>Math.round()</code> since a tick count has to be an integer.</p>
+<p>The single selected value (<code>timingInterval</code>, defaulting to <code>"1/16"</code>) is what governs the <strong>note-repeat retrigger interval</strong>: on every transport tick, <code>onTransportTick</code> checks each pad flagged for Note Repeat (section 19) against <code>tick % TIMING_INTERVALS[timingInterval] === 0</code>, and only retriggers that pad on ticks where this holds. TIMING has no effect on anything else in the sequencer — normal pattern playback and the QUANTIZE grid (section 20) are both fixed to 16th-note steps by <code>patterns.js</code>'s own step size, independent of whatever TIMING interval is currently selected.</p>
+<h3>HOW TO USE IT</h3>
+<p><code>setTimingInterval(name)</code> / <code>getTimingInterval()</code> read and write the current interval; the workstation starts on <code>"1/16"</code>.</p>
+<h3>KEYBOARD COMMANDS</h3>
+<p>None — see LIMITATIONS.</p>
+<h3>RELATED PARAMETERS</h3>
+<p>NOTE REPEAT (section 19) reads this value every tick to decide when to fire. QUANTIZE (section 20) is unrelated — it always snaps to the fixed 16th-note pattern grid regardless of what TIMING is set to.</p>
+<h3>LIMITATIONS</h3>
+<p><code>setTimingInterval</code>/<code>getTimingInterval</code> are fully implemented and exported on <code>window.WorkstationSequencer</code>, but nothing else in the codebase calls them — there is no keyboard shortcut and no on-screen control in <code>ui.js</code> or <code>app.js</code> that lets a user switch between the eight values. In the current build, TIMING is effectively locked to its default, <code>1/16</code>, for the life of the page. The interval map and its tick math are correct and real; only the control surface to change which interval is active is missing.</p>
+</section>
+
+<section id="19-note-repeat">
+<h2>19 Note Repeat</h2>
+<h3>WHAT IT DOES</h3>
+<p>Holding <strong>Tab</strong> — the computer-keyboard stand-in for the EP-133's physical TIMING button (section 03) — arms Note Repeat. While Tab is held, pressing and holding a pad calls <code>setNoteRepeat(letter, padIndex, true)</code>, which makes the tick handler retrigger that pad's sound every time the transport tick lands on a multiple of the current TIMING interval (section 18), for as long as the pad is held. Releasing the pad (with Tab still held) calls <code>setNoteRepeat(..., false)</code> and the retriggering stops immediately. If the transport isn't already playing when Note Repeat engages, <code>setNoteRepeat</code> starts it automatically, since the tick clock has to be running for anything to retrigger against.</p>
+<p>Holding <strong>Shift</strong> at the same time as pressing the pad (while Tab is held) additionally calls <code>latchNoteRepeat</code>, which toggles a separate <code>noteRepeatSustain</code> flag for that pad. Once latched, the pad keeps repeating even after the pad key — and even Tab — are released, independent of the held-state. Pressing Tab+Shift+the same pad again toggles the flag back off and the repeating stops.</p>
+<h3>HOW TO USE IT</h3>
+<ol>
+<li>Hold <strong>Tab</strong>.</li>
+<li>Press and hold a pad: it retriggers continuously at the current TIMING interval until you let go.</li>
+<li>To make it keep going hands-free, hold <strong>Shift</strong> as well when you press the pad; press Tab+Shift+that pad again later to stop it.</li>
+</ol>
+<h3>KEYBOARD COMMANDS</h3>
+<ul>
+<li><strong>Tab</strong> (hold) — arm Note Repeat.</li>
+<li><strong>Tab + pad</strong> (hold) — repeat that pad at the current TIMING interval while held.</li>
+<li><strong>Tab + Shift + pad</strong> — latch/un-latch continuous repeat for that pad.</li>
+</ul>
+<h3>RELATED PARAMETERS</h3>
+<p>TIMING (section 18) sets the retrigger rate. The active group (set via Function+group letter) determines which group's pad is targeted — the internal key is <code>"letter:padIndex"</code>, so the same pad key can be latched independently per group.</p>
+<h3>LIMITATIONS</h3>
+<p>Each retrigger fires at a fixed velocity of <code>1</code> (not the pad's played velocity) and is sent straight to the sampler via <code>triggerPad</code>, not through <code>liveRecordHit</code>. This means holding Note Repeat never writes anything into the active pattern, even while Record is armed and the transport is playing — it is a live-performance/monitoring layer on top of playback, not a way to record a burst of repeated hits into a lane.</p>
+</section>
+
+<section id="20-quantize">
+<h2>20 Quantize</h2>
+<h3>WHAT IT DOES</h3>
+<p>Two related but distinct mechanisms share the name "quantize" here:</p>
+<ol>
+<li><strong>The QUANTIZE toggle</strong> (<code>getQuantize()</code> / <code>setQuantize()</code>, surfaced as a button literally labeled "QUANTIZE" in Sequencer mode) controls how <code>liveRecordHit</code> treats every hit recorded while Play and Record are both active. With it <strong>on</strong> (the default), each hit's tick position is rounded to the nearest 16th-note step and written with <code>offsetTicks: 0</code> — it lands exactly on the grid, discarding the free-time timing it was actually played with. With it <strong>off</strong>, the hit is floored to the preceding step and the leftover ticks are kept as that event's <code>offsetTicks</code>, so playback reproduces the original free-time feel.</li>
+<li><strong><code>quantizePad(letter, padIndex)</code></strong> is a separate, one-shot correction: it doesn't touch how future hits are recorded — it reaches into whatever is already recorded on one pad's lane in the active group's active pattern and zeroes every existing event's <code>offsetTicks</code>, snapping already-recorded free-time hits on that pad back onto the grid after the fact. It pushes an undo snapshot first, like every other pattern edit, so one Undo reverses it.</li>
+</ol>
+<p>Both operate against the same fixed 16th-note grid; the TIMING interval (section 18) has no bearing on either.</p>
+<h3>HOW TO USE IT</h3>
+<p>Click the on-screen <strong>QUANTIZE</strong> button in Sequencer mode to toggle live-recording snap before or during a take. There is currently no interface path to invoke <code>quantizePad</code> — see LIMITATIONS.</p>
+<h3>KEYBOARD COMMANDS</h3>
+<p>None. The QUANTIZE toggle is wired only to its on-screen button click handler; no key triggers it.</p>
+<h3>RELATED PARAMETERS</h3>
+<p>Step recording (<code>stepRecordHit</code>, used while stopped) always writes <code>offsetTicks: 0</code> regardless of the QUANTIZE toggle — there's no free-time information to quantize in the first place, since the cursor already picks an exact step. The toggle only affects live (while-playing) recording via <code>liveRecordHit</code>.</p>
+<h3>LIMITATIONS</h3>
+<p><code>quantizePad</code> is fully implemented in <code>sequencer.js</code> (and the underlying <code>patterns.js</code> <code>quantize()</code> it calls even supports a whole-pattern pass when given a <code>null</code> pad index), but it is never called from anywhere in <code>ui.js</code>, <code>keyboard.js</code>, or <code>app.js</code>. The function works correctly if invoked, but there is currently no button or key combination in the running app that reaches it.</p>
+</section>
+
+<section id="21-loop">
+<h2>21 Loop</h2>
+<h3>WHAT IT DOES</h3>
+<p>A case-insensitive search for "loop" across every file in <code>midi-office/js/workstation/*.js</code> (<code>app.js</code>, <code>audio-engine.js</code>, <code>effects.js</code>, <code>groups.js</code>, <code>keyboard.js</code>, <code>keys-mode.js</code>, <code>midi.js</code>, <code>mixer.js</code>, <code>patterns.js</code>, <code>projects.js</code>, <code>sampler.js</code>, <code>sequencer.js</code>, <code>sound-editor.js</code>, <code>storage.js</code>, <code>transport.js</code>, <code>ui.js</code>) turns up <strong>no matches at all</strong> — not a function, not a comment, not a UI label. There is no dedicated Loop feature in this codebase: no loop-region start/end markers, no "hold to loop the current section while held" control, no loop button or keyboard binding. The EP-133 hardware's own temporary loop-a-section function has not been built here.</p>
+<p>What the workstation does provide, which is easy to mistake for a "loop" feature but is really just how playback works, is this: <strong>every active pattern repeats continuously, in full, for as long as Play is on</strong>, by design, per group:
+- <code>transport.js</code>'s <code>play()</code> resets <code>currentTick</code> to 0 and its scheduler increments that tick count indefinitely (in ~25ms lookahead batches) until <code>stop()</code> is called — it never resets or halts on its own.
+- <code>sequencer.js</code>'s <code>onTransportTick</code> computes, separately for each of the four groups, <code>patternTicks = pattern.lengthSteps * ticksPerStep()</code> and wraps the running tick into that pattern's own length (<code>tick % patternTicks</code>). Once the tick count passes one pattern's length, it wraps back to the start and the same lane events fire again — indefinitely, with no toggle to turn that wrapping off.
+- Because each group uses its own pattern's <code>lengthSteps</code> (settable via the BARS dropdown in Sequencer mode: 1/2/4/8 bars → 16/32/64/128 steps), groups with different pattern lengths loop independently and realign on whatever cycle their lengths share — e.g. a 1-bar A pattern and a 4-bar B pattern realign every 4 bars rather than restarting together.</p>
+<h3>HOW TO USE IT</h3>
+<p>No explicit action is needed: press Play and the active pattern in every group begins repeating, and keeps repeating until Stop. Loop length for a given pattern is set indirectly through its length — the BARS dropdown in Sequencer mode (1/2/4/8 bars).</p>
+<h3>KEYBOARD COMMANDS</h3>
+<p>None specific to looping — it isn't a toggle, it's the default behavior of playback whenever Play is active.</p>
+<h3>RELATED PARAMETERS</h3>
+<p>Pattern length (BARS dropdown / <code>patterns.js setLength</code>) determines each group's loop length. TIMING and NOTE REPEAT (sections 18–19) are independent of pattern playback and don't interact with this looping behavior.</p>
+<h3>LIMITATIONS</h3>
+<p>There is no counterpart in this codebase to the EP-133's temporary hold-to-loop-a-section function — confirmed by an exhaustive search of every workstation module. What exists instead is unconditional, always-on repetition of each group's full active pattern while Play is on, which is a simpler and different feature from a temporary section loop, not a substitute for it. A true hold-to-loop-a-region feature would need its own implementation (e.g., a loop-start tick and loop-length overriding the modulo bounds while a key is held) and should not be described as already present until it is built.</p>
+</section>
+
+<section id="22-effects">
+<h2>22 Effects</h2>
+<h3>WHAT IT DOES</h3>
+<p>The workstation has exactly one FX engine, matching the EP-133's own hardware model: only <strong>one</strong> effect type is ever processing audio at a time, picked from six types — <strong>DELAY, REVERB, DISTORTION, CHORUS, FILTER, COMPRESSOR</strong> (plus an <strong>OFF</strong> position). Each type exposes exactly two knobs:</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Knob 1</th>
+<th>Knob 2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DELAY</td>
+<td>LENGTH</td>
+<td>FEEDBACK</td>
+</tr>
+<tr>
+<td>REVERB</td>
+<td>LENGTH</td>
+<td>COLOR</td>
+</tr>
+<tr>
+<td>DISTORTION</td>
+<td>DRIVE</td>
+<td>COLOR</td>
+</tr>
+<tr>
+<td>CHORUS</td>
+<td>RATE</td>
+<td>DEPTH</td>
+</tr>
+<tr>
+<td>FILTER</td>
+<td>CUTOFF</td>
+<td>RESONANCE</td>
+</tr>
+<tr>
+<td>COMPRESSOR</td>
+<td>DRIVE</td>
+<td>SPEED</td>
+</tr>
+</tbody>
+</table>
+<p>Switching type fully disconnects and disposes the outgoing processor (stopping any of its oscillators) before building the next one from scratch — there is never more than one effect's nodes alive in the graph. Each knob's position is remembered per-type, so flipping back to a type you'd already tweaked restores where you left it.</p>
+<p>Every group (A-D) has its own <strong>SEND</strong> knob. This is a true send/return: a per-group gain node taps the group's shared input bus in parallel with the dry signal, so SEND = 0 means "no signal reaching the FX," not "group is muted." All four sends mix into one shared FX input bus, through the single active effect, into one FX output bus, into the workstation master — i.e., all four groups share the one FX engine's return, exactly as SEND/RETURN implies.</p>
+<p><strong>LIVE INPUT</strong> routes a microphone into that same shared FX input bus (<code>getUserMedia</code> → source → input GAIN → MIC SEND → the FX bus). There is no dry mic path: with the mic on and FX set to OFF, the mic is silent — audible only through whichever effect is currently selected. The mic defaults to <strong>off</strong> and must be explicitly enabled via the LIVE INPUT button; it is never activated automatically. If the browser has no <code>getUserMedia</code> support, or the permission prompt is denied, or any other failure occurs, the module never throws — it reports a plain <strong>"MIC UNAVAILABLE"</strong> status and leaves the rest of the FX panel untouched.</p>
+<p>REVERB and DISTORTION are <strong>not</strong> built from a bundled audio file. The reverb's impulse response is white noise shaped by an exponential decay envelope, generated at runtime for the chosen LENGTH; DISTORTION's curve is a tanh-style soft-clip table generated at runtime from the DRIVE value. Nothing is fetched from disk for either.</p>
+<h3>HOW TO USE IT</h3>
+<ol>
+<li>Enter FX mode (see KEYBOARD COMMANDS) to open the FX panel.</li>
+<li>Pick a TYPE from the dropdown — this is the one engine shared by all groups.</li>
+<li>Adjust the two type-specific knobs.</li>
+<li>For each group you want to hear through the effect, raise that group's SEND knob while that group's panel is open.</li>
+<li>To add microphone input, click LIVE INPUT (grants/uses mic permission), then set GAIN (mic input level) and MIC SEND (how much of the mic reaches the FX bus).</li>
+</ol>
+<h3>KEYBOARD COMMANDS</h3>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Keys</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Enter FX mode</td>
+<td>FUNCTION (<code>`</code>) + 9</td>
+</tr>
+<tr>
+<td>Select active group (changes which group's SEND knob is shown)</td>
+<td>FUNCTION + 1-4</td>
+</tr>
+</tbody>
+</table>
+<p>Knobs and the LIVE INPUT toggle are mouse/touch controls only — there is no keyboard binding for TYPE, the two param knobs, SEND, or mic GAIN/SEND.</p>
+<h3>RELATED PARAMETERS</h3>
+<ul>
+<li>TYPE (DELAY / REVERB / DISTORTION / CHORUS / FILTER / COMPRESSOR / OFF)</li>
+<li>Knob 1, Knob 2 (labels vary by type, see table above)</li>
+<li>SEND (per group, A-D)</li>
+<li>LIVE INPUT on/off, GAIN, MIC SEND</li>
+</ul>
+<h3>LIMITATIONS</h3>
+<ul>
+<li>REVERB's LENGTH knob regenerates the impulse-response buffer, which isn't cheap — it's debounced (150ms after you stop moving the knob) rather than recalculated on every drag tick. COLOR, on the same effect, is instant since it only touches a filter after the convolver.</li>
+</ul>
+</section>
+
+<section id="23-punch-in-fx">
+<h2>23 Punch-In FX</h2>
+<h3>WHAT IT DOES</h3>
+<p>Punch-in is a momentary, <strong>held</strong> performance effect applied directly to the master bus — distinct from the sustained SEND/RETURN engine in section 22. It's inserted into the one fixed connection between the workstation master and the punch bus: holding pad(s) swaps that single wire for a short series chain built from the held pads' effects; releasing a pad ramps its effect to neutral and rebuilds the chain without it. With zero pads held, the connection is the original direct wire — fully transparent, no processing at all.</p>
+<p>Holding more than one pad at once <strong>stacks</strong> their effects in series (pad order, lowest index first), so e.g. holding pads 0 and 2 together runs the lowpass sweep into the distortion spike.</p>
+<p>Each of the 12 pads has one fixed, self-contained effect — these are hand-picked per pad in the code, not user-assignable:</p>
+<table>
+<thead>
+<tr>
+<th>Pad</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Lowpass sweep down (18kHz → 250Hz over 500ms, Q 0.9)</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Highpass sweep up (20Hz → 3.5kHz over 500ms, Q 0.9)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Distortion spike (fixed drive)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Short feedback-delay stutter (90ms, 55% feedback)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Tremolo chop (9Hz square wave)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Flanger sweep (slow modulated short delay)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Reverb splash (1.2s procedurally generated IR)</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Telephone bandpass (1.2kHz, Q 5)</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Trance gate (16Hz square-wave tremolo)</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Long delay wash (380ms, 50% feedback)</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Low boost (low-shelf, +9dB at 150Hz)</td>
+</tr>
+<tr>
+<td>11</td>
+<td>High sparkle / air (high-shelf, +9dB at 6kHz)</td>
+</tr>
+</tbody>
+</table>
+<p>This mapping is independent of which group (A-D) is currently selected — it's keyed purely to the pad's physical position (0-11), since punch-in processes the already-summed master bus, not any one group.</p>
+<h3>HOW TO USE IT</h3>
+<ol>
+<li>Enter FX mode.</li>
+<li>Hold down one or more of the 12 pad keys. Each held pad's effect engages immediately and stays on the master bus for as long as that key is held.</li>
+<li>Release a pad to return its slot to transparent passthrough (a brief ~150ms ramp-to-neutral, then it's fully removed from the chain). Release all pads to return to the original untouched wire.</li>
+</ol>
+<h3>KEYBOARD COMMANDS</h3>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Keys</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Enter FX mode</td>
+<td>FUNCTION (<code>`</code>) + 9</td>
+</tr>
+<tr>
+<td>Hold punch-in effect (pad 0-11)</td>
+<td>1 2 3 4 5 6 7 8 9 0 - = (held)</td>
+</tr>
+<tr>
+<td>Panic / force-release all held punch effects</td>
+<td>Escape</td>
+</tr>
+</tbody>
+</table>
+<h3>RELATED PARAMETERS</h3>
+<p>None exposed — each pad's effect is a fixed preset; there are no knobs for punch-in.</p>
+<h3>LIMITATIONS</h3>
+<ul>
+<li>The 12 effects are permanently assigned to pad positions 0-11 in the order shown above; there is currently no UI to reassign or audition them independently.</li>
+</ul>
+</section>
+
+<section id="24-sidechain">
+<h2>24 Sidechain</h2>
+<h3>WHAT IT DOES</h3>
+<p>Sidechain ducking lets a hit on one trigger group pull down the volume of one or more other (target) groups, recovering over a configurable envelope — the classic "kick ducks the bass" effect. It is configured from the FX panel: a single <strong>SC TRIGGER</strong> group selector, a bank of per-group checkboxes to pick <strong>target(s)</strong>, and three knobs — <strong>LENGTH</strong>, <strong>SHAPE</strong>, <strong>DEPTH</strong> — shared across whichever targets are checked.</p>
+<p>Detection is <strong>not</strong> a second audio-analysis pass (no analyser node listening to the trigger group's output). Instead, it hooks the sequencer's own step clock and, on every tick, re-runs the exact same tick-matching math the sequencer itself uses to decide whether a lane event should fire (pattern length in ticks, local tick within the pattern, each event's normalized tick position) against the trigger group's active pattern. If that math says "yes, a hit lands on this tick," every checked target group gets ducked — it never re-triggers or duplicates the sound, it only detects the hit sequencer.js was already going to play.</p>
+<h3>HOW TO USE IT</h3>
+<ol>
+<li>Enter FX mode.</li>
+<li>Set SC TRIGGER to the group whose pattern hits should trigger ducking.</li>
+<li>Check one or more boxes under the target list for the groups that should duck.</li>
+<li>Adjust LENGTH (duck duration), SHAPE, and DEPTH (how far volume dips) to taste.</li>
+<li>Play the pattern — targets duck on every trigger-group hit per their pattern, for as long as the transport is running.</li>
+</ol>
+<h3>KEYBOARD COMMANDS</h3>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Keys</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Enter FX mode</td>
+<td>FUNCTION (<code>`</code>) + 9</td>
+</tr>
+</tbody>
+</table>
+<p>SC TRIGGER, the target checkboxes, and LENGTH/SHAPE/DEPTH are mouse/touch controls only.</p>
+<h3>RELATED PARAMETERS</h3>
+<ul>
+<li>SC TRIGGER (group A-D)</li>
+<li>Target group checkboxes (A-D, multiple allowed)</li>
+<li>LENGTH, SHAPE, DEPTH</li>
+</ul>
+<h3>LIMITATIONS</h3>
+<ul>
+<li>Ducking is driven by the trigger group's <em>active pattern data</em>, evaluated on the sequencer's tick clock — it only fires while the transport is running a pattern on that group. There is no live-audio-triggered ducking from, e.g., live-played (non-sequenced) hits or the LIVE INPUT mic.</li>
+</ul>
+</section>
+
+<section id="25-midi">
+<h2>25 MIDI</h2>
+<h3>WHAT IT DOES</h3>
+<p>The workstation accepts <strong>Web MIDI input only</strong> — there is no MIDI output or MIDI-thru; nothing here sends messages back out to a connected device.</p>
+<p>Incoming Note On/Off messages are translated into the same group+pad shape the computer keyboard drives, reproducing the EP-133's own documented note-map layout: four contiguous one-octave (12-note) banks, one per group, in group order, starting at note 36:</p>
+<table>
+<thead>
+<tr>
+<th>Notes</th>
+<th>Group</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>36-47</td>
+<td>A, pads 0-11</td>
+</tr>
+<tr>
+<td>48-59</td>
+<td>B, pads 0-11</td>
+</tr>
+<tr>
+<td>60-71</td>
+<td>C, pads 0-11</td>
+</tr>
+<tr>
+<td>72-83</td>
+<td>D, pads 0-11</td>
+</tr>
+</tbody>
+</table>
+<p>Notes outside 36-83 are outside the documented pad range and are ignored in pad mode. <strong>Keys mode is the one exception</strong>: while Keys mode is active, incoming notes bypass the group/pad mapping entirely and are handed to Keys mode as the raw note number across the full 0-127 range, so Keys mode plays chromatically from a MIDI controller exactly as it does from the computer keyboard's chromatic layout.</p>
+<p>Per the MIDI spec, a <strong>Note On with velocity 0 is treated as a Note Off</strong>, not as a zero-velocity hit. Outside Keys mode, Note Off is otherwise a deliberate no-op: pad hits are fire-and-forget one-shots with their own fixed envelope/duration (0.5s, matching the computer keyboard's own hit length), so there is no sustained voice to release.</p>
+<p>Realtime <strong>Start</strong> (0xFA) and <strong>Stop</strong> (0xFC) messages play and stop the transport, respectively.</p>
+<p>The MIDI status line reads exactly one of three states, and updates live the instant a device is plugged in or unplugged (via the Web MIDI <code>onstatechange</code> event) without a page reload:
+- <strong>"MIDI UNAVAILABLE"</strong> — the browser has no Web MIDI support, or the permission prompt was denied, or access otherwise failed
+- <strong>"MIDI: NO DEVICE"</strong> — Web MIDI is available and granted, but no input is currently connected
+- <strong>"MIDI: <device name>"</strong> — the name of the connected input, as reported by the browser</p>
+<p>Every entry point from the outside world (the access-request promise, and each incoming message) is wrapped so a malformed message or any downstream error can never crash the page — it only logs to the console and moves on.</p>
+<h3>HOW TO USE IT</h3>
+<ol>
+<li>Connect a class-compliant MIDI controller (or an EP-133 itself) before or after loading the page.</li>
+<li>Grant the browser's MIDI permission prompt if asked.</li>
+<li>Check the MIDI status readout to confirm the device name appears.</li>
+<li>Play pads 36-83 to trigger the matching group/pad; switch to Keys mode to play chromatically instead.</li>
+<li>Send Start/Stop from the controller (if it offers transport buttons) to play/stop the workstation's transport.</li>
+</ol>
+<h3>KEYBOARD COMMANDS</h3>
+<p>Not applicable — this section describes an external MIDI controller, not the computer keyboard.</p>
+<h3>RELATED PARAMETERS</h3>
+<ul>
+<li>MIDI status readout (read-only: "MIDI UNAVAILABLE" / "MIDI: NO DEVICE" / "MIDI: &lt;device name&gt;")</li>
+</ul>
+<h3>LIMITATIONS</h3>
+<ul>
+<li>Input only — no MIDI output or thru to an external device.</li>
+<li>Only Note On/Off, Control Change, Clock, Start, and Stop are handled. Program Change, pitch bend, and (poly/channel) pressure messages are intentionally ignored. Realtime <strong>Continue</strong> (0xFB) is also not handled — only Start and Stop affect the transport.</li>
+<li>If multiple MIDI inputs are connected at once, the status line shows whichever one the browser reports as "connected" first; all connected inputs still feed pad triggers identically, but only one name is ever shown.</li>
+</ul>
+</section>
+
+<section id="26-midi-cc-learn">
+<h2>26 MIDI CC / MIDI Learn</h2>
+<h3>WHAT IT DOES</h3>
+<p><strong>CC 64</strong> (the standard sustain-pedal controller number) is always tracked, regardless of anything else happening in the app: values ≥ 64 are "pedal down," values &lt; 64 are "pedal up," exposed through <code>isSustainDown()</code>.</p>
+<p>A generic, one-shot <strong>MIDI-learn primitive</strong> also exists: <code>startLearn(callback)</code> arms a single callback that fires on the very next incoming Control Change message (any CC number, any value), then immediately disarms itself — so a learned binding only ever captures one message, not a continuous stream. The callback is cleared <em>before</em> it's invoked, so a callback that itself calls <code>startLearn()</code> again to chain a second learn behaves predictably rather than re-triggering itself.</p>
+<h3>HOW TO USE IT</h3>
+<p>Neither of these is exposed as a user-facing control right now (see LIMITATIONS) — there is nothing to click to invoke MIDI learn, and the sustain state isn't wired into anything audible.</p>
+<h3>KEYBOARD COMMANDS</h3>
+<p>Not applicable — both are CC-message-driven primitives with no computer-keyboard equivalent.</p>
+<h3>RELATED PARAMETERS</h3>
+<p>None currently surfaced in any panel.</p>
+<h3>LIMITATIONS</h3>
+<ul>
+<li><strong><code>startLearn()</code> has no caller anywhere in the codebase.</strong> The one-shot learn primitive is fully implemented and functional, but no panel control (not in the FX panel, not in the mixer, not anywhere in <code>ui.js</code>) currently offers a "click to MIDI-learn" button to arm it. It exists today purely as infrastructure for a future control-binding feature.</li>
+<li><strong><code>isSustainDown()</code> also has no caller anywhere in the codebase.</strong> CC 64 is faithfully tracked as sustain-pedal state, but nothing in Keys mode or elsewhere currently reads that state to actually sustain a note — the plumbing is there, the consumer isn't, yet.</li>
+<li><strong>Incoming MIDI clock (0xF8) is advisory only.</strong> <code>getIncomingClockBpm()</code> averages the spacing of the last 24 clock pulses (one quarter note) into a read-only BPM estimate, and returns <code>null</code> if fewer than 2 pulses have arrived or the last pulse is more than 2 seconds stale. It does <strong>not</strong> slave or sync the workstation's own transport clock to the incoming signal in any way — it's purely a number available for inspection, and like the two primitives above, nothing currently displays or otherwise consumes it in the UI.</li>
+</ul>
+</section>
+
+<section id="27-file-import">
+<h2>27 File Import</h2>
+<h3>WHAT IT DOES</h3>
+<p>Loads an audio file onto the currently selected pad's sound. The whole operation is client-side: the file is read with <code>FileReader</code> and handed to the browser's own <code>decodeAudioData</code> (via the shared <code>window.ToneEngine.decodeFile()</code> helper that the original Sampler/DJ modules already use — see <code>midi-office/js/audio-engine.js</code>). Nothing is ever uploaded anywhere; there is no network request and no server in the loop. The decoded <code>AudioBuffer</code> is attached directly to that pad's sound record, the sound is renamed from the filename (stripped of extension, uppercased, truncated to 16 characters), and its trim range resets to the full buffer with any previous chop cleared.</p>
+<h3>HOW TO USE IT</h3>
+<p>Two equivalent paths, both in <strong>SOUND</strong> mode with a pad selected:</p>
+<ul>
+<li><strong>File picker</strong> — the SAMPLE section's <strong>LOAD FILE</strong> button opens the browser's native file dialog (<code>accept="audio/*"</code>). Picking a file decodes it and assigns it to the selected pad.</li>
+<li><strong>Drag and drop</strong> — drop an audio file anywhere on the Sound Edit panel while that pad is selected. One <code>dragover</code>/<code>drop</code> listener is wired on the panel container and always acts on whichever pad is currently selected at the moment of the drop.</li>
+</ul>
+<p>Loading a new file onto a pad that already has a sound fully replaces its buffer — there is no multi-layering of samples on one pad.</p>
+<h3>KEYBOARD COMMANDS</h3>
+<p>None. The file dialog is OS-driven, and drag-and-drop has no keyboard equivalent in this build.</p>
+<h3>RELATED PARAMETERS</h3>
+<p><code>sound.name</code>, <code>sound.buffer</code>, <code>sound.trimStart</code> / <code>trimEnd</code> (reset to 0 / 1 on load), <code>sound.chop</code> (cleared on load). Everything else about the sound (pitch, gain, pan, play mode, envelope, MIDI mapping, mute group) is untouched by importing a new file.</p>
+<h3>LIMITATIONS</h3>
+<ul>
+<li><strong>No fixed format list, by design.</strong> Supported formats are exactly whatever the browser's own <code>decodeAudioData</code> supports — commonly MP3/WAV/OGG/M4A-AAC, but this varies by browser and version. The <code>accept="audio/*"</code> filter only shapes what the OS file dialog <em>shows</em>; it doesn't guarantee a chosen file will actually decode.</li>
+<li><strong>Decode failures are silent.</strong> Neither the file-picker handler nor the drag-and-drop handler attaches an error handler to the <code>loadFileToPad()</code> promise. If <code>decodeAudioData</code> rejects (corrupt file, unsupported codec), the promise simply fails with no on-screen message — the pad is left exactly as it was, with no indication anything was attempted.</li>
+<li><strong>No size limit is enforced.</strong> A very large file will decode (slowly, and using however much memory the browser allows) with no warning; this code does not check file size beforehand.</li>
+<li>Loading via microphone (SAMPLE-mode pad recording) is a related but separate feature from file import — see its own section; it does not go through this file-picker/drag-drop path.</li>
+</ul>
+</section>
+
+<section id="28-project-save-load">
+<h2>28 Project Save / Load</h2>
+<h3>WHAT IT DOES</h3>
+<p>The project row at the bottom of the panel (project name field, <strong>NEW</strong>, <strong>SAVE</strong>, a <strong>LOAD PROJECT…</strong> dropdown, <strong>LOAD</strong>, <strong>DELETE</strong>) is backed by IndexedDB (<code>storage.js</code>). A project is split across normalized stores — <code>projects</code>, <code>groups</code>, <code>sounds</code>, <code>patterns</code>, <code>scenes</code>, <code>blobs</code> — so editing one sound or pattern doesn't require re-writing the whole project.</p>
+<p><strong>Verified round trip:</strong> saving a sound with loaded audio re-encodes its <code>AudioBuffer</code> to a plain 16-bit PCM WAV blob (<code>bufferToWavBlob()</code> in <code>sampler.js</code>) and stores those raw bytes in the <code>blobs</code> store; the sound's other parameters (trim, pitch, envelope, etc.) are stored separately in <code>sounds</code>, referencing the blob by id. Loading a project reverses this exactly: it fetches the blob's <code>ArrayBuffer</code> and runs it back through <code>decodeAudioData()</code> to rebuild a real, playable <code>AudioBuffer</code>. Having read both <code>serializeSounds()</code>/<code>bufferToWavBlob()</code> and <code>restoreSounds()</code>, this is confirmed working, lossless (PCM, no re-compression) behavior — a loaded project's pads actually make sound again, not just show metadata.</p>
+<h3>HOW TO USE IT</h3>
+<ul>
+<li><strong>NEW</strong> — starts a fresh project (groups reset, tempo reset to 120 BPM / 4-4, Group A re-seeded with the generated demo kit so it isn't silent).</li>
+<li>Type into the project name field and tab/click away to rename the current project.</li>
+<li><strong>SAVE</strong> — writes the current project, its 4 groups, every pattern referenced by those groups, and every sound (with audio, where not already stored) to IndexedDB. Shows <code>SAVED</code> briefly, or <code>SAVE FAILED — STORAGE UNAVAILABLE</code> if it couldn't.</li>
+<li><strong>LOAD PROJECT…</strong> dropdown lists every saved project (newest <code>updatedAt</code> first, with its last-saved timestamp).</li>
+<li><strong>LOAD</strong> — loads the selected project, replacing the entire live state: tempo, time signature, all 4 groups' pad assignments, patterns, scenes, song positions, and every pad's actual decoded audio.</li>
+<li><strong>DELETE</strong> — removes the selected project and cascades the delete across its groups, sounds, patterns, and scenes, including any audio blobs those sounds referenced (<code>deleteProjectCascade()</code> in <code>storage.js</code>).</li>
+</ul>
+<p>A sound's audio is only WAV-encoded and written to <code>blobs</code> <strong>once</strong> (tracked via an internal <code>_blobSaved</code> flag) — re-saving after only tweaking a parameter like pitch or trim updates the lightweight <code>sounds</code> record again but reuses the already-stored WAV rather than re-encoding it.</p>
+<h3>KEYBOARD COMMANDS</h3>
+<p>None. Save/load/delete are mouse/UI-only actions; no key combination triggers any of them.</p>
+<h3>RELATED PARAMETERS</h3>
+<p>Project: <code>name</code>, <code>tempo</code>, <code>timeSigNum</code>/<code>timeSigDen</code>, <code>scenes[]</code>, <code>songPositions[]</code>. Group: <code>soundIds[12]</code>, <code>activePatternId</code>, <code>patternIds[]</code>, <code>muteGroups[]</code>. Pattern: <code>lengthSteps</code>, <code>lanes[12]</code>. Sound: every field in <code>sampler.js</code>'s sound record except the live <code>buffer</code>, which is stripped before storage and rebuilt from its blob on load.</p>
+<h3>LIMITATIONS</h3>
+<ul>
+<li><strong>"STORAGE UNAVAILABLE" degraded state is explicit and real.</strong> When <code>indexedDB</code> doesn't exist in the current context, the <strong>LOAD PROJECT…</strong> dropdown is replaced with a single disabled <code>STORAGE UNAVAILABLE</code> option, and Save/Load/Delete reject immediately, surfacing as <code>SAVE FAILED — STORAGE UNAVAILABLE</code> / <code>LOAD FAILED</code> / <code>DELETE FAILED</code>. Everything else in the Workstation (playing, recording, editing) keeps working normally — only persistence is disabled.</li>
+<li><strong>Saving is manual, never automatic.</strong> Nothing touches IndexedDB until SAVE is explicitly clicked (matches the EP-133's own explicit-commit model). Closing the tab or a crash loses unsaved work.</li>
+<li><strong>WAV re-encoding costs space, not quality.</strong> Converting to 16-bit PCM WAV is lossless but typically <em>larger</em> than the original compressed source (e.g. an imported MP3), so a project with many/long samples can consume meaningful IndexedDB quota.</li>
+<li>A sound's <code>timeMode</code>/<code>timeValue</code> fields round-trip faithfully through save/load, but (as <code>sound-editor.js</code> itself discloses) they don't affect playback in this build — a reload won't "lose" a time-stretch effect, because none is ever actually applied. Mentioned here only so a user doesn't mistake normal round-trip behavior for data loss.</li>
+</ul>
+</section>
+
+<section id="29-keyboard-shortcuts">
+<h2>29 Keyboard Shortcuts</h2>
+<p>A single lookup table, compiled directly from the key-handling code in <code>keyboard.js</code> and <code>midi.js</code> rather than restating sections 03/19/20. Keys are matched by physical position (<code>KeyboardEvent.code</code>), so this table holds regardless of keyboard layout/language. Any key press while focus is inside a text field (project name, a number input, etc.) is ignored outright, and so is any key combination held with <strong>Ctrl</strong>, <strong>Cmd</strong>, or <strong>Alt</strong> — both are deliberate, so the Workstation never fights a text field or a browser shortcut.</p>
+<h3>Computer keyboard</h3>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Context</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>1</code> <code>2</code> <code>3</code> <code>4</code> <code>5</code> <code>6</code> <code>7</code> <code>8</code> <code>9</code> <code>0</code> <code>-</code> <code>=</code></td>
+<td>any mode</td>
+<td>Trigger pads 1–12. Fixed velocity (1.0) — no pressure sensing from a computer keyboard.</td>
+</tr>
+<tr>
+<td><strong>`</strong> (Backquote), held</td>
+<td>—</td>
+<td>FUNCTION modifier — the keys below change meaning while it's held; pads 1–12 do <strong>not</strong> trigger while FUNCTION is down.</td>
+</tr>
+<tr>
+<td>FUNCTION + <code>1</code>/<code>2</code>/<code>3</code>/<code>4</code></td>
+<td>—</td>
+<td>Switch active Group → A / B / C / D</td>
+</tr>
+<tr>
+<td>FUNCTION + <code>5</code>/<code>6</code>/<code>7</code>/<code>8</code>/<code>9</code>/<code>0</code></td>
+<td>—</td>
+<td>Jump to mode → SOUND / KEYS / SEQUENCER / SAMPLE / FX / MIXER</td>
+</tr>
+<tr>
+<td>FUNCTION + <code>-</code> / <code>=</code></td>
+<td>—</td>
+<td>Cycle to previous / next mode</td>
+</tr>
+<tr>
+<td><strong>Space</strong></td>
+<td>any mode</td>
+<td>Play / Stop transport</td>
+</tr>
+<tr>
+<td><strong>Enter</strong></td>
+<td>any mode</td>
+<td>Arm / disarm recording</td>
+</tr>
+<tr>
+<td><strong>Tab</strong>, held + pad</td>
+<td>any mode</td>
+<td>Note Repeat — the pad repeats at the current timing interval for as long as both are held</td>
+</tr>
+<tr>
+<td><strong>Tab + Shift</strong>, held + pad</td>
+<td>any mode</td>
+<td>Latch that pad's Note Repeat — keeps repeating after keys are released, until toggled again</td>
+</tr>
+<tr>
+<td><strong>Backspace</strong>, held + pad</td>
+<td>Sequencer, playing</td>
+<td>Erase that pad's entire lane in the active pattern</td>
+</tr>
+<tr>
+<td><strong>Backspace</strong>, held + pad</td>
+<td>Sequencer, stopped</td>
+<td>Erase that pad's event at the step cursor</td>
+</tr>
+<tr>
+<td><strong>Shift</strong>, held + pad click</td>
+<td>Sequencer</td>
+<td>Select that pad as the nudge target for <code>[</code> / <code>]</code> below (clears when Shift is released)</td>
+</tr>
+<tr>
+<td><code>[</code> (BracketLeft) / <code>]</code> (BracketRight)</td>
+<td>Sequencer, stopped, no nudge target selected</td>
+<td>Move the step cursor back / forward one step</td>
+</tr>
+<tr>
+<td><code>[</code> / <code>]</code></td>
+<td>Shift held + a nudge target selected</td>
+<td>Nudge that pad's recorded notes back / forward one tick-step</td>
+</tr>
+<tr>
+<td><code>[</code> / <code>]</code></td>
+<td>SOUND mode, no other modifier active</td>
+<td>Select previous / next pad ("scroll sounds" stand-in)</td>
+</tr>
+<tr>
+<td><strong>Esc</strong></td>
+<td>any time, any mode</td>
+<td><strong>PANIC</strong> — silences every sounding voice across every group, and independently releases any held punch-in FX back to a transparent signal path</td>
+</tr>
+</tbody>
+</table>
+<h3>MIDI controller</h3>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Note On, notes 36–47 / 48–59 / 60–71 / 72–83</td>
+<td>Trigger Group A / B / C / D, pad = <code>(note − 36) mod 12</code>. Velocity = MIDI velocity ÷ 127.</td>
+</tr>
+<tr>
+<td>Note On, any note 0–127</td>
+<td>In <strong>KEYS</strong> mode only: plays that raw note chromatically instead of using the 4×12 pad map.</td>
+</tr>
+<tr>
+<td>Note Off</td>
+<td>In <strong>KEYS</strong> mode: releases that note's voice. Everywhere else: a deliberate no-op — group/pad hits are fire-and-forget one-shots with no sustained voice to release.</td>
+</tr>
+<tr>
+<td>MIDI Start (0xFA) / Stop (0xFC)</td>
+<td>Play / stop the internal transport.</td>
+</tr>
+<tr>
+<td>MIDI Clock (0xF8)</td>
+<td>Feeds a read-only, advisory incoming-tempo estimate only — see Limitations.</td>
+</tr>
+<tr>
+<td>CC 64 (sustain pedal)</td>
+<td><em>Tracked internally but not yet wired to anything</em> — see Limitations.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Limitations (honest gaps, not bugs to "fix" via settings):</strong> <code>midi.js</code> tracks a sustain-pedal boolean (<code>isSustainDown()</code>) and exposes a one-shot "MIDI learn" arm/consume mechanism (<code>startLearn()</code>), and estimates incoming clock tempo (<code>getIncomingClockBpm()</code>) — but nothing elsewhere in the codebase currently calls any of the three. No control is MIDI-learnable yet, the sustain pedal currently does nothing audible, and the incoming-tempo estimate isn't displayed or used to sync playback. The plumbing exists; it just isn't connected to a feature yet.</p>
+</section>
+
+<section id="30-troubleshooting">
+<h2>30 Troubleshooting</h2>
+<p><strong>No sound when pressing pads</strong>
+- Check a sound is actually assigned: switch to <strong>SOUND</strong> mode, select the pad, and look at its SAMPLE row — if the name reads <code>… (EMPTY)</code>, nothing is loaded on that pad yet (load a file, or use <strong>LOAD DEMO KIT</strong>).
+- Check the browser tab isn't muted and system volume isn't at zero — the whole page shares one master bus, so this silences everything, not just the Workstation.
+- AudioContext needs a user gesture to start. The context is created lazily on the very first real interaction after page load (a click, a key press) — there is no explicit <code>resume()</code> call anywhere as a fallback. If sound still doesn't come through, reload the page and make sure the very first thing you do is a direct click or key press.
+- The pad may have just been cut by another pad in the same mute group — check SOUND mode's MUTE GROUP section for that pad.
+- If everything seems stuck sounding (or stuck silent from an effect), press <strong>Esc</strong> — it force-stops every voice and resets punch-in FX in one shot.</p>
+<p><strong>Display reads "MIDI: NO DEVICE"</strong>
+- Either no controller is connected, or the browser denied the MIDI permission prompt — both currently show the identical "NO DEVICE" text, so you can't tell them apart from the display alone. If the display instead reads "MIDI UNAVAILABLE", the browser itself has no Web MIDI support at all (see Browser Compatibility).</p>
+<p><strong>Mic recording does nothing (SAMPLE mode, hold a pad)</strong>
+- Permission was most likely denied or dismissed — check the browser's own site-permission UI (the address-bar site-info icon, or the browser's site settings page) for microphone access.
+- Note: this specific path (holding a pad in SAMPLE mode) doesn't currently show any on-screen error if the microphone request fails — the attempt just silently doesn't start. If you need visible confirmation, use FX mode's <strong>LIVE INPUT</strong> toggle instead, which does show <code>MIC UNAVAILABLE</code> in its status readout on the same failure.
+- Requires HTTPS (or <code>localhost</code>) — see Browser Compatibility.</p>
+<p><strong>Saved project disappeared</strong>
+- IndexedDB is scoped per browser <em>and</em> per origin — a project saved in one browser (or one OS/browser profile) will never show up in a different one.
+- Clearing site data, cookies, or history for this site removes it permanently.
+- Private/incognito windows may not persist IndexedDB writes once the window is fully closed, depending on the browser — don't rely on a private window to keep a save.
+- If the <strong>LOAD PROJECT…</strong> dropdown showed <code>STORAGE UNAVAILABLE</code> at the time you thought you saved, nothing was ever actually written — it isn't "lost," it never persisted in the first place.</p>
+<p><strong>Pads don't respond to the keyboard at all</strong>
+- Check focus isn't inside a text field — the project name field or any number input intentionally swallows all pad/mode keys while focused, so normal typing isn't hijacked.
+- Check you aren't holding Ctrl, Cmd, or Alt — any of those bails out of key handling entirely by design, to avoid colliding with browser shortcuts.</p>
+</section>
+
+<section id="31-browser-compatibility">
+<h2>31 Browser Compatibility</h2>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Web Audio API</strong></td>
+<td>Universal in modern evergreen browsers</td>
+<td>Falls back to <code>webkitAudioContext</code> if needed; this is the one API the entire Workstation depends on.</td>
+</tr>
+<tr>
+<td><strong>Web MIDI API</strong></td>
+<td>Chrome, Edge, Opera: yes. Firefox, Safari: historically no.</td>
+<td>Feature-detected via <code>typeof navigator.requestMIDIAccess === "function"</code>. When absent (or if <code>requestMIDIAccess()</code> throws synchronously), the app degrades cleanly to a <code>MIDI UNAVAILABLE</code> status with nothing else affected — every pad, mode, and FX feature works identically via keyboard/mouse with no controller connected.</td>
+</tr>
+<tr>
+<td><strong>IndexedDB</strong></td>
+<td>Universal except some private-browsing contexts</td>
+<td><code>storage.js</code>'s availability check only confirms the global exists, not that it will actually open successfully — a context that exposes <code>indexedDB</code> but fails on first real use (seen historically in some private-browsing modes) surfaces as <code>SAVE FAILED</code> / <code>LOAD FAILED</code> rather than the upfront <code>STORAGE UNAVAILABLE</code> state.</td>
+</tr>
+<tr>
+<td><strong>getUserMedia</strong> (mic sampling + FX Live Input)</td>
+<td>Requires a secure context (HTTPS or <code>localhost</code>) and an explicit per-origin permission grant</td>
+<td>Enforced by the browser itself, not by this code. Used in two independent places — SAMPLE-mode pad recording and FX mode's LIVE INPUT — that succeed or fail independently of one another.</td>
+</tr>
+<tr>
+<td><strong>MediaRecorder</strong> (mic sampling)</td>
+<td>Browser-dependent codec support</td>
+<td><code>startRecordingToPad()</code> constructs a plain <code>new MediaRecorder(stream)</code> with no explicit mimeType negotiation, relying entirely on the browser's own default container/codec.</td>
+</tr>
+</tbody>
+</table>
+</section>
+
+<section id="32-technical-notes">
+<h2>32 Technical Notes</h2>
+<p><strong>Shared-AudioContext architecture.</strong> The whole MIDI OFFICE page runs on exactly one <code>AudioContext</code>, created once, lazily, by <code>js/audio-engine.js</code>. The Workstation's own node graph (<code>workstation/audio-engine.js</code>) never constructs a context of its own — it calls <code>window.ToneEngine.init()</code> to get that same instance, builds its group/duck/fader/punch/limiter graph on top of it, and connects its single output through <code>ToneEngine.connectDry()</code> into the page's shared <code>masterGain</code>, the exact node every other module (Sequencer, Synth, DJ) already feeds. Because the page's existing Recorder module (<code>js/recorder.js</code>) taps that same <code>masterGain</code> via a <code>MediaStreamDestination</code>, hitting record on the Recorder automatically captures whatever the Workstation is doing — the Workstation is simply "another source" on a bus that already has a tap; no separate Workstation recorder exists or is needed.</p>
+<p><strong>Lookahead-scheduler timing.</strong> <code>transport.js</code> uses the standard Web Audio lookahead pattern rather than firing sound off <code>setInterval</code> (which drifts audibly under any UI jank). A <code>setTimeout</code> loop wakes every 25ms and, each time, schedules every tick that falls within the next 0.1 seconds against the AudioContext's own <code>currentTime</code>, advancing <code>nextTickTime</code>/<code>currentTick</code> only after scheduling. Every consumer — pattern playback, the metronome click, note repeat — subscribes through transport's single shared <code>onTick()</code> rather than running its own timer, so the whole Workstation runs off one clock, never several drifting against each other.</p>
+<p><strong>96-ticks-per-quarter-note resolution.</strong> Defined once in <code>patterns.js</code> (<code>TICKS_PER_QUARTER = 96</code>, with <code>transport.js</code> falling back to the same value if read before <code>patterns.js</code> loads). A quarter note is always exactly 96 ticks regardless of time signature, which works out to 24 ticks per 16th-note step on the sequencer's 16-step grid. This is the resolution underlying quantized recording (rounds to the nearest step), free-time recording (keeps the sub-step remainder as <code>offsetTicks</code>), swing, note-repeat subdivisions down to 1/32 and triplet 1/16T/1/8T, and manual nudge-by-step editing — all land on exact tick values, not rounded approximations.</p>
+<p><strong>Master limiter safety stage.</strong> The Workstation's internal signal path ends in <code>workstationMaster → punchBus → limiter → shared master bus</code>. The limiter is a <code>DynamicsCompressor</code> configured aggressively (threshold −6dB, ratio 20:1, 0 knee, 2ms attack, 60ms release). Every group's audio, the FX send/return bus, live mic input, and any punch-in FX all funnel through this one stage before leaving the Workstation, so no combination of simultaneously sounding pads/groups/effects can exceed that ceiling, regardless of how many voices are stacked or how hot an individual sound's own gain is set.</p>
+<p><strong>Panic / Escape all-notes-off.</strong> Every module that starts a voice (<code>sampler.js</code>'s <code>triggerSoundVoice</code>, used for every pad and keys-mode note) registers a stop callback with <code>window.WorkstationAudio.registerVoice()</code> and receives an unregister function it calls once the voice ends naturally — keeping the registry from growing unbounded during normal play. A single document-level <strong>Escape</strong> listener in <code>audio-engine.js</code> calls <code>panic()</code>, which walks every currently-registered voice, calls its <code>stop()</code> (each wrapped in <code>try/catch</code> so one misbehaving voice can't block the rest), clears the registry, and resets every group's sidechain-duck gain back to 1. A second, independent Escape listener in <code>effects.js</code> simultaneously tears down any punch-in FX pads still held and rewires the punch bus back to its transparent direct connection. Both listeners fire on every Escape press — so one keystroke really does reach literally everything in the Workstation that can currently be making sound or coloring the signal.</p>
+</section>
   </main>
 </div>
 

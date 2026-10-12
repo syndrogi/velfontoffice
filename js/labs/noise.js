@@ -127,6 +127,7 @@
     ".hero-title .letter",
     ".labs-menu-btn",
     ".footer-copy",
+    ".archive-pin",
   ].join(", ");
 
   var targets = [];

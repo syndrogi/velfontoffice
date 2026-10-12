@@ -1100,7 +1100,8 @@ html.labs-blueprint .logo,
 html.labs-blueprint .nav-link,
 html.labs-blueprint .social-icon,
 html.labs-blueprint .mobile-nav a,
-html.labs-blueprint main img {
+html.labs-blueprint main img,
+html.labs-blueprint .archive-pin {
   outline: 1px dashed rgba(0, 0, 0, 0.35);
   outline-offset: -1px;
 }
@@ -1524,6 +1525,11 @@ html.js-typing .hero-title {
   opacity: 1;
 }
 
+.archive-player.size-xs {
+  width: clamp(110px, 12vw, 180px);
+  height: clamp(140px, 16vw, 220px);
+}
+
 .archive-player.size-s {
   width: clamp(160px, 18vw, 280px);
   height: clamp(200px, 24vw, 340px);
@@ -1537,6 +1543,11 @@ html.js-typing .hero-title {
 .archive-player.size-l {
   width: clamp(280px, 32vw, 520px);
   height: clamp(360px, 42vw, 640px);
+}
+
+.archive-player.size-xl {
+  width: clamp(340px, 40vw, 640px);
+  height: clamp(440px, 52vw, 780px);
 }
 
 /* object-fit: contain (not cover) — every photo keeps its own aspect
@@ -1620,6 +1631,18 @@ html.js-typing .hero-title {
   z-index: 10;
 }
 
+/* main/footer need their own stacking context so they paint above
+   .archive-bg below. Without position+z-index here, these are plain
+   static content and a positioned z-index:50 sibling (.archive-bg)
+   always wins regardless of DOM order — scrolling down with the
+   background on would otherwise show nothing but the photo, with
+   #about and everything after it hidden underneath it. */
+main,
+.site-footer {
+  position: relative;
+  z-index: 60;
+}
+
 /* Archive background — the Background button puts the current photo
    full-screen behind the whole page (z-index below the header's 100,
    above everything else) until toggled off again (click it, or the
@@ -1646,7 +1669,8 @@ html.js-typing .hero-title {
 .archive-bg-active .nav-link,
 .archive-bg-active .hero-title,
 .archive-bg-active .social-icon,
-.archive-bg-active .more-toggle {
+.archive-bg-active .more-toggle,
+.archive-bg-active .more-menu-link {
   color: #fff;
 }
 
@@ -1664,7 +1688,9 @@ html.js-typing .hero-title {
 .archive-bg-active .social-icon:hover,
 .archive-bg-active .social-icon:focus-visible,
 .archive-bg-active .more-toggle:hover,
-.archive-bg-active .more-toggle:focus-visible {
+.archive-bg-active .more-toggle:focus-visible,
+.archive-bg-active .more-menu-link:hover,
+.archive-bg-active .more-menu-link:focus-visible {
   color: var(--color-hover);
 }
 

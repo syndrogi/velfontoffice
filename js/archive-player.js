@@ -32,7 +32,7 @@
   if (!hero) return;
 
   var INTERVAL_MS = 4500;
-  var SIZES = ["s", "m", "l"];
+  var SIZES = ["xs", "s", "m", "l", "xl"];
   var IMAGE_EXT = /\.(jpe?g|png|webp|gif|avif)$/i;
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -65,7 +65,7 @@
   var back = imgB;
   var urls = [];
   var index = 0;
-  var sizeIndex = 1; // "m"
+  var sizeIndex = 2; // "m"
   var timer = null;
   var inView = true;
   var bgActive = false;

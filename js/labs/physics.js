@@ -9,7 +9,7 @@
 (function () {
   if (typeof registerLab !== "function") return;
 
-  var TARGET_SELECTOR = "header a, header button, .hero-title .letter";
+  var TARGET_SELECTOR = "header a, header button, .hero-title .letter, .archive-pin";
   var RADIUS = 140;
   var STRENGTH = 40;
   var EASE = 0.15;

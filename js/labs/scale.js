@@ -44,7 +44,7 @@
 (function () {
   if (typeof registerLab !== "function") return;
 
-  var TARGET_SELECTOR = "header a, header button, .hero-title .letter, .labs-logo-mark";
+  var TARGET_SELECTOR = "header a, header button, .hero-title .letter, .labs-logo-mark, .labs-stem-logo-mark, .archive-pin";
   var MIN_SCALE = 0.05;
 
   // fx/fy: this handle's position as a fraction of the box (0 = left/top,

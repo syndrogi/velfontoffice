@@ -86,14 +86,42 @@
     return arr;
   }
 
+  // .archive-player's own box is sized to exactly match whichever
+  // photo is on screen (within the current size preset's max-width/
+  // max-height, read back from the CSS — see the .size-* rules) so its
+  // border hugs the actual photo instead of framing empty space left
+  // over from a mismatched fixed box.
+  function applyFittedSize(naturalW, naturalH) {
+    if (!naturalW || !naturalH) return;
+    var computed = getComputedStyle(player);
+    var maxW = parseFloat(computed.maxWidth) || naturalW;
+    var maxH = parseFloat(computed.maxHeight) || naturalH;
+    var scale = Math.min(maxW / naturalW, maxH / naturalH);
+    player.style.width = Math.round(naturalW * scale) + "px";
+    player.style.height = Math.round(naturalH * scale) + "px";
+  }
+
   function crossfadeTo(url) {
-    back.src = url;
-    back.classList.add("is-front");
-    front.classList.remove("is-front");
-    var swap = front;
-    front = back;
-    back = swap;
-    if (bgActive) bg.style.backgroundImage = 'url("' + url + '")';
+    var target = back;
+    function finish() {
+      target.classList.add("is-front");
+      front.classList.remove("is-front");
+      var swap = front;
+      front = back;
+      back = swap;
+      if (bgActive) bg.style.backgroundImage = 'url("' + url + '")';
+    }
+    target.onload = function () {
+      target.onload = null;
+      applyFittedSize(target.naturalWidth, target.naturalHeight);
+      finish();
+    };
+    target.src = url;
+    if (target.complete && target.naturalWidth) {
+      target.onload = null;
+      applyFittedSize(target.naturalWidth, target.naturalHeight);
+      finish();
+    }
   }
 
   function showNext() {
@@ -125,6 +153,8 @@
     player.classList.remove("size-" + SIZES[sizeIndex]);
     sizeIndex = (sizeIndex + 1) % SIZES.length;
     player.classList.add("size-" + SIZES[sizeIndex]);
+    // New max bounds — refit against whichever photo is currently shown.
+    if (front.naturalWidth) applyFittedSize(front.naturalWidth, front.naturalHeight);
   }
 
   // Same pointer-drag technique as main.js's hero-letter/header-link
@@ -255,11 +285,17 @@
           })
         );
         if (!urls.length) return;
+        function showFirst() {
+          front.onload = null;
+          applyFittedSize(front.naturalWidth, front.naturalHeight);
+          front.classList.add("is-front");
+          player.classList.add("is-ready");
+          setBackground(front.src);
+          start();
+        }
+        front.onload = showFirst;
         front.src = urls[0];
-        front.classList.add("is-front");
-        player.classList.add("is-ready");
-        setBackground(front.src);
-        start();
+        if (front.complete && front.naturalWidth) showFirst();
       });
   });
 

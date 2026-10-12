@@ -1515,8 +1515,7 @@ html.js-typing .hero-title {
   transform: translateY(-50%);
   z-index: 3;
   width: clamp(160px, 18vw, 300px);
-  aspect-ratio: 3 / 4;
-  overflow: hidden;
+  height: clamp(200px, 26vw, 380px);
   opacity: 0;
   pointer-events: none;
   transition: opacity 600ms var(--ease);
@@ -1526,12 +1525,15 @@ html.js-typing .hero-title {
   opacity: 1;
 }
 
+/* object-fit: contain (not cover) — every photo keeps its own aspect
+   ratio, just capped to this box, instead of being cropped to fill it. */
 .archive-player-img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: left center;
   opacity: 0;
   transition: opacity 900ms var(--ease);
 }

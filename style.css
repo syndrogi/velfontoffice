@@ -1503,6 +1503,41 @@ html.js-typing .hero-title {
   color: var(--color-fg-faint);
 }
 
+/* Archive reveal — click any empty part of the page, a random photo
+   from the same "archive" bucket pops up centered until dismissed
+   (js/archive-reveal.js). Below .page-veil/.mobile-advisory (9999+) so
+   neither a cross-site transition nor the desktop-recommended gate
+   ever ends up stuck underneath it. */
+.archive-reveal {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms var(--ease);
+}
+
+.archive-reveal.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.archive-reveal img {
+  display: block;
+  max-width: min(90vw, 900px);
+  max-height: 86vh;
+  width: auto;
+  height: auto;
+  border: 1px solid #fff;
+  background: var(--color-bg);
+}
+
 /* ==========================================================================
    Footer — structural placeholder; full footer design comes in a later pass
    ========================================================================== */

@@ -1631,51 +1631,22 @@ html.js-typing .hero-title {
   z-index: 10;
 }
 
-/* main/footer need their own stacking context so they paint above
-   .archive-bg below. Without position+z-index here, these are plain
-   static content and a positioned z-index:50 sibling (.archive-bg)
-   always wins regardless of DOM order — scrolling down with the
-   background on would otherwise show nothing but the photo, with
-   #about and everything after it hidden underneath it. */
-main,
-.site-footer {
-  position: relative;
-  z-index: 60;
-}
-
-/* Sitting above .archive-bg (below) visually is correct — every
-   section's own background is transparent, so the photo still shows
-   through — but it also means main/.site-footer would now silently
-   swallow every click before it reaches .archive-bg underneath,
-   breaking "click the photo to dismiss" (archive-player.js's own
-   bg.addEventListener("click", clearBackground)). Drop main/footer
-   out of the hit-testing path entirely while a photo is showing, then
-   hand pointer-events back to whatever still needs to be clickable —
-   same re-enable pattern .site-header already uses for the same
-   reason, just scoped to archive-bg-active instead of always-on. */
-.archive-bg-active main,
-.archive-bg-active .site-footer {
-  pointer-events: none;
-}
-
-.archive-bg-active main a,
-.archive-bg-active main button,
-.archive-bg-active main input,
-.archive-bg-active main textarea,
-.archive-bg-active main select,
-.archive-bg-active .archive-player {
-  pointer-events: auto;
-}
-
-/* Archive background — the Background button puts the current photo
-   full-screen behind the whole page (z-index below the header's 100,
-   above everything else) until toggled off again (click it, or the
-   button a second time). html.archive-bg-active (below) flips the
-   header to white so it stays legible over whatever photo is showing. */
+/* Archive background — the Background button replaces just the hero's
+   own background with the current photo (not the whole scrollable
+   page): absolute within .hero (appended there by archive-player.js,
+   not document.body), sitting behind the slider/overlay/player
+   (z-index 0 vs. their 1/2/3) so scrolling past the hero leaves it
+   behind naturally and the normal white page resumes for #office/
+   #archiveGallery/#about/footer, exactly like without it. Toggled off
+   again by clicking it, the Background button a second time, or
+   nothing else — it never follows you down the page because it was
+   never fixed to the viewport. html.archive-bg-active (below) flips
+   the header to white so it stays legible over whatever photo is
+   showing while the hero is in view. */
 .archive-bg {
-  position: fixed;
+  position: absolute;
   inset: 0;
-  z-index: 50;
+  z-index: 0;
   background-size: cover;
   background-position: center;
   background-color: var(--color-fg);

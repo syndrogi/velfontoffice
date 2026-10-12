@@ -6,8 +6,11 @@
  * controls: Next (manual advance), Size (cycle small/medium/large),
  * Pin (lifts the current photo out of the slideshow into its own
  * free-standing copy beside the player — see pinCurrent() below), and
- * Background (puts the current photo behind the whole page, flipping
- * the header to white for legibility, until toggled off).
+ * Background (replaces just the hero's own background with the current
+ * photo, flipping the header to white for legibility, until toggled
+ * off). Scrolling past the hero leaves it behind — it's absolutely
+ * positioned inside .hero, not fixed to the viewport, so the rest of
+ * the page stays its normal white self underneath.
  *
  * Pinned photos are draggable exactly like every other draggable
  * element on this site (hero letters, header links, the logo) — same
@@ -59,7 +62,7 @@
   var bg = document.createElement("div");
   bg.className = "archive-bg";
   bg.setAttribute("aria-hidden", "true");
-  document.body.appendChild(bg);
+  hero.insertBefore(bg, hero.firstChild);
 
   var front = imgA;
   var back = imgB;

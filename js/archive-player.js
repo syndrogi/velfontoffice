@@ -4,10 +4,16 @@
  * continuously cross-fading through every photo in the "archive"
  * Supabase storage bucket. Click the photo itself to reveal four
  * controls: Next (manual advance), Size (cycle small/medium/large),
- * Remove (drop the current photo from this session's rotation only —
- * does NOT delete the file from Supabase, see removeCurrent() below),
- * and Background (puts the current photo behind the whole page,
- * flipping the header to white for legibility, until toggled off).
+ * Pin (lifts the current photo out of the slideshow into its own
+ * free-standing copy beside the player — see pinCurrent() below), and
+ * Background (puts the current photo behind the whole page, flipping
+ * the header to white for legibility, until toggled off).
+ *
+ * Pinned photos are draggable exactly like every other draggable
+ * element on this site (hero letters, header links, the logo) — same
+ * pointerdown/pointermove technique through the shared
+ * window.labsTransform compositor from js/transform.js, see
+ * makeDraggable() below.
  *
  * Reads Storage's file list directly (not the archive_photos table
  * js/archive-gallery.js's scroll strip uses) — dropping an image into
@@ -115,19 +121,63 @@
     player.classList.add("size-" + SIZES[sizeIndex]);
   }
 
-  // Session-local only — splices the current photo out of this page
-  // load's rotation. The file stays exactly where it is in Supabase
-  // Storage; reloading the page brings it right back.
-  function removeCurrent() {
-    if (!urls.length) return;
-    urls.splice(index, 1);
-    if (!urls.length) {
-      player.classList.remove("is-ready", "is-controls-open");
-      stop();
-      return;
+  // Same pointer-drag technique as main.js's hero-letter/header-link
+  // dragging — offsets are tracked locally and composed through the
+  // shared window.labsTransform so a pin never fights Noise/Gravity/
+  // Physics/Scale for the same element's transform.
+  function makeDraggable(el) {
+    el.style.touchAction = "none";
+    var dragging = false;
+    var startX = 0, startY = 0, offsetX = 0, offsetY = 0, baseX = 0, baseY = 0;
+
+    el.addEventListener("pointerdown", function (e) {
+      if (window.__gravityActive || window.__multiSelectActive) return;
+      dragging = true;
+      baseX = offsetX;
+      baseY = offsetY;
+      startX = e.clientX;
+      startY = e.clientY;
+      el.setPointerCapture(e.pointerId);
+      el.classList.add("is-dragging");
+    });
+
+    el.addEventListener("pointermove", function (e) {
+      if (!dragging) return;
+      offsetX = baseX + (e.clientX - startX);
+      offsetY = baseY + (e.clientY - startY);
+      window.labsTransform.update(el, { tx: offsetX, ty: offsetY });
+    });
+
+    function releaseDrag() {
+      if (!dragging) return;
+      dragging = false;
+      el.classList.remove("is-dragging");
     }
-    if (index >= urls.length) index = 0;
-    crossfadeTo(urls[index]);
+    el.addEventListener("pointerup", releaseDrag);
+    el.addEventListener("pointercancel", releaseDrag);
+  }
+
+  var pinCount = 0;
+
+  // Lifts the current photo out of the slideshow into its own
+  // free-standing, draggable copy next to the player — the slideshow
+  // itself keeps cycling untouched. Appended to <body> (position:
+  // fixed, viewport coordinates), not .hero — .hero has overflow:
+  // hidden, which would clip a pin the moment it's dragged past the
+  // hero's own box instead of roaming free like every other draggable
+  // element on the page.
+  function pinCurrent() {
+    if (!front.src || !window.labsTransform) return;
+    var playerRect = player.getBoundingClientRect();
+    var pin = document.createElement("img");
+    pin.className = "archive-pin";
+    pin.src = front.src;
+    pin.alt = "";
+    pin.style.left = playerRect.right + 20 + pinCount * 24 + "px";
+    pin.style.top = playerRect.top + pinCount * 24 + "px";
+    document.body.appendChild(pin);
+    makeDraggable(pin);
+    pinCount++;
   }
 
   function setBackground(url) {
@@ -166,7 +216,7 @@
 
   makeButton("Next", manualNext);
   makeButton("Size", cycleSize);
-  makeButton("Remove", removeCurrent);
+  makeButton("Pin", pinCurrent);
   makeButton("Background", toggleBackground);
 
   player.addEventListener("click", function () {

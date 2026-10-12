@@ -1503,39 +1503,41 @@ html.js-typing .hero-title {
   color: var(--color-fg-faint);
 }
 
-/* Archive reveal — click any empty part of the page, a random photo
-   from the same "archive" bucket pops up centered until dismissed
-   (js/archive-reveal.js). Below .page-veil/.mobile-advisory (9999+) so
-   neither a cross-site transition nor the desktop-recommended gate
-   ever ends up stuck underneath it. */
-.archive-reveal {
-  position: fixed;
-  inset: 0;
-  z-index: 9000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-  background: rgba(0, 0, 0, 0.55);
+/* Archive player — a small always-on slideshow in the hero's empty
+   left side, continuously cross-fading through the "archive" bucket's
+   photos (js/archive-player.js). Sits just above .hero-overlay (z-index
+   2) in the hero's own stacking order; pointer-events: none since it's
+   purely ambient, never something to click. */
+.archive-player {
+  position: absolute;
+  left: var(--edge);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  width: clamp(160px, 18vw, 300px);
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 300ms var(--ease);
+  transition: opacity 600ms var(--ease);
 }
 
-.archive-reveal.is-visible {
+.archive-player.is-ready {
   opacity: 1;
-  pointer-events: auto;
-  cursor: pointer;
 }
 
-.archive-reveal img {
-  display: block;
-  max-width: min(90vw, 900px);
-  max-height: 86vh;
-  width: auto;
-  height: auto;
-  border: 1px solid #fff;
-  background: var(--color-bg);
+.archive-player-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 900ms var(--ease);
+}
+
+.archive-player-img.is-front {
+  opacity: 1;
 }
 
 /* ==========================================================================

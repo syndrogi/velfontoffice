@@ -2,15 +2,18 @@
  * VELFONT OFFICE — Archive Player
  * A small, always-on slideshow in the hero's empty left side —
  * continuously cross-fading through every photo in the "archive"
- * Supabase storage bucket. Click the photo itself to reveal four
- * controls: Next (manual advance), Size (cycle small/medium/large),
- * Pin (lifts the current photo out of the slideshow into its own
- * free-standing copy beside the player — see pinCurrent() below), and
- * Background (replaces just the hero's own background with the current
- * photo, flipping the header to white for legibility, until toggled
- * off). Scrolling past the hero leaves it behind — it's absolutely
- * positioned inside .hero, not fixed to the viewport, so the rest of
- * the page stays its normal white self underneath.
+ * Supabase storage bucket.
+ *
+ * The hero's background is the current photo from the moment the
+ * first one loads — no click needed to turn it on. Click the photo
+ * itself to turn it back off again; click it again (now that it's off)
+ * to reveal four controls instead: Next (manual advance), Size (cycle
+ * small/medium/large), Pin (lifts the current photo out of the
+ * slideshow into its own free-standing copy beside the player — see
+ * pinCurrent() below), and Background (turns the photo backdrop back
+ * on). Scrolling past the hero leaves the backdrop behind — it's
+ * absolutely positioned inside .hero, not fixed to the viewport, so
+ * the rest of the page stays its normal white self underneath.
  *
  * Pinned photos are draggable exactly like every other draggable
  * element on this site (hero letters, header links, the logo) — same
@@ -223,6 +226,15 @@
   makeButton("Background", toggleBackground);
 
   player.addEventListener("click", function () {
+    // While the background is on, clicking the photo itself turns it
+    // right back off — same as clicking the full-page photo behind it
+    // — instead of opening the controls strip. Controls (Next/Size/
+    // Pin/Background) are still reachable by clicking the photo once
+    // the background is off again.
+    if (bgActive) {
+      clearBackground();
+      return;
+    }
     player.classList.toggle("is-controls-open");
   });
 
@@ -246,6 +258,7 @@
         front.src = urls[0];
         front.classList.add("is-front");
         player.classList.add("is-ready");
+        setBackground(front.src);
         start();
       });
   });

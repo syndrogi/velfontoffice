@@ -165,6 +165,12 @@
     </div>
   </section>
 
+  <!-- Full-bleed photos from Supabase (sql/archive_photos_table.sql),
+       fading in as the page scrolls past — js/archive-gallery.js.
+       Not a separate destination: no title, no nav link. Starts hidden
+       and stays that way until at least one photo loads. -->
+  <section class="archive-gallery" id="archiveGallery" hidden></section>
+
   <section class="section-placeholder" id="about">
     <div class="section-grid">
       <div class="section-label">
@@ -230,7 +236,9 @@
 <script src="js/mobile-advisory.js" defer></script>
 <script src="js/logo-draw.js" defer></script>
 <script src="js/more-menu.js" defer></script>
+<script src="js/supabase-client.js" defer></script>
 <script src="js/contact.js" defer></script>
+<script src="js/archive-gallery.js" defer></script>
 <script src="js/office-palette.js" defer></script>
 <script src="js/labs.js" defer></script>
 <script src="js/labs/reset.js" defer></script>

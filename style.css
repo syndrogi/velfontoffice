@@ -1503,26 +1503,40 @@ html.js-typing .hero-title {
   color: var(--color-fg-faint);
 }
 
-/* Archive player — a small always-on slideshow in the hero's empty
-   left side, continuously cross-fading through the "archive" bucket's
-   photos (js/archive-player.js). Sits just above .hero-overlay (z-index
-   2) in the hero's own stacking order; pointer-events: none since it's
-   purely ambient, never something to click. */
+/* Archive player — an always-on slideshow in the hero's empty left
+   side, continuously cross-fading through the "archive" bucket's
+   photos (js/archive-player.js). Sits just above .hero-overlay
+   (z-index 2) in the hero's own stacking order. Click the photo to
+   reveal the controls strip; three sizes via .size-s/.size-m/.size-l,
+   cycled by the Size button. */
 .archive-player {
   position: absolute;
   left: var(--edge);
   top: 50%;
   transform: translateY(-50%);
   z-index: 3;
-  width: clamp(160px, 18vw, 300px);
-  height: clamp(200px, 26vw, 380px);
+  cursor: pointer;
+  transition: opacity 600ms var(--ease), width 300ms var(--ease), height 300ms var(--ease);
   opacity: 0;
-  pointer-events: none;
-  transition: opacity 600ms var(--ease);
 }
 
 .archive-player.is-ready {
   opacity: 1;
+}
+
+.archive-player.size-s {
+  width: clamp(160px, 18vw, 280px);
+  height: clamp(200px, 24vw, 340px);
+}
+
+.archive-player.size-m {
+  width: clamp(220px, 24vw, 380px);
+  height: clamp(280px, 32vw, 480px);
+}
+
+.archive-player.size-l {
+  width: clamp(280px, 32vw, 520px);
+  height: clamp(360px, 42vw, 640px);
 }
 
 /* object-fit: contain (not cover) — every photo keeps its own aspect
@@ -1535,11 +1549,98 @@ html.js-typing .hero-title {
   object-fit: contain;
   object-position: left center;
   opacity: 0;
+  pointer-events: none;
   transition: opacity 900ms var(--ease);
 }
 
 .archive-player-img.is-front {
   opacity: 1;
+}
+
+.archive-player-controls {
+  position: absolute;
+  left: 0;
+  bottom: -40px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: opacity 200ms var(--ease), transform 200ms var(--ease), visibility 200ms;
+}
+
+.archive-player.is-controls-open .archive-player-controls {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.archive-player-btn {
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 10px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-fg);
+  color: var(--color-fg);
+  cursor: pointer;
+  transition: color 180ms var(--ease), background-color 180ms var(--ease);
+}
+
+.archive-player-btn:hover,
+.archive-player-btn:focus-visible {
+  color: var(--color-bg);
+  background: var(--color-fg);
+}
+
+/* Archive background — the Background button puts the current photo
+   full-screen behind the whole page (z-index below the header's 100,
+   above everything else) until toggled off again (click it, or the
+   button a second time). html.archive-bg-active (below) flips the
+   header to white so it stays legible over whatever photo is showing. */
+.archive-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--color-fg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 500ms var(--ease);
+}
+
+.archive-bg.is-active {
+  opacity: 1;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.archive-bg-active .nav-link,
+.archive-bg-active .hero-title,
+.archive-bg-active .social-icon,
+.archive-bg-active .more-toggle {
+  color: #fff;
+}
+
+.archive-bg-active .logo-mark {
+  background-color: #fff;
+}
+
+/* Same specificity trick the :hover rules above already rely on
+   (class + class beats class + pseudo-class) — without these, the
+   plain white override just above would outrank hover/focus and the
+   red feedback color would stop working while a photo is behind the
+   page. */
+.archive-bg-active .nav-link:hover,
+.archive-bg-active .nav-link:focus-visible,
+.archive-bg-active .social-icon:hover,
+.archive-bg-active .social-icon:focus-visible,
+.archive-bg-active .more-toggle:hover,
+.archive-bg-active .more-toggle:focus-visible {
+  color: var(--color-hover);
 }
 
 /* ==========================================================================

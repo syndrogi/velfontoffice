@@ -81,7 +81,12 @@
       height: null,
       minimized: false,
       maximized: false,
-      closed: false,
+      // A first-ever mobile visit starts closed (just the small tab) —
+      // the full Labs grid popping open unprompted on a phone screen is
+      // a lot of UI at once. Desktop keeps opening by default. Only
+      // applies when there's no saved state yet; once a visitor has
+      // opened/closed/moved it, that choice persists either way.
+      closed: isFreshState && isMobile(),
     };
     if (!rawSaved) return state;
     try {

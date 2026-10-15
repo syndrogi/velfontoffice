@@ -1729,10 +1729,18 @@ html.js-typing .hero-title {
   }
 }
 
-/* Header — collapse the inline nav into a plain bar under the header.
-   Height stays fixed at 127px; side padding follows --edge, same as
-   the section grid below it. */
+/* Header — collapse the inline nav into a compact grid under a
+   shorter header, instead of just shrinking the desktop layout in
+   place. Below this breakpoint --header-height drops from 127px to
+   72px (the wordmark is gone and the logo's down to 56px here too, so
+   127px was mostly empty white space) and every custom property
+   reader — scroll-margin-top, .mobile-nav's own margin-top, the Office
+   Palette's default position — picks the smaller value up automatically. */
 @media (max-width: 768px) {
+  :root {
+    --header-height: 72px;
+  }
+
   .main-nav {
     display: none;
   }
@@ -1741,19 +1749,29 @@ html.js-typing .hero-title {
     display: none;
   }
 
-  /* Sits directly below the fixed header (margin-top matches its
-     height, same trick .mobile-nav's old drawer padding used) so every
-     link is visible on first paint instead of behind a toggle. Wraps
-     to a second line on narrow phones rather than overflowing. Same
-     fadeIn timing as .labs (below), so both first-paint reveals read
-     as one consistent animation instead of two different ones. */
+  .logo-mark {
+    height: 56px;
+  }
+
+  /* Logo + icon already fill a phone-width header — the wordmark next
+     to the logo (see .header-left) is the first thing to give up its
+     space. */
+  .hero-title {
+    display: none;
+  }
+
+  /* A real grid instead of flex-wrap — nine links wrap unevenly across
+     a ragged number of lines depending on label length; two fixed
+     columns read as a deliberate mobile layout instead of a shrunk
+     copy of the desktop row. Sits directly below the (now shorter)
+     fixed header. Same fadeIn timing as .labs, so both first-paint
+     reveals read as one consistent animation. */
   .mobile-nav {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 12px 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 20px;
     margin-top: var(--header-height);
-    padding: 16px var(--edge);
+    padding: 14px var(--edge);
     border-bottom: 1px solid var(--color-line);
     animation: fadeIn 1.2s 0.4s var(--ease) both;
   }
@@ -1776,17 +1794,6 @@ html.js-typing .hero-title {
 @media (max-width: 640px) {
   :root {
     --edge: 28px;
-  }
-
-  .logo-mark {
-    height: 56px;
-  }
-
-  /* Logo + icon + hamburger already fill a phone-width header — the
-     wordmark next to the logo (see .header-left) is the first thing
-     to give up its space. */
-  .hero-title {
-    display: none;
   }
 
   .labs-notice {

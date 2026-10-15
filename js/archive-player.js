@@ -216,16 +216,45 @@
     pinCount++;
   }
 
+  // archive-bg-active (the white-header CSS) must only apply while the
+  // header is actually sitting on top of the photo — on mobile, the
+  // nav grid now sits between the header and .hero, so at scroll:0 the
+  // header is over plain white nav, not the photo; turning it white
+  // unconditionally made the logo/links invisible (white on white).
+  // Desktop has no such gap — .hero starts right under the header —
+  // so this still resolves "true" there immediately like before.
+  function headerOverlapsHero() {
+    var headerHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-height")) || 0;
+    var heroRect = hero.getBoundingClientRect();
+    return heroRect.top < headerHeight && heroRect.bottom > 0;
+  }
+
+  function updateHeaderOverlap() {
+    document.documentElement.classList.toggle("archive-bg-active", bgActive && headerOverlapsHero());
+  }
+
+  var overlapTicking = false;
+  function scheduleOverlapCheck() {
+    if (overlapTicking) return;
+    overlapTicking = true;
+    requestAnimationFrame(function () {
+      overlapTicking = false;
+      updateHeaderOverlap();
+    });
+  }
+  window.addEventListener("scroll", scheduleOverlapCheck, { passive: true });
+  window.addEventListener("resize", scheduleOverlapCheck);
+
   function setBackground(url) {
     bg.style.backgroundImage = 'url("' + url + '")';
     bg.classList.add("is-active");
-    document.documentElement.classList.add("archive-bg-active");
     bgActive = true;
+    updateHeaderOverlap();
   }
   function clearBackground() {
     bg.classList.remove("is-active");
-    document.documentElement.classList.remove("archive-bg-active");
     bgActive = false;
+    updateHeaderOverlap();
   }
   function toggleBackground() {
     if (bgActive) {

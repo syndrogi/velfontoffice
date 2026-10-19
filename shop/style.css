@@ -1765,3 +1765,74 @@ html.js-enter.is-entered .page-veil {
   pointer-events: none;
   transition: opacity 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }
+
+/* ==========================================================================
+   Temporary access gate — shop/js/gate.js. Hidden by default; only
+   shown while html.shop-locked is present (set by the inline <head>
+   check before first paint, so the real page never flashes through).
+   Above everything else on the page, including .page-veil (9999).
+   ========================================================================== */
+
+.shop-gate {
+  display: none;
+}
+
+html.shop-locked .shop-gate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: var(--shop-bg);
+}
+
+.shop-gate__form {
+  width: min(90vw, 320px);
+  text-align: center;
+}
+
+.shop-gate__label {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--shop-fg);
+}
+
+.shop-gate__desc {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--shop-fg-muted);
+}
+
+.shop-gate__input {
+  width: 100%;
+  margin-top: 24px;
+  border: 1px solid var(--shop-fg);
+  background: var(--shop-bg);
+  padding: 10px 12px;
+  font-size: 13px;
+  text-align: center;
+}
+
+.shop-gate__submit {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--shop-fg);
+  color: var(--shop-bg);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.shop-gate__submit:hover {
+  background: var(--shop-fg-soft);
+}
+
+.shop-gate__error {
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--color-hover);
+}

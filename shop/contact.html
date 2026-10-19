@@ -17,8 +17,29 @@
     document.documentElement.classList.add("js-enter");
   }
 </script>
+<script>
+  (function () {
+    try {
+      if (localStorage.getItem("vfo-shop-unlocked") !== "1") {
+        document.documentElement.classList.add("shop-locked");
+      }
+    } catch (e) {
+      document.documentElement.classList.add("shop-locked");
+    }
+  })();
+</script>
 </head>
 <body>
+
+<div class="shop-gate" id="shopGate" role="dialog" aria-modal="true" aria-label="Shop access">
+  <form class="shop-gate__form" id="shopGateForm">
+    <p class="shop-gate__label">VELFONT SHOP</p>
+    <p class="shop-gate__desc">Temporarily closed &mdash; admin access only.</p>
+    <input type="password" class="shop-gate__input" id="shopGateInput" placeholder="Password" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <button type="submit" class="shop-gate__submit">Enter</button>
+    <p class="shop-gate__error" id="shopGateError" hidden>Incorrect password.</p>
+  </form>
+</div>
 
 <div class="page-veil" aria-hidden="true"></div>
 
@@ -130,6 +151,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/gate.js"></script>
 <script src="js/supabase.js"></script>
 <script src="js/products.js"></script>
 <script src="js/i18n.js"></script>

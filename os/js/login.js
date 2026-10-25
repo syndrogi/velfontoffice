@@ -13,8 +13,6 @@ const members = {
   }
 };
 
-const PASSPHRASE = "business";
-
 const FLASH_HOLD_MS = 200;
 const FADE_DURATION_MS = 400;
 const WELCOME_HOLD_MS = 700;
@@ -88,25 +86,41 @@ function clearDenied() {
   deniedMessage.classList.remove("visible");
 }
 
+let verifying = false;
+
+// The passphrase is checked by the "gate" Supabase Edge Function
+// (os/js/gate-client.js), not compared locally — it never lives in this
+// file, so it can't be read out of devtools. A successful check returns
+// a signed token that travels with the session to app/, which re-verifies
+// it server-side before rendering (see os/app/js/boot.js) instead of just
+// trusting that sessionStorage has *something* in it.
 function handleEnter() {
-  if (!selectedMemberId) return;
+  if (!selectedMemberId || verifying || !window.OSGate) return;
   const member = members[selectedMemberId];
 
-  if (passphraseInput.value === PASSPHRASE) {
-    authenticate(selectedMemberId, member);
-  } else {
-    denyAccess();
-  }
-}
-
-function authenticate(memberId, member) {
+  verifying = true;
   passphraseInput.disabled = true;
   passphraseToggle.disabled = true;
   enterButton.disabled = true;
-  flashSuccess(memberId, member);
+
+  window.OSGate.login(passphraseInput.value).then((result) => {
+    verifying = false;
+    if (result && result.ok && result.token) {
+      authenticate(selectedMemberId, member, result.token);
+    } else {
+      passphraseInput.disabled = false;
+      passphraseToggle.disabled = false;
+      enterButton.disabled = false;
+      denyAccess();
+    }
+  });
 }
 
-function flashSuccess(memberId, member) {
+function authenticate(memberId, member, token) {
+  flashSuccess(memberId, member, token);
+}
+
+function flashSuccess(memberId, member, token) {
   flash.style.transition = "none";
   flash.style.backgroundColor = member.color;
 
@@ -120,20 +134,20 @@ function flashSuccess(memberId, member) {
   }, FLASH_HOLD_MS);
 
   setTimeout(() => {
-    enterFounderDesktop(memberId, member);
+    enterFounderDesktop(memberId, member, token);
   }, FLASH_HOLD_MS + FADE_DURATION_MS + WELCOME_HOLD_MS);
 }
 
-// Hands off to the Founder OS application. The session is written to
-// sessionStorage — a placeholder for real backend-issued auth — so app/
-// can identify who's logged in after a real page navigation, and so app/
-// can refuse to render at all if it's opened without one. Swapping this
-// for a server session/token later shouldn't require touching app/'s read
-// side, only what writes it here.
-function enterFounderDesktop(memberId, member) {
+// Hands off to the Founder OS application. The session (including the
+// server-issued token) is written to sessionStorage so app/ can identify
+// who's logged in after a real page navigation — app/js/boot.js
+// re-verifies the token with the gate function before rendering anything,
+// so fabricating a founderSession value directly in devtools (without the
+// real passphrase) no longer gets past it.
+function enterFounderDesktop(memberId, member, token) {
   sessionStorage.setItem(
     "founderSession",
-    JSON.stringify({ id: memberId, name: member.name, color: member.color })
+    JSON.stringify({ id: memberId, name: member.name, color: member.color, token: token })
   );
   window.location.href = "app/index.html";
 }

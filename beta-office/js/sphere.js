@@ -34,7 +34,7 @@
   ];
   var SECONDARY = [
     { label: "MEMBERS ONLY", href: "/os/", meta: "Founder OS." },
-    { label: "5TH AVE. BIPOLAR KIDS", href: "https://revel-trace-46441903.figma.site/", meta: "External project.", external: true },
+    { label: "5TH AVE. BIPOLAR KIDS", href: "https://5thavebipolarkids.com/", meta: "External project.", external: true },
     { label: "HYUNGROK (ROY) SON", href: "/hyungrokson/", meta: "Portfolio and projects." },
   ];
 

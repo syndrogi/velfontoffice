@@ -1001,6 +1001,133 @@ html.js-enter .tone-topbar {
 }
 
 /* ==========================================================================
+   Pinkroll
+   ========================================================================== */
+
+.tone-pinkroll {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.tone-pinkroll.tone-is-dropping {
+  outline: 1px dashed var(--tone-accent);
+  outline-offset: 4px;
+}
+
+.tone-pinkroll-rail {
+  flex: 1 1 240px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tone-pinkroll-stage {
+  flex: 999 1 280px;
+  min-width: 0;
+  min-height: 400px;
+  height: 100%;
+}
+
+.tone-pinkroll-board {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Kept in the layout at 2px rather than display:none — browsers can
+   stop decoding frames for a video that isn't rendered at all. */
+.tone-pinkroll-video {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 2px;
+  height: 2px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tone-pinkroll-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tone-fg-faint);
+}
+
+.tone-pinkroll-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tone-pinkroll-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.tone-pinkroll-check input {
+  margin: 0;
+  accent-color: var(--tone-accent);
+}
+
+.tone-pinkroll-name {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--tone-line);
+  background: var(--tone-bg);
+}
+
+.tone-pinkroll-swatches {
+  display: flex;
+  gap: 8px;
+}
+
+.tone-pinkroll-swatch {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 2px solid var(--tone-bg);
+  box-shadow: 0 0 0 1px var(--tone-line);
+  cursor: pointer;
+}
+
+.tone-pinkroll-swatch[aria-pressed="true"] {
+  box-shadow: 0 0 0 2px var(--tone-fg);
+}
+
+.tone-pinkroll .tone-toggle-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.tone-pinkroll .tone-file-input:focus-visible + .tone-file-label,
+.tone-pinkroll-name:focus-visible,
+.tone-pinkroll-swatch:focus-visible {
+  outline: 2px solid var(--tone-accent);
+  outline-offset: 2px;
+}
+
+.tone-pinkroll-status {
+  min-height: 1.4em;
+  margin: 0;
+}
+
+.tone-pinkroll-status.tone-is-error {
+  color: var(--tone-accent);
+}
+
+/* ==========================================================================
    Responsive
    ========================================================================== */
 

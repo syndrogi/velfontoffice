@@ -84,10 +84,4 @@
     });
     dockButtonsEl.appendChild(btn);
   });
-
-  // Default-open the two modules worth seeing right away — same
-  // "nothing feels empty on first load" idea as the sequencer's own
-  // starter pattern.
-  window.ToneWM.openModule("sequencer");
-  window.ToneWM.openModule("synth");
 })();

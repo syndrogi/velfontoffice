@@ -79,23 +79,18 @@
       top: base.top,
       width: base.width,
       height: null,
+      // Every page load starts as just the edge tab, whatever was saved
+      // last time, and the tab always opens the full panel. Only the
+      // window's geometry carries over between visits.
       minimized: false,
       maximized: false,
-      // A first-ever mobile visit starts closed (just the small tab) —
-      // the full Labs grid popping open unprompted on a phone screen is
-      // a lot of UI at once. Desktop keeps opening by default. Only
-      // applies when there's no saved state yet; once a visitor has
-      // opened/closed/moved it, that choice persists either way.
-      closed: isFreshState && isMobile(),
+      closed: true,
     };
     if (!rawSaved) return state;
     try {
       var saved = JSON.parse(rawSaved);
       ["left", "top", "width", "height"].forEach(function (k) {
         if (typeof saved[k] === "number" && !isNaN(saved[k])) state[k] = saved[k];
-      });
-      ["minimized", "maximized", "closed"].forEach(function (k) {
-        if (typeof saved[k] === "boolean") state[k] = saved[k];
       });
     } catch (e) {
       /* corrupt value — fall back to defaults computed above */
@@ -195,13 +190,11 @@
 
   // Re-anchors the still-untouched default panel so every registered
   // Labs button is visible without the user resizing anything first.
-  // Deferred to DOMContentLoaded because this script runs before
-  // js/labs.js and js/labs/*.js (see index.html's script order) — the
-  // Labs grid isn't populated yet at the point the lines above run, so
-  // .office-palette__content's natural height isn't real until every
-  // deferred script has finished, right before DOMContentLoaded fires.
+  // Runs on the first open, not at load: a hidden panel measures zero,
+  // and this script also runs before js/labs.js fills the Labs grid.
   function fitToContent() {
-    if (!isFreshState || state.height !== null || state.minimized) return;
+    if (!isFreshState || state.height !== null) return;
+    isFreshState = false;
     var chrome = handle.getBoundingClientRect().height + 2; // + top/bottom border
     var needed = chrome + content.scrollHeight;
     var margin = isMobile() ? 24 : 40;
@@ -210,8 +203,6 @@
     clampPosition();
     applyGeometry();
   }
-
-  document.addEventListener("DOMContentLoaded", fitToContent);
 
   // ==========================================================================
   // Drag — titlebar only, ignores clicks that started on a window
@@ -315,8 +306,7 @@
   // Restoring just flips the flag back off — maximized never touches
   // state.left/top/width/height in the first place (see applyGeometry's
   // early return), so the pre-maximize geometry is still sitting there
-  // untouched and ready to reapply, even across a reload that happened
-  // while maximized.
+  // untouched and ready to reapply.
   maximizeBtn.addEventListener("click", function () {
     state.minimized = false;
     state.maximized = !state.maximized;
@@ -339,6 +329,7 @@
     clampSize();
     clampPosition();
     render();
+    fitToContent();
     saveState();
     handle.focus();
   });

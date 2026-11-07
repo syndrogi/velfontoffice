@@ -550,7 +550,7 @@ a {
   flex-direction: column;
   background: var(--color-bg);
   border: 1px solid var(--color-fg);
-  animation: fadeIn 1.2s 0.4s var(--ease) both;
+  animation: fadeIn 200ms var(--ease) both;
 }
 
 .office-palette[hidden] {

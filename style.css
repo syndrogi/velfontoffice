@@ -17,13 +17,6 @@
   --color-line: var(--color-grey-e5, #e5e5e5);
   --color-hover: var(--color-accent-red, #e0261f);
 
-  /* Text color only — kept separate from --color-fg (which also drives
-     borders/fills throughout) so text can go white without turning
-     every line/border white along with it. */
-  --color-text: #ffffff;
-  --color-text-muted: rgba(255, 255, 255, 0.72);
-  --color-text-faint: rgba(255, 255, 255, 0.5);
-
   --font-sans: "Helvetica Neue", Helvetica, Arial, "Apple SD Gothic Neo", sans-serif;
   /* archivio-uno.com's body font is a self-hosted custom face (Baikal VAR)
      that isn't ours to hotlink; this is the site's own declared fallback
@@ -58,7 +51,7 @@ html {
 
 body {
   background: var(--color-bg);
-  color: var(--color-text);
+  color: var(--color-fg);
   font-family: var(--font-body);
   font-weight: 700;
   -webkit-font-smoothing: antialiased;
@@ -171,7 +164,7 @@ a {
   display: block;
   position: absolute;
   inset: 0;
-  color: var(--color-text);
+  color: var(--color-fg);
   opacity: 0;
   transition: opacity 350ms var(--ease);
 }
@@ -229,7 +222,7 @@ a {
 
 .social-icon {
   display: inline-flex;
-  color: var(--color-text);
+  color: var(--color-fg);
   transition: color 180ms var(--ease);
 }
 
@@ -274,7 +267,7 @@ a {
   background: none;
   border: none;
   padding: 0;
-  color: var(--color-text);
+  color: var(--color-fg);
   transition: color 180ms var(--ease);
 }
 
@@ -340,7 +333,7 @@ a {
   font-size: clamp(15px, 1.6vw, 19px);
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: var(--color-text);
+  color: var(--color-fg);
   white-space: nowrap;
   transition: color 180ms var(--ease);
 }
@@ -363,7 +356,7 @@ a {
   padding: 22px 0;
   font-size: clamp(15px, 1.6vw, 19px);
   letter-spacing: 0.08em;
-  color: var(--color-text);
+  color: var(--color-fg);
   border-bottom: 1px solid transparent;
   transition: color 180ms var(--ease);
 }
@@ -416,7 +409,7 @@ a {
 .mobile-nav a {
   font-size: 13px;
   letter-spacing: 0.12em;
-  color: var(--color-text);
+  color: var(--color-fg);
   transition: color 180ms var(--ease);
 }
 
@@ -620,7 +613,7 @@ a {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-text);
+  color: var(--color-fg);
   white-space: nowrap;
 }
 
@@ -639,7 +632,7 @@ a {
   font-family: inherit;
   font-size: 13px;
   line-height: 1;
-  color: var(--color-text);
+  color: var(--color-fg);
   background: none;
   border: none;
   border-left: 1px solid var(--color-line);
@@ -708,7 +701,7 @@ a {
   font-weight: 700;
   letter-spacing: 0.04em;
   text-align: left;
-  color: var(--color-text);
+  color: var(--color-fg);
   background: var(--color-bg);
   border: none;
   border-bottom: 1px solid var(--color-line);
@@ -769,7 +762,7 @@ a {
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--color-text);
+  color: var(--color-fg);
   background: var(--color-bg);
   border: 1px solid var(--color-fg);
   border-right: none;
@@ -836,7 +829,7 @@ a {
   height: 28px;
   font-size: 20px;
   line-height: 1;
-  color: var(--color-text);
+  color: var(--color-fg);
   background: none;
   border: none;
   cursor: pointer;
@@ -868,7 +861,7 @@ a {
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-text-muted);
+  color: var(--color-fg-muted);
 }
 
 .contact-field em {
@@ -884,7 +877,7 @@ a {
   font-size: 14px;
   letter-spacing: 0;
   text-transform: none;
-  color: var(--color-text);
+  color: var(--color-fg);
   background: none;
   border: none;
   border-bottom: 1px solid var(--color-line);
@@ -930,7 +923,7 @@ a {
 
 .contact-status {
   font-size: 12px;
-  color: var(--color-text-muted);
+  color: var(--color-fg-muted);
   min-height: 1em;
 }
 
@@ -1066,7 +1059,7 @@ a {
   font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--color-text-muted);
+  color: var(--color-fg-muted);
   opacity: 0;
   transform: translateY(6px);
   transition: opacity 220ms var(--ease), transform 220ms var(--ease);
@@ -1087,7 +1080,7 @@ a {
   font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
   font-size: 11px;
   line-height: 1.7;
-  color: var(--color-text);
+  color: var(--color-fg);
   background: var(--color-bg);
   border: 1px solid var(--color-fg);
   padding: 10px 12px;
@@ -1130,7 +1123,7 @@ html.labs-blueprint body::after {
   font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
   font-size: 10px;
   letter-spacing: 0.14em;
-  color: var(--color-text);
+  color: var(--color-fg);
   background: var(--color-bg);
   border: 1px solid var(--color-fg);
   padding: 4px 8px;
@@ -1385,7 +1378,7 @@ html.js-typing .hero-title {
   font-family: var(--font-sans);
   font-size: 14px;
   line-height: 1.6;
-  color: var(--color-text-muted);
+  color: var(--color-fg-muted);
   margin-bottom: 24px;
 }
 
@@ -1405,7 +1398,7 @@ html.js-typing .hero-title {
   padding: 12px 10px;
   border: 1px solid var(--color-fg);
   background: var(--color-bg);
-  color: var(--color-text);
+  color: var(--color-fg);
   cursor: pointer;
   transition: color 180ms var(--ease), background-color 180ms var(--ease);
 }
@@ -1458,7 +1451,7 @@ html.js-typing .hero-title {
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--color-text-muted);
+  color: var(--color-fg-muted);
 }
 
 .section-title {
@@ -1473,7 +1466,7 @@ html.js-typing .hero-title {
   font-size: 15px;
   line-height: 1.7;
   max-width: 520px;
-  color: var(--color-text-muted);
+  color: var(--color-fg-muted);
 }
 
 /* ==========================================================================
@@ -1511,7 +1504,7 @@ html.js-typing .hero-title {
   padding: 10px var(--edge) 0;
   font-size: 11px;
   letter-spacing: 0.06em;
-  color: var(--color-text-faint);
+  color: var(--color-fg-faint);
 }
 
 /* ==========================================================================
@@ -1526,7 +1519,7 @@ html.js-typing .hero-title {
 .footer-copy {
   font-size: 12px;
   letter-spacing: 0.05em;
-  color: var(--color-text-faint);
+  color: var(--color-fg-faint);
 }
 
 /* ==========================================================================

@@ -1633,10 +1633,21 @@ html.header-on-photo .logo-mark {
   background-color: #fff;
 }
 
+html.header-on-photo .logo-draw {
+  color: #fff;
+}
+
 /* Same specificity trick the rest of the site's hover/focus pairs rely
    on (class + class beats class + pseudo-class) — without these, the
    white override above would outrank hover/focus and the red feedback
    color would stop working while the header sits over a photo. */
+html.header-on-photo .logo:hover .logo-mark,
+html.header-on-photo .logo:focus-visible .logo-mark {
+  background-color: var(--color-hover);
+}
+
+html.header-on-photo .logo:hover .logo-draw,
+html.header-on-photo .logo:focus-visible .logo-draw,
 html.header-on-photo .nav-link:hover,
 html.header-on-photo .nav-link:focus-visible,
 html.header-on-photo .social-icon:hover,

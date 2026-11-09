@@ -441,7 +441,6 @@ a {
   background: var(--color-bg);
 }
 
-/* Slider structure — placeholder-safe, works with zero real images */
 .hero-slider {
   position: absolute;
   inset: 0;
@@ -463,9 +462,14 @@ a {
   opacity: 1;
 }
 
-/* No source imagery yet — slides carry no fill so the white page shows
-   through. The markup and autoplay logic stay wired for when real
-   photography replaces this placeholder. */
+.hero-slide:nth-child(1) {
+  background-image: url("images/hero-red.jpg");
+}
+
+.hero-slide:nth-child(2) {
+  background-image: url("images/hero-blue.jpg");
+}
+
 .hero-overlay {
   position: absolute;
   inset: 0;

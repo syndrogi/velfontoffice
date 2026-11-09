@@ -550,3 +550,43 @@
     }
   });
 })();
+
+/**
+ * VELFONT OFFICE — Header Contrast Over the Hero Photos
+ * .site-header is fixed and transparent, so it sits directly on top of
+ * whatever's behind it. With the hero now carrying real photos, the
+ * header's own black text/logo disappear into them — this flips the
+ * header to white (html.header-on-photo, see style.css) only while it's
+ * actually overlapping the hero, and back to black once the page has
+ * scrolled past it into the plain white sections below.
+ */
+(function () {
+  var hero = document.getElementById("hero");
+  if (!hero) return;
+
+  var html = document.documentElement;
+
+  function headerOverlapsHero() {
+    var headerHeight = parseFloat(getComputedStyle(html).getPropertyValue("--header-height")) || 0;
+    var heroRect = hero.getBoundingClientRect();
+    return heroRect.top < headerHeight && heroRect.bottom > 0;
+  }
+
+  function update() {
+    html.classList.toggle("header-on-photo", headerOverlapsHero());
+  }
+
+  var ticking = false;
+  function scheduleUpdate() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function () {
+      ticking = false;
+      update();
+    });
+  }
+
+  update();
+  window.addEventListener("scroll", scheduleUpdate, { passive: true });
+  window.addEventListener("resize", scheduleUpdate);
+})();

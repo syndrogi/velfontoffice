@@ -1613,3 +1613,37 @@ html.js-typing .hero-title {
     bottom: 24px;
   }
 }
+
+/* ==========================================================================
+   Header contrast over the hero photos — html.header-on-photo is toggled
+   by js/main.js whenever the fixed, transparent .site-header is actually
+   overlapping the hero (its text/logo would otherwise disappear into a
+   dark photo); scrolling past the hero into the plain white sections
+   below reverts it to the normal black.
+   ========================================================================== */
+html.header-on-photo .nav-link,
+html.header-on-photo .hero-title,
+html.header-on-photo .social-icon,
+html.header-on-photo .more-toggle,
+html.header-on-photo .more-menu-link {
+  color: #fff;
+}
+
+html.header-on-photo .logo-mark {
+  background-color: #fff;
+}
+
+/* Same specificity trick the rest of the site's hover/focus pairs rely
+   on (class + class beats class + pseudo-class) — without these, the
+   white override above would outrank hover/focus and the red feedback
+   color would stop working while the header sits over a photo. */
+html.header-on-photo .nav-link:hover,
+html.header-on-photo .nav-link:focus-visible,
+html.header-on-photo .social-icon:hover,
+html.header-on-photo .social-icon:focus-visible,
+html.header-on-photo .more-toggle:hover,
+html.header-on-photo .more-toggle:focus-visible,
+html.header-on-photo .more-menu-link:hover,
+html.header-on-photo .more-menu-link:focus-visible {
+  color: var(--color-hover);
+}

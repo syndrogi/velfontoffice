@@ -1585,6 +1585,27 @@ html.js-typing .hero-title {
     animation: fadeIn 1.2s 0.4s var(--ease) both;
   }
 
+  /* Mobile hero — a single landscape photo (images/hero-mobile.jpg)
+     instead of the desktop red/blue slideshow. The hero drops its
+     full-viewport height and takes the photo's own aspect ratio, so the
+     whole image shows uncropped at full width. Only the first slide is
+     kept (always visible); the rest are hidden, so js/main.js's
+     slideshow timer has nothing visible to fade between. */
+  .hero {
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 1600 / 1204;
+  }
+
+  .hero-slide:nth-child(1) {
+    background-image: url("images/hero-mobile.jpg");
+    opacity: 1;
+  }
+
+  .hero-slide:nth-child(n + 2) {
+    display: none;
+  }
+
   .section-placeholder {
     padding: 100px var(--edge);
   }

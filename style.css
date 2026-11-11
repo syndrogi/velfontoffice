@@ -89,7 +89,6 @@ a {
      instead of the header's empty space blocking it. pointer-events
      is inherited, so this alone covers every descendant. */
   pointer-events: none;
-  animation: fadeIn 1s var(--ease) both;
 }
 
 .header-left,
@@ -1290,10 +1289,9 @@ html.labs-blueprint body::after {
    script in <head>) when JS runs and the visitor hasn't asked for
    reduced motion, so with JS off or motion reduced this rule never
    applies and the text just shows normally. */
-html.js-typing .main-nav a,
-html.js-typing .hero-title {
-  visibility: hidden;
-}
+/* (Nav links and the wordmark used to start hidden here and get typed
+   in; they're now visible from the first paint — only the header logo's
+   line draw animates on load.) */
 
 .is-typing,
 .is-typed {
@@ -1573,8 +1571,8 @@ html.js-typing .hero-title {
      a ragged number of lines depending on label length; two fixed
      columns read as a deliberate mobile layout instead of a shrunk
      copy of the desktop row. Sits directly below the (now shorter)
-     fixed header. Same fadeIn timing as .labs, so both first-paint
-     reveals read as one consistent animation. */
+     fixed header. No fade-in: it's there from the first paint
+     (the header logo's line draw is the only load animation). */
   .mobile-nav {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1582,7 +1580,6 @@ html.js-typing .hero-title {
     margin-top: var(--header-height);
     padding: 14px var(--edge);
     border-bottom: 1px solid var(--color-line);
-    animation: fadeIn 1.2s 0.4s var(--ease) both;
   }
 
   /* Mobile hero — a single landscape photo (images/hero-mobile.jpg)
@@ -1828,7 +1825,7 @@ body {
   border: 0;
   border-top: 1px solid var(--color-fg);
   padding: 20px var(--edge) calc(20px + env(safe-area-inset-bottom));
-  animation: mobileAdvisoryUp 0.35s var(--ease) both;
+  animation: none;
 }
 
 .mobile-advisory__title {

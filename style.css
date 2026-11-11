@@ -1801,10 +1801,12 @@ body {
     gap: 0;
   }
 
+  /* Each row spans the full width: first link flush left, last link
+     flush right, any links in between spread evenly across the middle. */
   .mobile-nav-row {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0 20px;
+    justify-content: space-between;
+    gap: 0 12px;
   }
 
   .section-placeholder {

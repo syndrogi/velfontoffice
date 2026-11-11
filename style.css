@@ -1679,3 +1679,119 @@ html.header-on-photo .more-menu-link:hover,
 html.header-on-photo .more-menu-link:focus-visible {
   color: var(--color-hover);
 }
+
+/* ==========================================================================
+   Typography — modelled on postarchivefaction.com: plain Helvetica Neue,
+   one modest bold title per block, regular-weight copy in sentence case
+   with no added tracking, everything in full black, tight line-height and
+   a narrow side margin. Kept as one override block at the end of the file
+   so it wins over the per-component rules above (same selectors, later in
+   the cascade) without rewriting each of them. The labs dev/blueprint/
+   measure overlays keep their IBM Plex Mono — they are a technical
+   readout, not site copy.
+   ========================================================================== */
+
+:root {
+  --font-body: "Helvetica Neue", Helvetica, Arial, "Apple SD Gothic Neo", sans-serif;
+  --type-body: 15px;
+  --type-title: 26px;
+}
+
+body {
+  font-weight: 400;
+  font-size: var(--type-body);
+  line-height: 1.3;
+}
+
+/* Titles — bold, slightly tight, like "POST ARCHIVE FACTION (PAF)". */
+.section-title,
+.contact-title,
+.mobile-advisory__title {
+  font-size: var(--type-title);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  text-transform: none;
+}
+
+.hero-title {
+  font-weight: 700;
+  text-transform: none;
+}
+
+/* Everything else — body size, regular weight, no tracking, no caps. */
+.nav-link,
+.more-menu-link,
+.mobile-nav a,
+.office-palette__title,
+.office-palette__btn,
+.labs-menu-btn,
+.office-palette-tab,
+.contact-field,
+.contact-submit,
+.contact-status,
+.labs-notice,
+.mobile-advisory__desc,
+.mobile-advisory__btn,
+.section-label span,
+.section-desc,
+.archive-photo figcaption,
+.footer-copy {
+  font-size: var(--type-body);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.3;
+  text-transform: none;
+  color: var(--color-fg);
+}
+
+/* Small UI chrome stays a step below body size. */
+.office-palette__title,
+.office-palette-tab,
+.labs-notice,
+.contact-field,
+.mobile-advisory__btn {
+  font-size: 13px;
+}
+
+/* Sections — title, then copy, nothing else: the small logo + label row
+   just repeated the title, so it goes, as does the wide label column. */
+.section-placeholder {
+  padding: 96px var(--edge);
+}
+
+.section-grid {
+  display: block;
+  max-width: 560px;
+}
+
+.section-label {
+  display: none;
+}
+
+.section-title {
+  margin-bottom: 24px;
+}
+
+.section-desc {
+  max-width: none;
+}
+
+.site-footer {
+  padding: 40px var(--edge);
+}
+
+@media (max-width: 768px) {
+  :root {
+    --edge: 20px;
+    --type-title: 24px;
+  }
+
+  .mobile-nav {
+    gap: 6px 20px;
+  }
+
+  .section-placeholder {
+    padding: 64px var(--edge);
+  }
+}

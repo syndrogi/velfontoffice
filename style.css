@@ -1791,9 +1791,9 @@ body {
     --type-title: 24px;
   }
 
-  /* Four fixed rows (see index.html) instead of the two-column grid:
-     Shop / Office / Contact, Midi Office / Beta Office, 5th Ave. /
-     Hyungrok(Roy) Son, Members Only / About. Rows sit at the 20px line
+  /* Three fixed rows (see index.html) instead of the two-column grid:
+     Shop / Office / Contact / About, Midi Office / Beta Office / Members
+     Only, 5th Ave. / Hyungrok(Roy) Son. Rows sit at the 20px line
      pitch; links in a row are spaced by a plain word gap. */
   .mobile-nav {
     display: flex;

@@ -1791,7 +1791,19 @@ body {
     --type-title: 24px;
   }
 
+  /* Four fixed rows (see index.html) instead of the two-column grid:
+     Shop / Office / Contact, Midi Office / Beta Office, 5th Ave. /
+     Hyungrok(Roy) Son, Members Only / About. Rows sit at the 20px line
+     pitch; links in a row are spaced by a plain word gap. */
   .mobile-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .mobile-nav-row {
+    display: flex;
+    flex-wrap: wrap;
     gap: 0 20px;
   }
 

@@ -1679,3 +1679,78 @@ html.header-on-photo .more-menu-link:hover,
 html.header-on-photo .more-menu-link:focus-visible {
   color: var(--color-hover);
 }
+
+/* ==========================================================================
+   Typography — plain Helvetica Neue in the style of
+   postarchivefaction.com: regular-weight body text in sentence case with
+   no added tracking, bold reserved for titles. Kept as one override block
+   at the end of the file so it wins over the per-component rules above
+   (same selectors, later in the cascade) without rewriting each of them.
+   The labs dev/blueprint/measure overlays keep their IBM Plex Mono — they
+   are a technical readout, not site copy.
+   ========================================================================== */
+
+:root {
+  --font-body: "Helvetica Neue", Helvetica, Arial, "Apple SD Gothic Neo", sans-serif;
+}
+
+body {
+  font-weight: 400;
+}
+
+/* Titles — bold, slightly tight, like the "POST ARCHIVE FACTION (PAF)"
+   heading. */
+.hero-title,
+.section-title,
+.contact-title,
+.mobile-advisory__title {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-transform: none;
+}
+
+/* Everything else — regular weight, no tracking, no forced caps. */
+.nav-link,
+.more-menu-link,
+.mobile-nav a,
+.office-palette__title,
+.office-palette__btn,
+.labs-menu-btn,
+.office-palette-tab,
+.contact-field,
+.contact-submit,
+.contact-status,
+.labs-notice,
+.mobile-advisory__desc,
+.mobile-advisory__btn,
+.section-label span,
+.archive-photo figcaption,
+.footer-copy {
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.nav-link,
+.more-menu-link {
+  font-size: clamp(16px, 1.6vw, 19px);
+}
+
+.mobile-nav a {
+  font-size: 17px;
+}
+
+.section-label span {
+  font-size: 14px;
+}
+
+/* Body copy in full black, like the PAF description and name list. */
+.section-desc {
+  font-size: 17px;
+  line-height: 1.4;
+  color: var(--color-fg);
+}
+
+.footer-copy {
+  font-size: 14px;
+}

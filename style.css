@@ -1326,93 +1326,6 @@ html.labs-blueprint body::after {
 }
 
 /* ==========================================================================
-   Mobile advisory — "desktop recommended" notice (js/mobile-advisory.js).
-   An advisory, not a gate: it sits above everything, including the
-   Office Palette (z-index 60) and the page-veil transition (9999), since
-   it can appear on the very first load before either is relevant. Same
-   bordered-panel, square-corner, color-inverting-button language as the
-   Office Palette itself — no rounded corners, no shadow.
-   ========================================================================== */
-
-.mobile-advisory-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  background: rgba(0, 0, 0, 0.4);
-}
-
-.mobile-advisory-backdrop[hidden] {
-  display: none;
-}
-
-.mobile-advisory {
-  position: fixed;
-  z-index: 10001;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: min(360px, calc(100vw - 48px));
-  background: var(--color-bg);
-  border: 1px solid var(--color-fg);
-  padding: 28px 24px 24px;
-  text-align: left;
-  animation: fadeIn 0.3s var(--ease) both;
-}
-
-.mobile-advisory[hidden] {
-  display: none;
-}
-
-.mobile-advisory__title {
-  font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-bottom: 14px;
-}
-
-.mobile-advisory__desc {
-  font-family: var(--font-sans);
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--color-fg-muted);
-  margin-bottom: 24px;
-}
-
-.mobile-advisory__actions {
-  display: flex;
-  gap: 10px;
-}
-
-.mobile-advisory__btn {
-  flex: 1;
-  min-height: 44px;
-  font-family: var(--font-body);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 12px 10px;
-  border: 1px solid var(--color-fg);
-  background: var(--color-bg);
-  color: var(--color-fg);
-  cursor: pointer;
-  transition: color 180ms var(--ease), background-color 180ms var(--ease);
-}
-
-.mobile-advisory__btn:hover,
-.mobile-advisory__btn:active {
-  color: var(--color-bg);
-  background: var(--color-fg);
-}
-
-.mobile-advisory__btn:focus-visible {
-  outline: 1px solid var(--color-hover);
-  outline-offset: 2px;
-}
-
-/* ==========================================================================
    Placeholder sections — Office / Archive / About
    Editorial shell: divider, label tag, large title, short description,
    laid out on a two-column grid. Content is structural; the sections
@@ -1706,8 +1619,7 @@ body {
 
 /* Titles — bold, slightly tight, like "POST ARCHIVE FACTION (PAF)". */
 .section-title,
-.contact-title,
-.mobile-advisory__title {
+.contact-title {
   font-size: var(--type-title);
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -1732,8 +1644,6 @@ body {
 .contact-submit,
 .contact-status,
 .labs-notice,
-.mobile-advisory__desc,
-.mobile-advisory__btn,
 .section-label span,
 .section-desc,
 .archive-photo figcaption,
@@ -1750,8 +1660,7 @@ body {
 .office-palette__title,
 .office-palette-tab,
 .labs-notice,
-.contact-field,
-.mobile-advisory__btn {
+.contact-field {
   font-size: 13px;
 }
 
@@ -1808,41 +1717,5 @@ body {
 
   .section-placeholder {
     padding: 64px var(--edge);
-  }
-}
-
-/* Mobile advisory — docked to the bottom of the screen as a full-width
-   sheet (like a cookie banner) instead of a centred box, so the hero
-   photo stays visible above it. Same modal behaviour as before
-   (js/mobile-advisory.js); only the placement changes. */
-.mobile-advisory {
-  left: 0;
-  right: 0;
-  top: auto;
-  bottom: 0;
-  transform: none;
-  width: 100%;
-  border: 0;
-  border-top: 1px solid var(--color-fg);
-  padding: 20px var(--edge) calc(20px + env(safe-area-inset-bottom));
-  animation: none;
-}
-
-.mobile-advisory__title {
-  margin-bottom: 8px;
-}
-
-.mobile-advisory__desc {
-  margin-bottom: 16px;
-}
-
-@keyframes mobileAdvisoryUp {
-  from {
-    opacity: 0;
-    transform: translateY(100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }

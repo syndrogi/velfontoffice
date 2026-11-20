@@ -378,8 +378,8 @@
   var HERO_ORIGINAL_TEXT = heroTitleVisual ? heroTitleVisual.textContent : "";
 
   // Nav links are no longer typed in on first paint — they're simply
-  // there from the start (the header logo's line draw is the only load
-  // animation). typeElement() stays for anything that calls it later.
+  // there from the start. typeElement() stays for anything that calls it
+  // later.
 
   // Swaps the landed text for real letter spans — same draggable-letter
   // treatment as every other typed element on the page, just built in
@@ -483,13 +483,12 @@
     runHeroReel(heroTitleVisual, sequence, onDone);
   };
 
-  // No first-paint reel: the title is shown as-is and just gets its
-  // draggable letter spans right away. The reel itself stays available
-  // for the Roulette lab (window.spinHeroTitleRoulette above).
-  if (heroTitle && heroTitleVisual) {
-    buildHeroLetters(heroTitleVisual);
-    heroTitle.classList.add("is-typed");
-  }
+  // First-paint reel: the wordmark stays hidden (html.js-typing
+  // .hero-title in style.css) until this spin starts, then lands on
+  // English and gets its draggable letter spans.
+  setTimeout(function () {
+    if (heroTitle && heroTitleVisual) spinHeroTitle(heroTitleVisual);
+  }, 200);
 })();
 
 /**

@@ -1293,9 +1293,11 @@ html.labs-blueprint body::after {
    script in <head>) when JS runs and the visitor hasn't asked for
    reduced motion, so with JS off or motion reduced this rule never
    applies and the text just shows normally. */
-/* (Nav links and the wordmark used to start hidden here and get typed
-   in; they're now visible from the first paint — only the header logo's
-   line draw animates on load.) */
+/* Only the wordmark waits for its first-paint language reel
+   (js/main.js); nav links are visible from the first paint. */
+html.js-typing .hero-title {
+  visibility: hidden;
+}
 
 .is-typing,
 .is-typed {

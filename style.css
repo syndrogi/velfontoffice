@@ -574,8 +574,8 @@ a {
    pre-maximize left/top/width/height to restore and skips writing its
    own inline geometry while this class is set. */
 .office-palette.is-maximized {
-  /* Above the header (100) and its "more" dropdown (30, open by
-     default from first paint — see js/more-menu.js) — that dropdown's
+  /* Above the header (100) and its "more" dropdown (30, once opened
+     — see js/more-menu.js) — that dropdown's
      own content runs a little past the header's own height, into the
      16px gap left below it here, so without this the header would
      still win hit-testing over the palette's own topmost controls

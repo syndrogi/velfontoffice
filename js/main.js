@@ -1,33 +1,27 @@
 /**
  * VELFONT OFFICE — Hero Slider
- * Fades between .hero-slide elements every 4s.
+ * Stays on one photo until the background itself is clicked, then fades
+ * to the next .hero-slide. Only .hero-slider listens, so clicks on the
+ * contact panel or anything else layered over the hero never change it.
  * The first slide already carries `.is-active` in the HTML, so the hero
  * renders correctly even if this script never runs.
  */
 (function () {
-  var AUTOPLAY_MS = 4000;
+  var slider = document.querySelector("#hero .hero-slider");
+  if (!slider) return;
 
-  var hero = document.getElementById("hero");
-  if (!hero) return;
-
-  var slides = hero.querySelectorAll(".hero-slide");
-
-  if (!slides.length) return;
-
+  var slides = slider.querySelectorAll(".hero-slide");
   var total = slides.length;
+  if (total < 2) return;
+
   var current = 0;
 
   Array.prototype.forEach.call(slides, function (slide, i) {
     slide.classList.toggle("is-active", i === 0);
   });
 
-  var reduceMotion = window.matchMedia(
-    "(prefers-reduced-motion: reduce)"
-  ).matches;
-
-  if (total > 1 && !reduceMotion) {
-    setInterval(advance, AUTOPLAY_MS);
-  }
+  slider.classList.add("is-clickable");
+  slider.addEventListener("click", advance);
 
   function advance() {
     slides[current].classList.remove("is-active");

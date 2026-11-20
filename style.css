@@ -446,6 +446,10 @@ a {
   z-index: 1;
 }
 
+.hero-slider.is-clickable {
+  cursor: pointer;
+}
+
 .hero-slide {
   position: absolute;
   inset: 0;
@@ -1499,8 +1503,8 @@ html.labs-blueprint body::after {
      instead of the desktop red/blue slideshow. The hero drops its
      full-viewport height and takes the photo's own aspect ratio, so the
      whole image shows uncropped at full width. Only the first slide is
-     kept (always visible); the rest are hidden, so js/main.js's
-     slideshow timer has nothing visible to fade between. */
+     kept (always visible); the rest are hidden, so a click on the
+     background (js/main.js) has nothing visible to fade between. */
   .hero {
     height: auto;
     min-height: 0;
@@ -1514,6 +1518,10 @@ html.labs-blueprint body::after {
 
   .hero-slide:nth-child(n + 2) {
     display: none;
+  }
+
+  .hero-slider.is-clickable {
+    cursor: auto;
   }
 
   .section-placeholder {

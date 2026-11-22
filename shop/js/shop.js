@@ -13,11 +13,17 @@ const rail = document.getElementById("studioRail");
 const thumbs = document.getElementById("studioThumbs");
 const prev = document.getElementById("studioPrev");
 const next = document.getElementById("studioNext");
+const stageTitle = document.getElementById("studioTitle");
+const emptyPanel = document.getElementById("studioEmpty");
+const emptyCategory = document.getElementById("studioEmptyCategory");
+const caption = nameLabel.parentElement;
+const departments = ["T-shirt", "Top", "Outer", "Bottom", "Accessories"];
 
 function clothingType(product) {
   if (/\b(?:tees?|t[ -]?shirts?)\b/i.test(product.name + " " + product.category)) return "T-shirt";
   const category = (product.category || "Other").trim();
-  return ({tops:"Top", bottoms:"Bottom", outerwear:"Outer"})[category.toLowerCase()] || category;
+  return ({tops:"Top", bottoms:"Bottom", outerwear:"Outer", accessory:"Accessories"})[category.toLowerCase()]
+    || departments.find(label => label.toLowerCase() === category.toLowerCase()) || category;
 }
 
 function productEntry(product) {
@@ -71,7 +77,9 @@ async function selectEntry(entry) {
   frame.classList.add("visible");
   variant.hidden = !entry.alternate;
   variant.setAttribute("aria-pressed", "false");
-  nameLabel.textContent = [entry.name, entry.price].filter(Boolean).join(" · ");
+  stageTitle.textContent = entry.href ? entry.name : "";
+  stageTitle.hidden = !entry.href;
+  nameLabel.textContent = entry.href ? entry.price : entry.name;
   link.hidden = !entry.href;
   if (entry.href) link.href = entry.href;
   else link.removeAttribute("href");
@@ -82,6 +90,16 @@ function openGroup(label, entries) {
   for (const item of list.children) item.setAttribute("aria-pressed", String(item.textContent === label));
   thumbs.replaceChildren();
   rail.hidden = entries.length < 2;
+  emptyPanel.hidden = entries.length !== 0;
+  photos.hidden = caption.hidden = !entries.length;
+  if (!entries.length) {
+    ++selectionVersion;
+    activeKey = "";
+    photos.replaceChildren();
+    stageTitle.hidden = true;
+    emptyCategory.textContent = label;
+    return;
+  }
   let selected = Math.max(0, entries.findIndex(entry => entry.key === activeKey));
   function choose(index, scroll) {
     selected = index;
@@ -103,6 +121,9 @@ function openGroup(label, entries) {
     thumb.title = entry.name;
     thumb.setAttribute("aria-label", entry.name);
     if (entry.url) thumb.append(makePhoto(entry.url, ""));
+    const label = document.createElement("span");
+    label.textContent = entry.name;
+    thumb.append(label);
     thumb.onclick = () => choose(i, true);
     thumbs.append(thumb);
   }
@@ -139,6 +160,7 @@ function renderCollection() {
       entries.push({key:"archive-" + block.id, name:block.title || block.caption || "Archive", url:block.image && resolveImageUrl(block.image,"archive")});
     }
     groups.set("Campaign", entries);
+    for (const label of departments) groups.set(label, []);
   }
   for (const product of products) {
     const category = clothingType(product);
@@ -162,6 +184,8 @@ function renderCollection() {
     selectionVersion++;
     activeKey = "";
     photos.replaceChildren();
+    emptyPanel.hidden = stageTitle.hidden = true;
+    caption.hidden = photos.hidden = false;
     rail.hidden = true;
     link.hidden = variant.hidden = true;
     nameLabel.textContent = t("shop.noResults",{query});

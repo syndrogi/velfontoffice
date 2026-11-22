@@ -12,11 +12,22 @@
 #studioList button[aria-pressed=true]::after {opacity:1}
 .studio-index small,.studio-caption {font-size:13px}
 .studio-stage { position:relative; min-width:0; height:var(--studio-height); background:#eeefec; display:flex; flex-direction:column; }
+.studio-stage [hidden] {display:none!important}
+.studio-title {padding:20px 24px 0;text-align:center;font:500 20px/1.2 "Helvetica Neue",Arial,sans-serif;overflow-wrap:anywhere}
+.studio-empty {flex:1;display:grid;align-content:center;justify-items:center;gap:12px}
+.studio-empty span {font-size:13px}
+.studio-empty h2 {font:400 38px/1.1 "Helvetica Neue",Arial,sans-serif}
 #studioPhotos {position:relative;flex:1;min-height:0;isolation:isolate;}
 .studio-frame {position:absolute;inset:0;opacity:0;pointer-events:none;background:#eeefec;transition:opacity .44s ease;}
 .studio-frame.visible {opacity:1;pointer-events:auto}
 .studio-frame img {position:absolute;inset:5%;width:90%;height:90%;object-fit:contain;mix-blend-mode:multiply;}
 .studio-frame.editorial img {inset:0;width:100%;height:100%;object-fit:cover;object-position:58% center;mix-blend-mode:normal}
+.studio-frame.editorial {overflow:hidden}
+@media(prefers-reduced-motion:no-preference){
+  .studio-frame.editorial.visible img {scale:1.09;animation:studio-pan-x 9s ease-in-out -2.25s infinite,studio-pan-y 7s ease-in-out -1.75s infinite}
+}
+@keyframes studio-pan-x {0%,100%{translate:-2% 0}50%{translate:2% 0}}
+@keyframes studio-pan-y {0%,100%{transform:translateY(-1.5%)}50%{transform:translateY(1.5%)}}
 .studio-frame .alternate {position:absolute;inset:0;opacity:0;transition:opacity .3s;background:#eeefec;isolation:isolate;pointer-events:none}
 .studio-frame.show-alternate .alternate {opacity:1}
 @media(hover:hover){.studio-frame:hover .alternate {opacity:1}}
@@ -24,11 +35,14 @@
 #studioRail:not([hidden]) {display:flex;align-items:center;gap:10px;padding:6px 18px}
 #studioRail > button {flex:0 0 32px;height:40px;font-size:20px}
 #studioRail > button:disabled {opacity:.25;cursor:default}
-#studioThumbs {position:relative;flex:1;display:flex;gap:8px;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;scroll-snap-type:x mandatory}
-#studioThumbs::before,#studioThumbs::after {content:"";flex:0 0 max(0px, calc(50% - 44px))}
-#studioThumbs button {flex:0 0 72px;height:65px;border-bottom:2px solid transparent;scroll-snap-align:center}
+#studioThumbs {--thumb-width:96px;position:relative;flex:1;display:flex;gap:8px;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;scroll-snap-type:x mandatory}
+#studioThumbs::-webkit-scrollbar {display:none}
+#studioThumbs::before,#studioThumbs::after {content:"";flex:0 0 max(0px, calc(50% - var(--thumb-width) / 2 - 8px))}
+#studioThumbs button {flex:0 0 var(--thumb-width);min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:2px 2px 5px;border-bottom:1px solid transparent;scroll-snap-align:center}
 #studioThumbs button[aria-pressed=true] {border-color:currentColor}
-#studioThumbs img {display:block;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply}
+#studioThumbs button:focus-visible {outline-offset:-2px}
+#studioThumbs img {display:block;width:100%;height:58px;object-fit:contain;mix-blend-mode:multiply}
+#studioThumbs span {font:500 12px/1.25 "Helvetica Neue",Arial,sans-serif;color:#262725;overflow-wrap:anywhere}
 .studio-caption a,.studio-caption button {text-decoration:underline;text-underline-offset:3px}
 .studio-caption span {margin-right:auto}
 @media(max-width:760px){
@@ -38,5 +52,9 @@
   #studioList button {font-size:19px;white-space:nowrap}
   .studio-stage {height:clamp(380px,62svh,720px)}
   .studio-caption {padding:10px 16px;gap:8px}
+  .studio-title {padding-top:14px;font-size:17px}
+  #studioThumbs {--thumb-width:82px}
+  #studioThumbs img {height:46px}
+  #studioRail:not([hidden]) {gap:4px;padding-inline:8px}
 }
 @media(prefers-reduced-motion:reduce){.studio *,.studio *::after {transition:none!important}}

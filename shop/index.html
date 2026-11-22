@@ -134,10 +134,15 @@
       <option value="recommended">Recommended</option><option value="new">Newest</option>
       <option value="price-asc">Price: low to high</option><option value="price-desc">Price: high to low</option>
     </select></header>
-    <nav id="studioList" aria-label="Select a photograph"></nav>
+    <nav id="studioList" aria-label="Collections"></nav>
     <small id="studioCount" role="status">Loading collection…</small>
   </section>
   <section class="studio-stage" aria-label="Selected item">
+    <h2 class="studio-title" id="studioTitle" hidden></h2>
+    <div class="studio-empty" id="studioEmpty" role="status" hidden>
+      <span id="studioEmptyCategory"></span>
+      <h2>Out of order</h2>
+    </div>
     <div id="studioPhotos"></div>
     <div id="studioRail" hidden>
       <button type="button" id="studioPrev" aria-label="Previous item">&#8592;</button>

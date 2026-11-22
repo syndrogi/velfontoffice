@@ -1,326 +1,119 @@
-const ARCHIVE_STORAGE_BUCKET = "archive";
-const ARCHIVE_BLOCK_INTERVAL = 5; // an archive block after every 5th product, while blocks last
+const list = document.getElementById("studioList");
+const photos = document.getElementById("studioPhotos");
+const nameLabel = document.getElementById("studioName");
+const link = document.getElementById("studioLink");
+const variant = document.getElementById("studioVariant");
+const sort = document.getElementById("studioSort");
+let query = "";
+let activeKey = "";
+let ready = false;
+let selectionVersion = 0;
 
-// Sold-out products already show "Sold Out" in place of the price (see
-// productCardHtml's .sold-out-label below) — a badge on top of the image
-// would just repeat it, so this only flags coming-soon items.
-function badgeFor(product) {
-  if (product.status === "coming_soon") return '<span class="badge">Coming Soon</span>';
-  return "";
+function productEntry(product) {
+  const rows = getProductImages(product.id).filter(row => row.image);
+  const first = rows[0]?.image || product.thumbnail;
+  const last = product.hover_image || rows.at(-1)?.image;
+  return {
+    key: product.id, name: product.name, price: product.status === "sold_out" ? t("product.soldOutLabel") : formatPrice(product.price),
+    url: first && resolveImageUrl(first), alternate: last && last !== first && resolveImageUrl(last),
+    href: "product.html?slug=" + encodeURIComponent(product.slug)
+  };
 }
 
-// Interleaves archive blocks into the product sequence every ARCHIVE_BLOCK_INTERVAL
-// slot. With zero archive blocks (the default today) this is just the product list.
-function buildFeed(products, archiveBlocks) {
-  if (!archiveBlocks.length) {
-    return products.map((product) => ({ kind: "product", product }));
+function makePhoto(url, alt) {
+  const image = new Image();
+  image.src = url;
+  image.alt = alt;
+  return image;
+}
+
+async function selectEntry(entry, button) {
+  const version = ++selectionVersion;
+  activeKey = entry.key;
+  for (const item of list.children) item.setAttribute("aria-pressed", String(item === button));
+  const frame = document.createElement(entry.href ? "a" : "div");
+  frame.className = "studio-frame";
+  if (entry.href) {
+    frame.href = entry.href;
+    frame.setAttribute("aria-label", entry.name);
+  } else frame.classList.add("editorial");
+  if (entry.url) {
+    const first = makePhoto(entry.url, entry.name);
+    await first.decode().catch(() => {});
+    if (version !== selectionVersion) return;
+    frame.append(first);
   }
-
-  const feed = [];
-  let archiveIndex = 0;
-
-  products.forEach((product, i) => {
-    feed.push({ kind: "product", product });
-    const atInterval = (i + 1) % ARCHIVE_BLOCK_INTERVAL === 0;
-    if (atInterval && archiveIndex < archiveBlocks.length) {
-      feed.push({ kind: "archive", block: archiveBlocks[archiveIndex] });
-      archiveIndex++;
-    }
-  });
-
-  while (archiveIndex < archiveBlocks.length) {
-    feed.push({ kind: "archive", block: archiveBlocks[archiveIndex] });
-    archiveIndex++;
+  if (entry.alternate) {
+    const second = makePhoto(entry.alternate, "");
+    second.className = "alternate";
+    frame.append(second);
   }
-
-  return feed;
-}
-
-function productCardHtml(product) {
-  const soldOut = product.status === "sold_out";
-  const images = getProductImages(product.id);
-  const stageUrls = images.length ? images.map((row) => resolveImageUrl(row.image)) : [product.thumbnail ? resolveImageUrl(product.thumbnail) : ""];
-
-  const stageImagesHtml = stageUrls
-    .filter(Boolean)
-    .map((src, i) => `<img class="stage-image${i === 0 ? " is-active" : ""}" src="${src}" alt="${product.name}" loading="lazy">`)
-    .join("");
-
-  return `
-    <a class="collection-card" href="product.html?slug=${product.slug}" data-product-id="${product.id}">
-      <div class="collection-card-media${soldOut ? " is-sold-out" : ""}">
-        ${stageImagesHtml}
-        ${badgeFor(product)}
-      </div>
-      <div class="collection-card-info">
-        <div class="collection-card-name">${product.name}</div>
-        ${soldOut ? `<div class="sold-out-label">${t("product.soldOutLabel")}</div>` : `<div class="price"><span>${formatPrice(product.price)}</span></div>`}
-      </div>
-    </a>
-  `;
-}
-
-function archiveBlockHtml(block) {
-  const img = block.image
-    ? `<img src="${resolveImageUrl(block.image, ARCHIVE_STORAGE_BUCKET)}" alt="${block.title || ""}" loading="lazy">`
-    : "";
-  const caption =
-    block.title || block.caption
-      ? `<div class="archive-block-caption">
-          ${block.title ? `<div class="archive-block-title">${block.title}</div>` : ""}
-          ${block.caption ? `<p>${block.caption}</p>` : ""}
-        </div>`
-      : "";
-
-  return `
-    <div class="collection-card archive-block${block.span === 2 ? " span-2" : ""}">
-      <div class="collection-card-media">${img}</div>
-      ${caption}
-    </div>
-  `;
-}
-
-// Swaps straight to the card's last stage image on hover — product_images
-// rows are inserted white-first then black-last (see supabase/*.sql), so
-// the last image is that product's black colorway. Crossfades via the
-// .stage-image opacity transition in style.css, not a timer, so it
-// reacts immediately instead of waiting out a cycle interval. With only
-// one image this is a no-op, since there's nothing to swap to.
-function setupHoverCycle(card) {
-  const stageImages = card.querySelectorAll(".stage-image");
-  if (stageImages.length < 2) return;
-
-  const first = stageImages[0];
-  const last = stageImages[stageImages.length - 1];
-
-  card.addEventListener("pointerenter", () => {
-    first.classList.remove("is-active");
-    last.classList.add("is-active");
-  });
-
-  card.addEventListener("pointerleave", () => {
-    last.classList.remove("is-active");
-    first.classList.add("is-active");
-  });
-}
-
-// Set by filterCollectionBySearch(); empty means no active search.
-let currentSearchQuery = "";
-
-function matchesSearch(product, query) {
-  return product.name.toLowerCase().includes(query) || (product.category || "").toLowerCase().includes(query);
+  const previous = photos.lastElementChild;
+  photos.append(frame);
+  if (previous) {
+    previous.inert = true;
+    previous.classList.remove("visible");
+    setTimeout(() => previous.remove(), 460);
+  }
+  frame.getBoundingClientRect();
+  frame.classList.add("visible");
+  variant.hidden = !entry.alternate;
+  variant.setAttribute("aria-pressed", "false");
+  nameLabel.textContent = [entry.name, entry.price].filter(Boolean).join(" · ");
+  link.hidden = !entry.href;
+  if (entry.href) link.href = entry.href;
+  else link.removeAttribute("href");
 }
 
 function renderCollection() {
-  const grid = document.getElementById("productGrid");
-  const itemCount = document.getElementById("itemCount");
-
-  if (getProductsLoadError()) {
-    grid.innerHTML = `<p class="cart-empty">${t("shop.loadError")}</p>`;
-    itemCount.textContent = "";
-    return;
+  if (!ready) return;
+  const needle = query.trim().toLowerCase();
+  const products = getProducts().filter(p => (p.name + " " + p.category).toLowerCase().includes(needle));
+  if (sort.value === "new") products.reverse();
+  if (sort.value === "price-asc") products.sort((a,b) => a.price - b.price);
+  if (sort.value === "price-desc") products.sort((a,b) => b.price - a.price);
+  const entries = products.map(productEntry);
+  if (!needle) {
+    entries.push({key:"campaign", name:"Campaign", url:"images/laundry-vel-expand.jpg"});
+    for (const block of getArchiveBlocks()) {
+      entries.push({key:"archive-" + block.id, name:block.title || block.caption || "Archive", url:block.image && resolveImageUrl(block.image,"archive")});
+    }
   }
-
-  const query = currentSearchQuery.trim().toLowerCase();
-  const products = query ? getProducts().filter((p) => matchesSearch(p, query)) : getProducts();
-
-  if (!products.length) {
-    grid.innerHTML = `<p class="cart-empty">${query ? t("shop.noResults", { query: currentSearchQuery.trim() }) : t("shop.empty")}</p>`;
-    itemCount.textContent = t("shop.itemCount", { count: 0 });
-    return;
+  const count = document.getElementById("studioCount");
+  count.textContent = getProductsLoadError() ? t("shop.loadError") : t("shop.itemCount",{count:products.length});
+  list.replaceChildren();
+  for (const entry of entries) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = entry.name;
+    button.onclick = () => { if (activeKey !== entry.key) selectEntry(entry, button); };
+    list.append(button);
   }
-
-  // Archive blocks are editorial, not products — leave them out of search results.
-  const feed = query ? products.map((product) => ({ kind: "product", product })) : buildFeed(products, getArchiveBlocks());
-
-  grid.innerHTML = feed
-    .map((entry) => (entry.kind === "product" ? productCardHtml(entry.product) : archiveBlockHtml(entry.block)))
-    .join("");
-
-  itemCount.textContent = t("shop.itemCount", { count: products.length });
-
-  grid.querySelectorAll(".collection-card").forEach(setupHoverCycle);
-}
-
-function sortProducts(order) {
-  const products = getProducts();
-
-  if (order === "price-asc") {
-    products.sort((a, b) => a.price - b.price);
-  } else if (order === "price-desc") {
-    products.sort((a, b) => b.price - a.price);
-  } else if (order === "new") {
-    products.reverse();
-  }
-
-  renderCollection();
-}
-
-// Called by common.js's search box (live as the user types, and once on
-// load if the page was reached via a ?search= link from another page).
-function filterCollectionBySearch(query) {
-  currentSearchQuery = query;
-  renderCollection();
-}
-
-// Small rounded floating pills (All / Sort) — the one deliberate exception
-// to this site's otherwise square-cornered visual language. Each opens the
-// same dropdown content/logic the header used to hold inline.
-function setupFloatingDropdown(itemId, toggleId) {
-  const item = document.getElementById(itemId);
-  const toggle = document.getElementById(toggleId);
-  if (!item || !toggle) return null;
-
-  function close() {
-    item.classList.remove("open");
-    toggle.setAttribute("aria-expanded", "false");
-  }
-
-  toggle.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const isOpen = item.classList.toggle("open");
-    toggle.setAttribute("aria-expanded", String(isOpen));
-  });
-
-  document.addEventListener("click", (e) => {
-    if (!item.contains(e.target)) close();
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") close();
-  });
-
-  return { close };
-}
-
-function setupFloatingNav() {
-  setupFloatingDropdown("floatingAllItem", "floatingAllToggle");
-  const sortHandle = setupFloatingDropdown("floatingSortItem", "floatingSortToggle");
-
-  document.querySelectorAll(".sort-option").forEach((option) => {
-    option.addEventListener("click", (e) => {
-      e.preventDefault();
-      document.querySelectorAll(".sort-option").forEach((o) => o.classList.remove("is-active"));
-      option.classList.add("is-active");
-      sortProducts(option.dataset.sort);
-      sortHandle?.close();
-    });
-  });
-}
-
-/**
- * Promo Banner — Idle Drift
- * The (zoomed-in, model-anchored — see .promo-banner-image-center in
- * style.css) photo drifts gently and continuously on its own. Bounds
- * are measured from the actual rendered box rather than hardcoded, so
- * the drift can never expose empty space around the (asymmetrically
- * anchored) image.
- *
- * Bounds only change on resize (the box doesn't move on its own), so
- * they're cached instead of re-measured — forced layout, previously —
- * every single frame. The loop also pauses via IntersectionObserver
- * once the banner scrolls out of view and via visibilitychange when the
- * tab isn't active, instead of drifting an invisible image forever.
- */
-function setupPromoBannerIdle() {
-  const wrap = document.querySelector(".promo-banner-image");
-  const img = wrap?.querySelector("img");
-  if (!wrap || !img) return;
-
-  // Must match the translate() in .promo-banner-image-center.
-  const ANCHOR_X = 0.55;
-  const ANCHOR_Y = 0.58;
-  const IDLE_AMOUNT = 0.4; // fraction of the tighter safe bound per axis
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  if (reduceMotion) return;
-
-  let idleStart = null;
-  let rafId = null;
-  let bounds = null;
-  let inView = true;
-
-  function computeBounds() {
-    const cr = wrap.getBoundingClientRect();
-    const imgW = img.offsetWidth;
-    const imgH = img.offsetHeight;
-    const neutralLeft = cr.left + cr.width / 2 - ANCHOR_X * imgW;
-    const neutralTop = cr.top + cr.height / 2 - ANCHOR_Y * imgH;
-    return {
-      maxX: cr.left - neutralLeft,
-      minX: -(neutralLeft + imgW - (cr.left + cr.width)),
-      maxY: cr.top - neutralTop,
-      minY: -(neutralTop + imgH - (cr.top + cr.height)),
-    };
-  }
-
-  function refreshBounds() {
-    bounds = computeBounds();
-  }
-  refreshBounds();
-  window.addEventListener("resize", refreshBounds);
-
-  function idleTick(timestamp) {
-    if (idleStart === null) idleStart = timestamp;
-    const elapsed = (timestamp - idleStart) / 1000;
-    const ampX = Math.min(bounds.maxX, -bounds.minX) * IDLE_AMOUNT;
-    const ampY = Math.min(bounds.maxY, -bounds.minY) * IDLE_AMOUNT;
-    img.style.transform = `translate(${Math.sin((elapsed * 2 * Math.PI) / 9) * ampX}px, ${
-      Math.sin((elapsed * 2 * Math.PI) / 7) * ampY
-    }px)`;
-    rafId = requestAnimationFrame(idleTick);
-  }
-
-  function start() {
-    if (rafId || document.hidden || !inView) return;
-    rafId = requestAnimationFrame(idleTick);
-  }
-  function stop() {
-    if (rafId) cancelAnimationFrame(rafId);
-    rafId = null;
-    idleStart = null; // picks the drift phase back up from center, not mid-cycle — fine since it was off-screen/hidden either way
-  }
-
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) stop();
-    else start();
-  });
-
-  if ("IntersectionObserver" in window) {
-    const observer = new IntersectionObserver((entries) => {
-      inView = entries[0].isIntersecting;
-      if (inView) start();
-      else stop();
-    });
-    observer.observe(wrap);
+  if (entries.length) {
+    const index = Math.max(0, entries.findIndex(entry => entry.key === activeKey));
+    selectEntry(entries[index],list.children[index]);
   } else {
-    start();
+    selectionVersion++;
+    activeKey = "";
+    photos.replaceChildren();
+    link.hidden = variant.hidden = true;
+    nameLabel.textContent = t("shop.noResults",{query});
   }
 }
 
-// Collapses/reveals the promo banner via .promo-banner-clip's max-height
-// transition (see style.css) — the button itself lives outside that clip
-// so it stays put as the small reveal control once collapsed, swapping
-// its own icon/label through .promo-banner.is-hidden.
-function setupPromoBannerToggle() {
-  const banner = document.getElementById("promoBanner");
-  const toggle = document.getElementById("promoBannerToggle");
-  if (!banner || !toggle) return;
-
-  toggle.addEventListener("click", () => {
-    const hidden = banner.classList.toggle("is-hidden");
-    toggle.setAttribute("aria-label", t(hidden ? "promo.reveal" : "promo.hide"));
-  });
+function filterCollectionBySearch(value) {
+  query = value;
+  renderCollection();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  setupPromoBannerIdle();
-  setupPromoBannerToggle();
-});
-
+variant.onclick = () => {
+  const alternate = photos.lastElementChild?.classList.toggle("show-alternate");
+  variant.setAttribute("aria-pressed", String(Boolean(alternate)));
+};
+sort.onchange = renderCollection;
 document.addEventListener("DOMContentLoaded", async () => {
   await Promise.all([productsReady, archiveBlocksReady]);
+  ready = true;
   renderCollection();
-  setupFloatingNav();
   onCurrencyChange(renderCollection);
 });

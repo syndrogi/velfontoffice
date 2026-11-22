@@ -8,6 +8,7 @@
 <link rel="canonical" href="https://velfontoffice.com/shop/">
 <link rel="stylesheet" href="/css/tokens.css">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="studio.css">
 <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
@@ -127,55 +128,20 @@
   <p class="login-signup-note">Don't have an account? <a href="#">Sign up here</a></p>
 </div>
 
-<section class="promo-banner" id="promoBanner">
-  <div class="promo-banner-clip">
-    <div class="promo-banner-image">
-      <div class="promo-banner-image-center">
-        <img src="images/laundry-vel-expand.jpg" alt="VELFONT OFFICE — Laundry" width="3000" height="1182" fetchpriority="high" decoding="async">
-      </div>
-      <p class="promo-banner-caption">"ALL FOR VEL" — VELFONT OFFICE, 2026</p>
-    </div>
-  </div>
-  <button type="button" class="promo-banner-toggle" id="promoBannerToggle" data-i18n-aria-label="promo.hide" aria-label="Hide banner">
-    <svg class="promo-banner-toggle-icon" viewBox="0 0 24 24" aria-hidden="true">
-      <line x1="6" y1="6" x2="18" y2="18"></line>
-      <line x1="18" y1="6" x2="6" y2="18"></line>
-    </svg>
-    <span class="promo-banner-toggle-label" data-i18n="promo.reveal">reveal</span>
-  </button>
-</section>
-
-<main>
-  <section class="collection-head">
-    <h1>All</h1>
-    <span class="item-count" id="itemCount">12 items total</span>
+<main class="studio">
+  <section class="studio-index" aria-label="Collection index">
+    <header><h1>All for Vel</h1><select id="studioSort" aria-label="Sort products">
+      <option value="recommended">Recommended</option><option value="new">Newest</option>
+      <option value="price-asc">Price: low to high</option><option value="price-desc">Price: high to low</option>
+    </select></header>
+    <nav id="studioList" aria-label="Select a photograph"></nav>
+    <small id="studioCount" role="status">Loading collection…</small>
   </section>
-
-  <section class="collection-feed" id="productGrid">
-    <!-- Product cards are rendered in js/shop.js -->
+  <section class="studio-stage" aria-label="Selected item">
+    <div id="studioPhotos"></div>
+    <div class="studio-caption"><span id="studioName"></span><button id="studioVariant" type="button" hidden aria-pressed="false">Alternate view</button><a id="studioLink" hidden>View product ↗</a></div>
   </section>
 </main>
-
-<div class="floating-nav" id="floatingNav">
-  <div class="floating-nav-item has-dropdown" id="floatingAllItem">
-    <button type="button" class="floating-nav-btn" id="floatingAllToggle" aria-expanded="false" aria-controls="floatingAllDropdown">All</button>
-    <ul class="dropdown floating-dropdown" id="floatingAllDropdown">
-      <li><a href="#">Outerwear</a></li>
-      <li><a href="#">Tops</a></li>
-      <li><a href="#">Bottoms</a></li>
-      <li><a href="#">Accessories</a></li>
-    </ul>
-  </div>
-  <div class="floating-nav-item has-dropdown" id="floatingSortItem">
-    <button type="button" class="floating-nav-btn" id="floatingSortToggle" aria-expanded="false" aria-controls="floatingSortDropdown" data-i18n="collection.sort">Sort</button>
-    <ul class="dropdown floating-dropdown" id="floatingSortDropdown">
-      <li><a href="#" class="sort-option is-active" data-sort="recommended" data-i18n="sort.recommended">Recommended</a></li>
-      <li><a href="#" class="sort-option" data-sort="new" data-i18n="sort.new">Newest</a></li>
-      <li><a href="#" class="sort-option" data-sort="price-asc" data-i18n="sort.priceAsc">Price: Low to High</a></li>
-      <li><a href="#" class="sort-option" data-sort="price-desc" data-i18n="sort.priceDesc">Price: High to Low</a></li>
-    </ul>
-  </div>
-</div>
 
 <footer class="site-footer">
   <div class="footer-col">

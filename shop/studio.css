@@ -11,16 +11,24 @@
 #studioList button::after {content:"";display:inline-block;width:6px;height:6px;margin-left:7px;vertical-align:super;border-radius:50%;background:currentColor;opacity:0;transition:opacity .25s}
 #studioList button[aria-pressed=true]::after {opacity:1}
 .studio-index small,.studio-caption {font-size:13px}
-.studio-stage { position:relative; height:var(--studio-height); background:#eeefec; }
-#studioPhotos {position:absolute;inset:0 0 60px;isolation:isolate;}
+.studio-stage { position:relative; min-width:0; height:var(--studio-height); background:#eeefec; display:flex; flex-direction:column; }
+#studioPhotos {position:relative;flex:1;min-height:0;isolation:isolate;}
 .studio-frame {position:absolute;inset:0;opacity:0;pointer-events:none;background:#eeefec;transition:opacity .44s ease;}
 .studio-frame.visible {opacity:1;pointer-events:auto}
 .studio-frame img {position:absolute;inset:5%;width:90%;height:90%;object-fit:contain;mix-blend-mode:multiply;}
 .studio-frame.editorial img {inset:0;width:100%;height:100%;object-fit:cover;object-position:58% center;mix-blend-mode:normal}
-.studio-frame .alternate {opacity:0;transition:opacity .3s;background:#eeefec;mix-blend-mode:normal}
+.studio-frame .alternate {position:absolute;inset:0;opacity:0;transition:opacity .3s;background:#eeefec;isolation:isolate;pointer-events:none}
 .studio-frame.show-alternate .alternate {opacity:1}
 @media(hover:hover){.studio-frame:hover .alternate {opacity:1}}
-.studio-caption {position:absolute;bottom:0;padding:14px 20px;width:100%;background:#eeefec;align-items:center}
+.studio-caption {padding:14px 20px;width:100%;background:#eeefec;align-items:center}
+#studioRail:not([hidden]) {display:flex;align-items:center;gap:10px;padding:6px 18px}
+#studioRail > button {flex:0 0 32px;height:40px;font-size:20px}
+#studioRail > button:disabled {opacity:.25;cursor:default}
+#studioThumbs {position:relative;flex:1;display:flex;gap:8px;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;scroll-snap-type:x mandatory}
+#studioThumbs::before,#studioThumbs::after {content:"";flex:0 0 max(0px, calc(50% - 44px))}
+#studioThumbs button {flex:0 0 72px;height:65px;border-bottom:2px solid transparent;scroll-snap-align:center}
+#studioThumbs button[aria-pressed=true] {border-color:currentColor}
+#studioThumbs img {display:block;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply}
 .studio-caption a,.studio-caption button {text-decoration:underline;text-underline-offset:3px}
 .studio-caption span {margin-right:auto}
 @media(max-width:760px){

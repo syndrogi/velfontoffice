@@ -8,6 +8,17 @@ let query = "";
 let activeKey = "";
 let ready = false;
 let selectionVersion = 0;
+let activeGroup = "Campaign";
+const rail = document.getElementById("studioRail");
+const thumbs = document.getElementById("studioThumbs");
+const prev = document.getElementById("studioPrev");
+const next = document.getElementById("studioNext");
+
+function clothingType(product) {
+  if (/\b(?:tees?|t[ -]?shirts?)\b/i.test(product.name + " " + product.category)) return "T-shirt";
+  const category = (product.category || "Other").trim();
+  return ({tops:"Top", bottoms:"Bottom", outerwear:"Outer"})[category.toLowerCase()] || category;
+}
 
 function productEntry(product) {
   const rows = getProductImages(product.id).filter(row => row.image);
@@ -27,10 +38,9 @@ function makePhoto(url, alt) {
   return image;
 }
 
-async function selectEntry(entry, button) {
+async function selectEntry(entry) {
   const version = ++selectionVersion;
   activeKey = entry.key;
-  for (const item of list.children) item.setAttribute("aria-pressed", String(item === button));
   const frame = document.createElement(entry.href ? "a" : "div");
   frame.className = "studio-frame";
   if (entry.href) {
@@ -45,8 +55,10 @@ async function selectEntry(entry, button) {
   }
   if (entry.alternate) {
     const second = makePhoto(entry.alternate, "");
-    second.className = "alternate";
-    frame.append(second);
+    const layer = document.createElement("span");
+    layer.className = "alternate";
+    layer.append(second);
+    second.decode().then(() => frame.append(layer)).catch(() => {});
   }
   const previous = photos.lastElementChild;
   photos.append(frame);
@@ -65,37 +77,92 @@ async function selectEntry(entry, button) {
   else link.removeAttribute("href");
 }
 
+function openGroup(label, entries) {
+  activeGroup = label;
+  for (const item of list.children) item.setAttribute("aria-pressed", String(item.textContent === label));
+  thumbs.replaceChildren();
+  rail.hidden = entries.length < 2;
+  let selected = Math.max(0, entries.findIndex(entry => entry.key === activeKey));
+  function choose(index, scroll) {
+    selected = index;
+    for (const [i, item] of Array.from(thumbs.children).entries()) {
+      item.setAttribute("aria-pressed", String(i === index));
+    }
+    prev.disabled = index === 0;
+    next.disabled = index === entries.length - 1;
+    if (scroll && !rail.hidden) {
+      const thumb = thumbs.children[index];
+      thumbs.scrollTo({left:thumb.offsetLeft - (thumbs.clientWidth - thumb.offsetWidth) / 2,
+        behavior:matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth"});
+    }
+    selectEntry(entries[index]);
+  }
+  for (const [i, entry] of entries.entries()) {
+    const thumb = document.createElement("button");
+    thumb.type = "button";
+    thumb.title = entry.name;
+    thumb.setAttribute("aria-label", entry.name);
+    if (entry.url) thumb.append(makePhoto(entry.url, ""));
+    thumb.onclick = () => choose(i, true);
+    thumbs.append(thumb);
+  }
+  prev.onclick = () => choose(selected - 1, true);
+  next.onclick = () => choose(selected + 1, true);
+  thumbs.onscrollend = () => {
+    if (rail.hidden) return;
+    const center = thumbs.scrollLeft + thumbs.clientWidth / 2;
+    let nearest = selected;
+    let distance = Infinity;
+    Array.from(thumbs.children).forEach((thumb, index) => {
+      const offset = Math.abs(thumb.offsetLeft + thumb.offsetWidth / 2 - center);
+      if (offset < distance) {
+        nearest = index;
+        distance = offset;
+      }
+    });
+    if (nearest !== selected) choose(nearest, false);
+  };
+  choose(selected, true);
+}
+
 function renderCollection() {
   if (!ready) return;
   const needle = query.trim().toLowerCase();
-  const products = getProducts().filter(p => (p.name + " " + p.category).toLowerCase().includes(needle));
+  const products = getProducts().filter(p => [p.name,p.category,clothingType(p)].join(" ").toLowerCase().includes(needle));
   if (sort.value === "new") products.reverse();
   if (sort.value === "price-asc") products.sort((a,b) => a.price - b.price);
   if (sort.value === "price-desc") products.sort((a,b) => b.price - a.price);
-  const entries = products.map(productEntry);
+  const groups = new Map();
   if (!needle) {
-    entries.push({key:"campaign", name:"Campaign", url:"images/laundry-vel-expand.jpg"});
+    const entries = [{key:"campaign", name:"Campaign", url:"images/laundry-vel-expand.jpg"}];
     for (const block of getArchiveBlocks()) {
       entries.push({key:"archive-" + block.id, name:block.title || block.caption || "Archive", url:block.image && resolveImageUrl(block.image,"archive")});
     }
+    groups.set("Campaign", entries);
+  }
+  for (const product of products) {
+    const category = clothingType(product);
+    if (!groups.has(category)) groups.set(category, []);
+    groups.get(category).push(productEntry(product));
   }
   const count = document.getElementById("studioCount");
   count.textContent = getProductsLoadError() ? t("shop.loadError") : t("shop.itemCount",{count:products.length});
   list.replaceChildren();
-  for (const entry of entries) {
+  for (const [label, entries] of groups) {
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = entry.name;
-    button.onclick = () => { if (activeKey !== entry.key) selectEntry(entry, button); };
+    button.textContent = label;
+    button.onclick = () => { if (activeGroup !== label) openGroup(label, entries); };
     list.append(button);
   }
-  if (entries.length) {
-    const index = Math.max(0, entries.findIndex(entry => entry.key === activeKey));
-    selectEntry(entries[index],list.children[index]);
+  if (groups.size) {
+    const label = groups.has(activeGroup) ? activeGroup : groups.keys().next().value;
+    openGroup(label, groups.get(label));
   } else {
     selectionVersion++;
     activeKey = "";
     photos.replaceChildren();
+    rail.hidden = true;
     link.hidden = variant.hidden = true;
     nameLabel.textContent = t("shop.noResults",{query});
   }

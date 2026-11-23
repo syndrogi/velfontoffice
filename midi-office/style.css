@@ -1001,47 +1001,46 @@ html.js-enter .tone-topbar {
 }
 
 /* ==========================================================================
-   Pinkroll
+   SV-16 — js/sv16.js + js/sv16/*.js. A screen module beside a control
+   plate of lettered sections (A INPUT, B COLOR, C TRANSPORT, D EXPORT).
+   Square everywhere: no radius on any control. The board's own colours
+   come from the palette (ACC / INK / PAP), not from these tokens.
    ========================================================================== */
 
-.tone-pinkroll {
+.tone-sv16 {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
+  align-items: flex-start;
 }
 
-.tone-pinkroll.tone-is-dropping {
-  outline: 1px dashed var(--tone-accent);
+.tone-sv16.tone-is-dropping {
+  outline: 1px dashed var(--tone-fg);
   outline-offset: 4px;
 }
 
-.tone-pinkroll-rail {
-  flex: 1 1 240px;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.tone-pinkroll-stage {
+.tone-sv16-stage {
   flex: 999 1 280px;
   min-width: 0;
   min-height: 400px;
   height: 100%;
+  display: flex;
+  justify-content: center;
 }
 
-.tone-pinkroll-board {
+.tone-sv16-board {
   display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+  max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: 9 / 16;
+  border: 1px solid var(--tone-fg);
 }
 
 /* Kept in the layout at 2px rather than display:none — browsers can
    stop decoding frames for a video that isn't rendered at all. */
-.tone-pinkroll-video {
+.tone-sv16-video {
   position: fixed;
   left: 0;
   top: 0;
@@ -1051,22 +1050,113 @@ html.js-enter .tone-topbar {
   pointer-events: none;
 }
 
-.tone-pinkroll-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--tone-fg-faint);
+.tone-sv16-rail {
+  flex: 1 1 260px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--tone-fg);
 }
 
-.tone-pinkroll-row {
+.tone-sv16-mod {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid var(--tone-fg);
+}
+
+.tone-sv16-mod:first-child {
+  border-top: 0;
+}
+
+.tone-sv16-mod-head {
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.tone-sv16-mod-key {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  background: var(--tone-fg);
+  color: var(--tone-bg);
+}
+
+.tone-sv16-row {
+  display: flex;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
-.tone-pinkroll-check {
+.tone-sv16-key {
+  display: inline-grid;
+  place-items: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--tone-fg);
+  border-radius: 0;
+  background: var(--tone-bg);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tone-sv16-key:active {
+  transform: translateY(1px);
+}
+
+.tone-sv16-key-dark {
+  background: var(--tone-fg);
+  color: var(--tone-bg);
+}
+
+.tone-sv16-key-rec.tone-is-active,
+.tone-sv16-key-rec:hover {
+  background: var(--tone-accent);
+  border-color: var(--tone-accent);
+  color: var(--tone-bg);
+}
+
+.tone-sv16-key:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.tone-sv16-field {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  align-items: center;
+  border: 1px solid var(--tone-fg);
+}
+
+.tone-sv16-field span {
+  padding-left: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--tone-fg-muted);
+}
+
+.tone-sv16-field input {
+  height: 34px;
+  padding: 0 8px;
+  border: 0;
+  border-left: 1px solid var(--tone-fg);
+  border-radius: 0;
+  background: var(--tone-bg);
+}
+
+.tone-sv16-check {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1076,55 +1166,181 @@ html.js-enter .tone-topbar {
   cursor: pointer;
 }
 
-.tone-pinkroll-check input {
+.tone-sv16-check input {
+  appearance: none;
+  width: 14px;
+  height: 14px;
   margin: 0;
-  accent-color: var(--tone-accent);
-}
-
-.tone-pinkroll-name {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid var(--tone-line);
-  background: var(--tone-bg);
-}
-
-.tone-pinkroll-swatches {
-  display: flex;
-  gap: 8px;
-}
-
-.tone-pinkroll-swatch {
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: 2px solid var(--tone-bg);
-  box-shadow: 0 0 0 1px var(--tone-line);
+  border: 1px solid var(--tone-fg);
+  display: grid;
+  place-items: center;
   cursor: pointer;
 }
 
-.tone-pinkroll-swatch[aria-pressed="true"] {
-  box-shadow: 0 0 0 2px var(--tone-fg);
+.tone-sv16-check input:checked {
+  background: var(--tone-fg);
 }
 
-.tone-pinkroll .tone-toggle-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+.tone-sv16-check input:checked::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--tone-bg);
 }
 
-.tone-pinkroll .tone-file-input:focus-visible + .tone-file-label,
-.tone-pinkroll-name:focus-visible,
-.tone-pinkroll-swatch:focus-visible {
-  outline: 2px solid var(--tone-accent);
-  outline-offset: 2px;
+/* ---------- B COLOR ---------- */
+
+.tone-sv16-slots {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) 32px 32px;
+  gap: 4px;
 }
 
-.tone-pinkroll-status {
+.tone-sv16-slots .tone-sv16-key {
+  padding: 0;
+}
+
+.tone-sv16-slot {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 36px;
+  min-width: 0;
+  padding: 0 5px;
+  border: 1px solid var(--tone-fg);
+  border-radius: 0;
+  background: var(--tone-bg);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.tone-sv16-slot i {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--tone-fg);
+}
+
+.tone-sv16-slot[aria-pressed="true"] {
+  background: var(--tone-fg);
+  color: var(--tone-bg);
+}
+
+.tone-sv16-slot[aria-pressed="true"] i {
+  border-color: var(--tone-bg);
+}
+
+.tone-sv16-sv,
+.tone-sv16-hue {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--tone-fg);
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.tone-sv16-sv {
+  aspect-ratio: 2 / 1;
+}
+
+.tone-sv16-hue {
+  height: 18px;
+}
+
+.tone-sv16-values {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.tone-sv16-value {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--tone-fg-muted);
+}
+
+.tone-sv16-value input {
+  width: 100%;
+  height: 30px;
+  padding: 0 6px;
+  border: 1px solid var(--tone-fg);
+  border-radius: 0;
+  background: var(--tone-bg);
+  font-size: 12px;
+}
+
+.tone-sv16-swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(22px, 1fr));
+  gap: 3px;
+}
+
+.tone-sv16-swatch {
+  aspect-ratio: 1;
+  min-height: 22px;
+  padding: 0;
+  border: 1px solid var(--tone-fg);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.tone-sv16-swatch-add {
+  background: var(--tone-bg);
+  font-size: 13px;
+  line-height: 1;
+}
+
+/* ---------- C TRANSPORT ---------- */
+
+.tone-sv16-transport {
+  display: grid;
+  grid-template-columns: 36px 36px minmax(0, 1fr);
+  gap: 4px;
+  align-items: center;
+}
+
+.tone-sv16-seek {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--tone-fg);
+}
+
+.tone-sv16-readout {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+  color: var(--tone-fg-muted);
+}
+
+.tone-sv16-status {
   min-height: 1.4em;
   margin: 0;
 }
 
-.tone-pinkroll-status.tone-is-error {
+.tone-sv16-status.tone-is-error {
   color: var(--tone-accent);
+}
+
+.tone-sv16 .tone-file-input:focus-visible + .tone-file-label,
+.tone-sv16-key:focus-visible,
+.tone-sv16-slot:focus-visible,
+.tone-sv16-swatch:focus-visible,
+.tone-sv16-field input:focus-visible,
+.tone-sv16-value input:focus-visible,
+.tone-sv16-sv:focus-visible,
+.tone-sv16-hue:focus-visible {
+  outline: 2px solid var(--tone-accent);
+  outline-offset: 2px;
 }
 
 /* ==========================================================================

@@ -68,12 +68,12 @@
       build: function (container) { return window.ToneRecorder.buildWindow(container); },
     },
     {
-      id: "pinkroll",
-      name: "PINKROLL",
-      description: "Turns an audio or video file into a 9:16 music visualizer — piano roll, spectrum, scopes and a beat ring that all move with the sound. LOAD AUDIO / VIDEO reads a file from your own computer (nothing uploads anywhere), or drop one onto the window; tempo and notes are estimated automatically, so they won't always be exact. A video's picture fills the image panel, or LOAD IMAGE sets your own, and ZOOM CUTS crops into it on the beat. TRACK NAME and ACCENT restyle the board. SAVE VIDEO records in real time from start to end and downloads an MP4 or WebM, depending on your browser; SAVE PNG downloads the current frame. Closing this window stops playback and discards the loaded file.",
-      defaultWidth: 720,
-      defaultHeight: 640,
-      build: function (container) { return window.TonePinkroll.buildWindow(container); },
+      id: "sv16",
+      name: "SV-16",
+      description: "Score visualizer — turns an audio or video file into a 9:16 board of sequencer pixels, piano roll, scopes, polar spectrum and a square beat frame that all move with the sound. A INPUT: + AUDIO / VIDEO reads a file from your own computer (nothing uploads anywhere), or drop one onto the window; tempo and notes are estimated automatically, so they won't always be exact. A video's picture fills the image panel, whose shape follows the picture's aspect ratio, or + IMAGE sets your own; ZOOM CUTS crops into it on the beat. TITLE prints on the board. B COLOR: pick a slot — ACC (signal colour), INK (lines and type) or PAP (paper) — then drag the saturation/brightness field and hue strip, type HEX or RGB, or click a swatch; + saves the current colour to this browser, Shift-click removes a saved one, ⇄ swaps INK and PAP, ↺ resets. Every other board colour is mixed from these three. C TRANSPORT: ▶ plays/pauses, ■ returns to the start, the slider seeks. D EXPORT: REC VIDEO records in real time from start to end and downloads an MP4 or WebM, depending on your browser; PNG downloads the current frame. Closing this window stops playback and discards the loaded file.",
+      defaultWidth: 760,
+      defaultHeight: 700,
+      build: function (container) { return window.ToneSv16.buildWindow(container); },
     },
     {
       id: "workstation",

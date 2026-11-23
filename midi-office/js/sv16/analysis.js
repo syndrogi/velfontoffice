@@ -1,9 +1,11 @@
 /**
- * MIDI OFFICE — Pinkroll / Analysis
+ * MIDI OFFICE — SV-16 / Analysis
  * Turns a decoded AudioBuffer into everything the renderer reads:
- * spectrum bands, loudness, an estimated tempo and beat offset, and
- * detected piano-roll notes. Runs entirely in the browser, yielding to
- * the event loop as it goes so a long file doesn't freeze the page.
+ * per-band spectrum (each band scaled against its own range across the
+ * song, so quiet registers still read), per-note energy, loudness, an
+ * estimated tempo and beat offset, and detected piano-roll notes. Runs
+ * entirely in the browser, yielding as it goes so a long file doesn't
+ * freeze the page.
  */
 (() => {
   const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
@@ -43,19 +45,18 @@
       for (let size = 2; size <= N; size *= 2) {
         const half = size / 2,
           step = N / size;
-        for (let i = 0; i < N; i += size) {
+        for (let i = 0; i < N; i += size)
           for (let j = i, k = 0; j < i + half; j++, k += step) {
             const l = j + half,
               c = cos[k],
-              s = sin[k];
-            const tr = re[l] * c + im[l] * s,
+              s = sin[k],
+              tr = re[l] * c + im[l] * s,
               ti = -re[l] * s + im[l] * c;
             re[l] = re[j] - tr;
             im[l] = im[j] - ti;
             re[j] += tr;
             im[j] += ti;
           }
-        }
       }
     };
   }
@@ -65,11 +66,10 @@
     M0 = 36,
     M1 = 96,
     NM = M1 - M0 + 1,
-    OVN = 60,
+    OVN = 90,
     H2 = 512;
   const fft = makeFFT(FFTN);
 
-  /* ---------- Analysis ---------- */
   async function analyze(buf, prog, known) {
     const sr = buf.sampleRate,
       len = buf.length;
@@ -91,8 +91,8 @@
       binHz = sr / FFTN;
     const hann = new Float32Array(FFTN);
     for (let i = 0; i < FFTN; i++) hann[i] = 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / (FFTN - 1));
-    const fmax = Math.min(16000, (sr / 2) * 0.95);
-    const bEdge = new Int32Array(NB + 1);
+    const fmax = Math.min(16000, (sr / 2) * 0.95),
+      bEdge = new Int32Array(NB + 1);
     for (let b = 0; b <= NB; b++)
       bEdge[b] = Math.max(1, Math.round((40 * Math.pow(fmax / 40, b / NB)) / binHz));
     for (let b = 1; b <= NB; b++) if (bEdge[b] <= bEdge[b - 1]) bEdge[b] = bEdge[b - 1] + 1;
@@ -109,13 +109,12 @@
     const re = new Float32Array(FFTN),
       im = new Float32Array(FFTN),
       mag = new Float32Array(half);
-    let maxDb = -200;
     for (let f = 0; f < nF; f++) {
       const s0 = f * HOP - half;
       let ss = 0;
       for (let i = 0; i < FFTN; i++) {
-        const k = s0 + i;
-        const v = k >= 0 && k < len ? mono[k] : 0;
+        const k = s0 + i,
+          v = k >= 0 && k < len ? mono[k] : 0;
         re[i] = v * hann[i];
         im[i] = 0;
         ss += v * v;
@@ -128,9 +127,7 @@
         const a = bEdge[b],
           z = Math.min(half, bEdge[b + 1]);
         for (let k = a; k < z; k++) s += mag[k];
-        const d = 20 * Math.log10(s / Math.max(1, z - a) + 1e-9);
-        bandsDb[f * NB + b] = d;
-        if (d > maxDb) maxDb = d;
+        bandsDb[f * NB + b] = 20 * Math.log10(s / Math.max(1, z - a) + 1e-9);
       }
       for (let n = 0; n < NM; n++) {
         let mx = 0;
@@ -142,18 +139,34 @@
         await tick();
       }
     }
-    const bands = new Float32Array(nF * NB),
-      floor = maxDb - 52;
-    for (let i = 0; i < bands.length; i++) bands[i] = clamp((bandsDb[i] - floor) / 52, 0, 1);
     let rmsMax = 1e-6;
     for (let f = 0; f < nF; f++) if (rms[f] > rmsMax) rmsMax = rms[f];
+    /* each band is scaled against its own range across the song, so quiet registers still read */
+    const bands = new Float32Array(nF * NB),
+      col = new Float32Array(nF);
+    for (let b = 0; b < NB; b++) {
+      for (let f = 0; f < nF; f++) col[f] = bandsDb[f * NB + b];
+      const s = Array.from(col).sort((a, c) => a - c),
+        lo = s[Math.floor(nF * 0.3)],
+        hi = s[Math.min(nF - 1, Math.floor(nF * 0.97))],
+        span = Math.max(6, hi - lo);
+      for (let f = 0; f < nF; f++)
+        bands[f * NB + b] =
+          clamp((col[f] - lo) / span, 0, 1) * clamp(rms[f] / (rmsMax * 0.03), 0, 1);
+    }
     const cum = new Float32Array(nF);
     for (let f = 0; f < nF; f++) cum[f] = (f ? cum[f - 1] : 0) + rms[f];
+    const samp = [];
+    for (let i = 0; i < noteE.length; i += 5) samp.push(noteE[i]);
+    samp.sort((a, b) => a - b);
+    const ref = samp[Math.floor(samp.length * 0.995)] || 1;
+    const noteN = new Float32Array(nF * NM);
+    for (let i = 0; i < noteN.length; i++) noteN[i] = Math.min(1, noteE[i] / ref);
 
-    /* onset envelope (fine hop) */
+    /* onset envelope */
     const n2 = Math.max(2, Math.floor(len / H2)),
-      fps2 = sr / H2;
-    const en = new Float32Array(n2);
+      fps2 = sr / H2,
+      en = new Float32Array(n2);
     for (let i = 0; i < n2; i++) {
       let s = 0;
       const o = i * H2;
@@ -167,29 +180,26 @@
     for (let i = 1; i < n2; i++) on[i] = Math.max(0, en[i] - en[i - 1]);
     const on2 = new Float32Array(n2);
     {
+      const pre = new Float32Array(n2);
       let acc = 0;
-      const w = 8;
-      const pre = [];
       for (let i = 0; i < n2; i++) {
         acc += on[i];
-        pre.push(acc);
+        pre[i] = acc;
       }
       for (let i = 0; i < n2; i++) {
-        const a = Math.max(0, i - w),
-          b = Math.min(n2 - 1, i + w);
-        const m = (pre[b] - (a ? pre[a - 1] : 0)) / (b - a + 1);
+        const a = Math.max(0, i - 8),
+          b = Math.min(n2 - 1, i + 8),
+          m = (pre[b] - (a ? pre[a - 1] : 0)) / (b - a + 1);
         on2[i] = Math.max(0, on[i] - m);
       }
     }
     let mean = 0,
       sq = 0;
-    for (let i = 0; i < n2; i++) {
-      mean += on2[i];
-    }
+    for (let i = 0; i < n2; i++) mean += on2[i];
     mean /= n2;
     for (let i = 0; i < n2; i++) sq += (on2[i] - mean) ** 2;
-    const thr = mean + 2 * Math.sqrt(sq / n2) + 1e-6;
-    const onN = new Float32Array(n2);
+    const thr = mean + 2 * Math.sqrt(sq / n2) + 1e-6,
+      onN = new Float32Array(n2);
     for (let i = 0; i < n2; i++) onN[i] = on2[i] / thr;
     prog(0.9);
     await tick();
@@ -201,8 +211,8 @@
       beat0 = known.beat0;
     } else {
       const lo = Math.floor((fps2 * 60) / 180),
-        hi = Math.ceil((fps2 * 60) / 65);
-      const ac = new Float32Array(hi + 2);
+        hi = Math.ceil((fps2 * 60) / 65),
+        ac = new Float32Array(hi + 2);
       for (let lag = Math.max(1, lo - 1); lag <= hi + 1 && lag < n2; lag++) {
         let s = 0;
         for (let i = 0; i + lag < n2; i++) s += on2[i] * on2[i + lag];
@@ -211,9 +221,9 @@
       let best = -1,
         bl = 0;
       for (let lag = lo; lag <= hi && lag < n2; lag++) {
-        const b = (60 * fps2) / lag;
-        const w = Math.exp(-0.5 * Math.pow(Math.log2(b / 118) / 0.5, 2));
-        const sc = ac[lag] * w;
+        const b = (60 * fps2) / lag,
+          w = Math.exp(-0.5 * Math.pow(Math.log2(b / 118) / 0.5, 2)),
+          sc = ac[lag] * w;
         if (sc > best) {
           best = sc;
           bl = lag;
@@ -222,10 +232,10 @@
       if (bl > 1) {
         const a = ac[bl - 1],
           b = ac[bl],
-          c = ac[bl + 1];
-        const den = a - 2 * b + c;
-        const d = den !== 0 ? clamp((0.5 * (a - c)) / den, -0.5, 0.5) : 0;
-        const lagF = bl + d;
+          c = ac[bl + 1],
+          den = a - 2 * b + c,
+          d = den !== 0 ? clamp((0.5 * (a - c)) / den, -0.5, 0.5) : 0,
+          lagF = bl + d;
         bpm = (60 * fps2) / lagF;
         let bp = -1,
           bo = 0;
@@ -245,16 +255,11 @@
       }
     }
 
-    /* notes */
     let notes;
     if (known) notes = known.notes.slice();
     else {
-      const samp = [];
-      for (let i = 0; i < noteE.length; i += 5) samp.push(noteE[i]);
-      samp.sort((a, b) => a - b);
-      const ref = samp[Math.floor(samp.length * 0.995)] || 1,
-        gate = rmsMax * 0.06;
-      const e = new Float32Array(NM),
+      const gate = rmsMax * 0.06,
+        e = new Float32Array(NM),
         sal = new Float32Array(NM),
         open = new Map();
       notes = [];
@@ -312,9 +317,8 @@
     for (const n of notes) {
       const a = Math.max(0, Math.round((n.t0 * sr) / HOP)),
         b = Math.min(nF - 1, Math.round((n.t1 * sr) / HOP));
-      for (let f = a; f <= b; f++) pcMask[f] |= 1 << n.m % 12;
+      for (let f = a; f <= b; f++) pcMask[f] |= 1 << (n.m % 12);
     }
-
     const ovPeak = new Float32Array(OVN),
       ovRms = new Float32Array(OVN);
     let ovMax = 1e-6;
@@ -324,8 +328,8 @@
       let p = 0,
         s = 0;
       for (let i = a; i < b; i++) {
-        const v = mono[i];
-        const av = v < 0 ? -v : v;
+        const v = mono[i],
+          av = v < 0 ? -v : v;
         if (av > p) p = av;
         s += v * v;
       }
@@ -344,6 +348,7 @@
       peak,
       nF,
       bands,
+      noteN,
       rms,
       rmsMax,
       cum,
@@ -358,5 +363,5 @@
     };
   }
 
-  window.TonePinkrollAnalysis = { analyze, HOP, NB, M0, M1, NM, OVN };
+  window.ToneSv16Analysis = { analyze, HOP, NB, M0, M1, NM, OVN };
 })();

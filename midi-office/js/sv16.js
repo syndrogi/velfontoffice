@@ -1,9 +1,10 @@
 /**
- * MIDI OFFICE — Pinkroll
+ * MIDI OFFICE — SV-16 (score visualizer, 16 steps)
  * Loads an audio or video file (nothing uploads anywhere) and plays it
- * against a 9:16 board of piano roll, spectrum and beat ring, which can
- * be saved as a video or a PNG. Analysis, demo content and drawing live
- * in js/pinkroll/; this file owns the window, playback and saving.
+ * against a 9:16 board of sequencer pixels, piano roll, scopes, polar
+ * spectrum and beat frame, which can be saved as a video or a PNG.
+ * Analysis, demo content, drawing and the colour palette live in
+ * js/sv16/; this file owns the window, playback and saving.
  *
  * Playback goes through the shared master bus, so MASTER volume and the
  * RECORDER module both hear it. Saved videos tap the track directly
@@ -12,17 +13,11 @@
  * playback and discards the loaded file.
  */
 (function () {
-  const { analyze } = window.TonePinkrollAnalysis;
-  const { makeDemo, makeDemoImage } = window.TonePinkrollDemo;
-  const { createRenderer, formatTime, WIDTH, HEIGHT } = window.TonePinkrollRenderer;
+  const { analyze } = window.ToneSv16Analysis;
+  const { makeDemo, makeDemoImage } = window.ToneSv16Demo;
+  const { createRenderer, formatTime, WIDTH, HEIGHT } = window.ToneSv16Renderer;
+  const { buildPaletteControls } = window.ToneSv16Palette;
 
-  const ACCENTS = [
-    { name: "Pink", hex: "#E8336F" },
-    { name: "Coral", hex: "#EE5A2F" },
-    { name: "Blue", hex: "#2F5BEA" },
-    { name: "Violet", hex: "#7A3FF0" },
-    { name: "Green", hex: "#13915F" },
-  ];
   const VIDEO_TYPES = [
     "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
     "video/mp4",
@@ -33,37 +28,17 @@
   const VIDEO_FILE_PATTERN = /\.(mp4|mov|m4v|webm)$/i;
   const MEDIA_FILE_PATTERN = /\.(mp3|wav|m4a|aac|flac|ogg|mp4|mov|m4v|webm)$/i;
   const DEMO_TRACK_NAME = "Demo Track";
-  const DEMO_START_SECONDS = 5.2; // opens on a busy moment of the demo
+  const DEMO_START_SECONDS = 14.6; // opens on a busy moment of the demo
   const END_TOLERANCE_SECONDS = 0.05;
   const VIDEO_DRIFT_LIMIT_SECONDS = 0.25;
   const VIDEO_READY_STATE = 2; // HAVE_CURRENT_DATA
   const RECORD_FPS = 30;
-  const RECORD_BITRATE = 8e6;
+  const RECORD_BITRATE = 10e6;
   const RECORD_TIMESLICE_MS = 500;
   const RECORD_TAIL_MS = 250;
   const SEEK_STEPS = 1000;
 
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-
-  function hexToRgb(hex) {
-    const n = parseInt(hex.slice(1), 16);
-    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-  }
-
-  function mixColor(from, to, amount) {
-    const a = hexToRgb(from);
-    const b = hexToRgb(to);
-    return "rgb(" + a.map((v, i) => Math.round(v + (b[i] - v) * amount)).join(",") + ")";
-  }
-
-  function createAccent(hex) {
-    return {
-      main: hex,
-      soft: mixColor(hex, "#ffffff", 0.5),
-      pale: mixColor(hex, "#ffffff", 0.78),
-      deep: mixColor(hex, "#000000", 0.3),
-    };
-  }
 
   function pickVideoType() {
     return VIDEO_TYPES.find((type) => window.MediaRecorder.isTypeSupported(type)) || "";
@@ -78,7 +53,12 @@
   }
 
   function safeFileName(name) {
-    return name.replace(/[\\/:*?"<>|]+/g, "").trim().slice(0, 60) || "pinkroll";
+    return (
+      name
+        .replace(/[\\/:*?"<>|]+/g, "")
+        .trim()
+        .slice(0, 60) || "sv-16"
+    );
   }
 
   function downloadBlob(blob, fileName) {
@@ -108,140 +88,125 @@
     input.type = "file";
     input.id = id;
     input.accept = accept;
-    const label = createElement("label", "tone-mini-btn tone-file-label", text);
+    const label = createElement("label", "tone-sv16-key tone-file-label", text);
     label.htmlFor = id;
     return { input, label };
   }
 
-  function createField(labelText, inputId) {
-    const field = createElement("div", "tone-field");
-    const label = createElement(inputId ? "label" : "span", "tone-pinkroll-label", labelText);
-    if (inputId) label.htmlFor = inputId;
-    field.appendChild(label);
-    return field;
+  // One lettered module of the control plate: A INPUT, B COLOR, ...
+  function createSection(rail, letter, title) {
+    const section = createElement("section", "tone-sv16-mod");
+    const head = createElement("div", "tone-sv16-mod-head");
+    head.append(createElement("span", "tone-sv16-mod-key", letter), title);
+    section.appendChild(head);
+    rail.appendChild(section);
+    return section;
   }
 
-  function buildSourceControls(rail) {
-    const row = createElement("div", "tone-sampler-load");
-    const media = createFilePicker("tonePinkrollMedia", "audio/*,video/*", "LOAD AUDIO / VIDEO");
-    const image = createFilePicker("tonePinkrollImage", "image/*", "LOAD IMAGE");
+  function buildInputControls(rail) {
+    const section = createSection(rail, "A", "INPUT");
+    const row = createElement("div", "tone-sv16-row");
+    const media = createFilePicker("toneSv16Media", "audio/*,video/*", "+ AUDIO / VIDEO");
+    const image = createFilePicker("toneSv16Image", "image/*", "+ IMAGE");
     row.append(media.input, media.label, image.input, image.label);
 
-    const zoomLabel = createElement("label", "tone-pinkroll-check");
+    const nameLabel = createElement("label", "tone-sv16-field");
+    nameLabel.appendChild(createElement("span", "", "TITLE"));
+    const nameInput = createElement("input");
+    nameInput.type = "text";
+    nameInput.maxLength = 40;
+    nameInput.autocomplete = "off";
+    nameInput.value = DEMO_TRACK_NAME;
+    nameLabel.appendChild(nameInput);
+
+    const zoomLabel = createElement("label", "tone-sv16-check");
     const zoomInput = createElement("input");
     zoomInput.type = "checkbox";
     zoomInput.checked = true;
     zoomLabel.append(zoomInput, "ZOOM CUTS ON THE BEAT");
 
-    rail.append(row, zoomLabel);
-    return { mediaInput: media.input, imageInput: image.input, zoomInput };
+    section.append(row, nameLabel, zoomLabel);
+    return { mediaInput: media.input, imageInput: image.input, nameInput, zoomInput };
   }
 
-  function buildStyleControls(rail) {
-    const nameField = createField("TRACK NAME", "tonePinkrollName");
-    const nameInput = createElement("input", "tone-pinkroll-name");
-    nameInput.type = "text";
-    nameInput.id = "tonePinkrollName";
-    nameInput.maxLength = 40;
-    nameInput.autocomplete = "off";
-    nameInput.value = DEMO_TRACK_NAME;
-    nameField.appendChild(nameInput);
-
-    const accentField = createField("ACCENT");
-    const swatchRow = createElement("div", "tone-pinkroll-swatches");
-    const swatches = ACCENTS.map((accent, index) => {
-      const swatch = createButton("tone-pinkroll-swatch");
-      swatch.style.backgroundColor = accent.hex;
-      swatch.dataset.hex = accent.hex;
-      swatch.setAttribute("aria-label", accent.name);
-      swatch.setAttribute("aria-pressed", String(index === 0));
-      swatchRow.appendChild(swatch);
-      return swatch;
-    });
-    accentField.appendChild(swatchRow);
-
-    rail.append(nameField, accentField);
-    return { nameInput, swatches };
-  }
-
-  function buildPlaybackControls(rail) {
-    const row = createElement("div", "tone-pinkroll-row");
-    const playBtn = createButton("tone-toggle-btn", "PLAY");
-    const timeEl = createElement("span", "tone-sampler-status", "0:00 / 0:00");
-    row.append(playBtn, timeEl);
-
-    const seekField = createField("POSITION", "tonePinkrollSeek");
-    const seekInput = createElement("input");
+  function buildTransportControls(rail) {
+    const section = createSection(rail, "C", "TRANSPORT");
+    const row = createElement("div", "tone-sv16-transport");
+    const playBtn = createButton("tone-sv16-key tone-sv16-key-dark", "▶");
+    playBtn.setAttribute("aria-label", "Play");
+    const stopBtn = createButton("tone-sv16-key", "■");
+    stopBtn.setAttribute("aria-label", "Back to start");
+    const seekInput = createElement("input", "tone-sv16-seek");
     seekInput.type = "range";
-    seekInput.id = "tonePinkrollSeek";
     seekInput.min = "0";
     seekInput.max = String(SEEK_STEPS);
     seekInput.value = "0";
-    seekField.appendChild(seekInput);
+    seekInput.setAttribute("aria-label", "Position");
+    row.append(playBtn, stopBtn, seekInput);
 
-    const metaEl = createElement("span", "tone-hint", "Loading…");
+    const readout = createElement("div", "tone-sv16-readout");
+    const timeEl = createElement("span", "", "0:00 / 0:00");
+    const metaEl = createElement("span", "", "LOADING");
+    readout.append(timeEl, metaEl);
 
-    rail.append(row, seekField, metaEl);
-    return { playBtn, timeEl, seekInput, metaEl };
+    section.append(row, readout);
+    return { playBtn, stopBtn, seekInput, timeEl, metaEl };
   }
 
-  function buildSaveControls(rail) {
-    const row = createElement("div", "tone-pinkroll-row");
-    const recordBtn = createButton("tone-toggle-btn", "SAVE VIDEO");
-    const snapshotBtn = createButton("tone-toggle-btn", "SAVE PNG");
+  function buildExportControls(rail) {
+    const section = createSection(rail, "D", "EXPORT");
+    const row = createElement("div", "tone-sv16-row");
+    const recordBtn = createButton("tone-sv16-key tone-sv16-key-rec", "● REC VIDEO");
+    const snapshotBtn = createButton("tone-sv16-key", "PNG");
     row.append(recordBtn, snapshotBtn);
 
     const hint = createElement(
       "p",
       "tone-hint",
-      "SAVE VIDEO records in real time from start to end. Keep this tab open while it runs."
+      "REC VIDEO records in real time from start to end. Keep this tab open while it runs.",
     );
-    const statusEl = createElement("p", "tone-sampler-status tone-pinkroll-status");
+    const statusEl = createElement("p", "tone-sampler-status tone-sv16-status");
     statusEl.setAttribute("aria-live", "polite");
 
-    rail.append(row, hint, statusEl);
+    section.append(row, hint, statusEl);
     return { recordBtn, snapshotBtn, statusEl };
   }
 
-  function buildLayout(container) {
-    const root = createElement("div", "tone-pinkroll");
-    const rail = createElement("div", "tone-pinkroll-rail");
-    const stage = createElement("div", "tone-pinkroll-stage");
+  function buildLayout(container, onColors) {
+    const root = createElement("div", "tone-sv16");
+    const rail = createElement("div", "tone-sv16-rail");
+    const stage = createElement("div", "tone-sv16-stage");
 
-    const canvas = createElement("canvas", "tone-pinkroll-board");
+    const canvas = createElement("canvas", "tone-sv16-board");
     canvas.width = WIDTH;
     canvas.height = HEIGHT;
     canvas.setAttribute("role", "img");
     canvas.setAttribute("aria-label", "Music visualization board");
 
-    const video = createElement("video", "tone-pinkroll-video");
+    const video = createElement("video", "tone-sv16-video");
     video.muted = true;
     video.playsInline = true;
     video.preload = "auto";
 
+    const input = buildInputControls(rail);
+    const palette = buildPaletteControls(createSection(rail, "B", "COLOR"), onColors);
     const controls = {
-      ...buildSourceControls(rail),
-      ...buildStyleControls(rail),
-      ...buildPlaybackControls(rail),
-      ...buildSaveControls(rail),
+      ...input,
+      ...buildTransportControls(rail),
+      ...buildExportControls(rail),
     };
 
     stage.append(canvas, video);
-    root.append(rail, stage);
+    root.append(stage, rail);
     container.appendChild(root);
-    return { root, canvas, video, ...controls };
+    return { root, canvas, video, palette, ...controls };
   }
 
   function buildWindow(container) {
-    const ui = buildLayout(container);
-    const renderer = createRenderer(ui.canvas);
-    const ctx = window.ToneEngine.init();
-    const videoTap = ctx.createMediaStreamDestination();
-
+    let colors = null;
     let analysis = null;
     let buffer = null;
     let trackName = DEMO_TRACK_NAME;
-    let accent = createAccent(ACCENTS[0].hex);
     let zoomCuts = true;
     let demoImage = null;
     let userImage = null;
@@ -258,6 +223,19 @@
     let hidden = false;
     let closed = false;
     let frameId = 0;
+
+    const ui = buildLayout(container, applyColors);
+    const renderer = createRenderer(ui.canvas);
+    const ctx = window.ToneEngine.init();
+    const videoTap = ctx.createMediaStreamDestination();
+    applyColors(ui.palette.colors());
+
+    function applyColors(next) {
+      colors = next;
+      if (ui) ui.canvas.style.backgroundColor = colors.C.bg;
+      if (demoImage) demoImage = makeDemoImage(colors);
+      dirty = true;
+    }
 
     function currentTime() {
       if (!analysis) return 0;
@@ -286,10 +264,11 @@
     function updateControls() {
       const ready = !!analysis && !busy;
       ui.playBtn.disabled = !ready || !!recorder;
-      ui.playBtn.textContent = playing ? "PAUSE" : "PLAY";
-      ui.playBtn.classList.toggle("tone-is-active", playing);
+      ui.playBtn.textContent = playing ? "❚❚" : "▶";
+      ui.playBtn.setAttribute("aria-label", playing ? "Pause" : "Play");
+      ui.stopBtn.disabled = !ready || !!recorder;
       ui.recordBtn.disabled = !ready && !recorder;
-      ui.recordBtn.textContent = recorder ? "STOP RECORDING" : "SAVE VIDEO";
+      ui.recordBtn.textContent = recorder ? "■ STOP REC" : "● REC VIDEO";
       ui.recordBtn.classList.toggle("tone-is-active", !!recorder);
       ui.snapshotBtn.disabled = !ready || !!recorder;
       ui.seekInput.disabled = !ready || !!recorder;
@@ -356,12 +335,16 @@
 
     function renderFrame() {
       const time = currentTime();
-      if (hasVideo && playing && Math.abs(ui.video.currentTime - time) > VIDEO_DRIFT_LIMIT_SECONDS) {
+      if (
+        hasVideo &&
+        playing &&
+        Math.abs(ui.video.currentTime - time) > VIDEO_DRIFT_LIMIT_SECONDS
+      ) {
         seekVideo(time);
       }
-      renderer.draw(time, { an: analysis, accent, media: currentMedia(), zoomCuts, trackName });
       dirty = false;
       if (!analysis) return;
+      renderer.draw(time, { an: analysis, colors, media: currentMedia(), zoomCuts, trackName });
       ui.timeEl.textContent = formatTime(time) + " / " + formatTime(analysis.dur);
       if (!seeking) ui.seekInput.value = String(Math.round((time / analysis.dur) * SEEK_STEPS));
     }
@@ -379,7 +362,7 @@
       const result = await analyze(
         decoded,
         (progress) => setStatus("Analyzing… " + Math.round(progress * 100) + "%"),
-        known
+        known,
       );
       if (closed) return;
       buffer = decoded;
@@ -388,7 +371,7 @@
       busy = false;
       setStatus("");
       ui.metaEl.textContent =
-        label + " · " + Math.round(result.bpm) + " BPM · " + result.notes.length + " NOTES";
+        label + " / " + Math.round(result.bpm) + " BPM / " + result.notes.length + " NOTES";
       dirty = true;
       updateControls();
     }
@@ -417,7 +400,7 @@
           isVideoFile(file)
             ? "Couldn't read sound from this video. Try an MP4 with an audio track."
             : "Couldn't read this file. Try an MP3, WAV or M4A.",
-          true
+          true,
         );
         return;
       }
@@ -504,15 +487,6 @@
       }, "image/png");
     }
 
-    function selectAccent(swatch) {
-      ui.swatches.forEach((other) => {
-        other.setAttribute("aria-pressed", String(other === swatch));
-      });
-      accent = createAccent(swatch.dataset.hex);
-      if (demoImage) demoImage = makeDemoImage(accent);
-      dirty = true;
-    }
-
     function handleDrop(event) {
       event.preventDefault();
       ui.root.classList.remove("tone-is-dropping");
@@ -541,6 +515,10 @@
 
     function wireEvents() {
       ui.playBtn.addEventListener("click", () => (playing ? pause() : play()));
+      ui.stopBtn.addEventListener("click", () => {
+        pause();
+        seekTo(0);
+      });
       ui.recordBtn.addEventListener("click", () => (recorder ? stopRecording() : startRecording()));
       ui.snapshotBtn.addEventListener("click", saveSnapshot);
       ui.mediaInput.addEventListener("change", (event) => handleFilePick(event, loadMedia));
@@ -552,9 +530,6 @@
       ui.zoomInput.addEventListener("change", () => {
         zoomCuts = ui.zoomInput.checked;
         dirty = true;
-      });
-      ui.swatches.forEach((swatch) => {
-        swatch.addEventListener("click", () => selectAccent(swatch));
       });
       ui.seekInput.addEventListener("pointerdown", () => {
         seeking = true;
@@ -580,7 +555,7 @@
     async function loadDemo() {
       await document.fonts.ready;
       if (closed) return;
-      demoImage = makeDemoImage(accent);
+      demoImage = makeDemoImage(colors);
       const demo = makeDemo();
       await loadBuffer(demo.buffer, demo.known, "DEMO");
       if (!closed) seekTo(DEMO_START_SECONDS);
@@ -615,5 +590,5 @@
     };
   }
 
-  window.TonePinkroll = { buildWindow };
+  window.ToneSv16 = { buildWindow };
 })();
